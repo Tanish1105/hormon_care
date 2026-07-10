@@ -25,10 +25,6 @@ function configFromParts() {
     password,
     database,
     connectionLimit: Number(env("DATABASE_POOL_SIZE") ?? 2),
-    minimumIdle: 0,
-    idleTimeout: 30_000,
-    connectTimeout: 10_000,
-    acquireTimeout: 15_000,
   };
 }
 
@@ -44,10 +40,6 @@ function configFromUrl() {
     password: decodeURIComponent(parsed.password),
     database: decodeURIComponent(parsed.pathname.replace(/^\//, "")),
     connectionLimit: Number(env("DATABASE_POOL_SIZE") ?? 2),
-    minimumIdle: 0,
-    idleTimeout: 30_000,
-    connectTimeout: 10_000,
-    acquireTimeout: 15_000,
   };
 }
 
@@ -61,8 +53,21 @@ export function getMysqlConfig() {
   return config;
 }
 
+export function buildMysqlConnectionUrl() {
+  const config = getMysqlConfig();
+  const auth = `${encodeURIComponent(config.user)}:${encodeURIComponent(config.password)}`;
+  const params = new URLSearchParams({
+    allowPublicKeyRetrieval: "true",
+    connectionLimit: String(config.connectionLimit),
+    connectTimeout: "60000",
+    acquireTimeout: "60000",
+  });
+  return `mariadb://${auth}@${config.host}:${config.port}/${config.database}?${params.toString()}`;
+}
+
 export function createMysqlAdapter() {
-  return new PrismaMariaDb(getMysqlConfig());
+  // PrismaMariaDb works reliably with a connection URL; object config can pool-timeout on Hostinger.
+  return new PrismaMariaDb(buildMysqlConnectionUrl());
 }
 
 export async function testMysqlConnection() {
@@ -76,6 +81,7 @@ export async function testMysqlConnection() {
       user: config.user,
       password: config.password,
       database: config.database,
+      allowPublicKeyRetrieval: true,
       connectTimeout: 10_000,
     });
     await conn.query("SELECT 1");
