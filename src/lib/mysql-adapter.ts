@@ -6,6 +6,11 @@ function env(name: string): string | undefined {
   return raw.trim().replace(/^["']|["']$/g, "");
 }
 
+function normalizeMysqlHost(host: string) {
+  // Hostinger/MariaDB often grants users for 127.0.0.1, not IPv6 ::1.
+  return host === "localhost" ? "127.0.0.1" : host;
+}
+
 function configFromParts() {
   const host = env("DB_HOST");
   const user = env("DB_USER");
@@ -14,7 +19,7 @@ function configFromParts() {
   if (!host || !user || !password || !database) return null;
 
   return {
-    host,
+    host: normalizeMysqlHost(host),
     port: Number(env("DB_PORT") ?? 3306),
     user,
     password,
@@ -33,7 +38,7 @@ function configFromUrl() {
 
   const parsed = new URL(url);
   return {
-    host: parsed.hostname,
+    host: normalizeMysqlHost(parsed.hostname),
     port: parsed.port ? Number(parsed.port) : 3306,
     user: decodeURIComponent(parsed.username),
     password: decodeURIComponent(parsed.password),
