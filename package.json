@@ -5,13 +5,16 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "prisma generate && next build",
-    "start": "next start -p ${PORT:-3000}",
+    "start": "node server.mjs",
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:setup": "prisma migrate dev && npx tsx prisma/seed.ts",
     "db:export-sql": "prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script -o prisma/mysql-init.sql"
+  },
+  "engines": {
+    "node": ">=20 <=22"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",
