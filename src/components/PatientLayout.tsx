@@ -57,9 +57,12 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
     const now = Date.now();
     if (!force) {
       const cached = readGateStatusCache<GateStatus>();
-      if (cached) {
+      if (cached && Array.isArray(cached.assignedPlans)) {
         setStatus(cached);
         return;
+      }
+      if (cached && !Array.isArray(cached.assignedPlans)) {
+        invalidateGateStatusCache();
       }
       if (now - lastFetchRef.current < 15_000) return;
     }
@@ -186,7 +189,7 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
                       title="Complete lifestyle assessment first"
                     >
                       <Icon className="h-4 w-4 shrink-0" />
-                      <span className="hidden truncate sm:inline">{item.title}</span>
+                      <span className="max-w-[7rem] truncate sm:max-w-[10rem]">{item.title}</span>
                     </span>
                   );
                 }
@@ -203,7 +206,7 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
-                    <span className="hidden truncate sm:inline">{item.title}</span>
+                    <span className="max-w-[7rem] truncate sm:max-w-[10rem]">{item.title}</span>
                   </Link>
                 );
               })}
