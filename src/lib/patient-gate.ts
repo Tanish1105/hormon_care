@@ -6,6 +6,8 @@ type GateProfile = {
   currentWeek: number;
   followupAccessToken: string | null;
   plan: { totalWeeks: number; title?: string } | null;
+  garbhaPlan?: { title?: string } | null;
+  childGuidancePlan?: { title?: string } | null;
   weeklyFollowups: { weekNumber: number }[];
   user?: { name: string };
   lifestyleAssessment: {
@@ -13,6 +15,34 @@ type GateProfile = {
     submittedAt: Date | null;
   } | null;
 };
+
+export type AssignedPlanNav = {
+  href: string;
+  title: string;
+  program: "care" | "garbha" | "child";
+};
+
+function buildAssignedPlans(profile: GateProfile): AssignedPlanNav[] {
+  const plans: AssignedPlanNav[] = [];
+  if (profile.plan?.title) {
+    plans.push({ href: "/patient", title: profile.plan.title, program: "care" });
+  }
+  if (profile.garbhaPlan?.title) {
+    plans.push({
+      href: "/patient/garbha-sanskar",
+      title: profile.garbhaPlan.title,
+      program: "garbha",
+    });
+  }
+  if (profile.childGuidancePlan?.title) {
+    plans.push({
+      href: "/patient/child-guidance",
+      title: profile.childGuidancePlan.title,
+      program: "child",
+    });
+  }
+  return plans;
+}
 
 export async function buildPatientGateStatus(
   profile: GateProfile,
@@ -49,6 +79,7 @@ export async function buildPatientGateStatus(
       ...followup,
       showPrompt: followup.showPrompt && !lifestyleBlocked,
     },
+    assignedPlans: buildAssignedPlans(profile),
     blocked,
     blockType,
     redirectTo,

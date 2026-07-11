@@ -14,12 +14,19 @@ import {
   writeGateStatusCache,
 } from "@/lib/gate-status-cache";
 
+type AssignedPlanNav = {
+  href: string;
+  title: string;
+  program: "care" | "garbha" | "child";
+};
+
 type GateStatus = {
   blocked: boolean;
   blockType: "lifestyle" | "followup" | null;
   redirectTo: string | null;
   blockMessage: string;
   patientName: string;
+  assignedPlans: AssignedPlanNav[];
   lifestyle: { pending: boolean };
   followup: {
     hasCarePlan: boolean;
@@ -30,11 +37,11 @@ type GateStatus = {
   };
 };
 
-const navItems = [
-  { href: "/patient", label: "My Plan", icon: Home },
-  { href: "/patient/garbha-sanskar", label: "Garbha Sanskar", icon: Baby },
-  { href: "/patient/child-guidance", label: "Child Guidance", icon: GraduationCap },
-];
+const planIcons = {
+  care: Home,
+  garbha: Baby,
+  child: GraduationCap,
+} as const;
 
 const lifestyleExemptPaths = ["/patient/lifestyle-assessment"];
 const followupExemptPaths = ["/patient/followup"];
@@ -168,18 +175,18 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
                   <span className="hidden sm:inline">Followup</span>
                 </Link>
               )}
-              {navItems.map((item) => {
-                const Icon = item.icon;
+              {(status?.assignedPlans ?? []).map((item) => {
+                const Icon = planIcons[item.program];
                 const active = pathname === item.href;
                 if (lifestyleBlocked) {
                   return (
                     <span
                       key={item.href}
-                      className="flex cursor-not-allowed items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-300"
+                      className="flex max-w-[9rem] cursor-not-allowed items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 sm:max-w-[12rem]"
                       title="Complete lifestyle assessment first"
                     >
-                      <Icon className="h-4 w-4" />
-                      <span className="hidden sm:inline">{item.label}</span>
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span className="hidden truncate sm:inline">{item.title}</span>
                     </span>
                   );
                 }
@@ -187,15 +194,16 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    title={item.title}
                     className={cn(
-                      "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition",
+                      "flex max-w-[9rem] items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition sm:max-w-[12rem]",
                       active
                         ? "bg-purple-100 text-purple-700"
                         : "text-slate-600 hover:bg-slate-100"
                     )}
                   >
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{item.label}</span>
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="hidden truncate sm:inline">{item.title}</span>
                   </Link>
                 );
               })}

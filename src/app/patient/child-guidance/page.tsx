@@ -139,7 +139,7 @@ export default function PatientChildGuidancePage() {
       <div className="flex items-center gap-3">
         <GraduationCap className="h-8 w-8 text-purple-600" />
         <div>
-          <h1 className="text-2xl font-bold">Child Guidance</h1>
+          <h1 className="text-2xl font-bold">{plan?.title ?? "Plan"}</h1>
           <p className="text-slate-500">તમારા માટે assign કરેલો child guidance plan</p>
         </div>
       </div>

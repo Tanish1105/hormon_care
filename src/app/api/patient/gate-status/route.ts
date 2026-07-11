@@ -15,6 +15,8 @@ export async function GET(req: Request) {
       include: {
         user: { select: { name: true } },
         plan: { select: { totalWeeks: true, title: true } },
+        garbhaPlan: { select: { title: true } },
+        childGuidancePlan: { select: { title: true } },
         weeklyFollowups: { select: { weekNumber: true }, orderBy: { weekNumber: "asc" } },
         lifestyleAssessment: { select: { requestedAt: true, submittedAt: true } },
       },

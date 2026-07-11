@@ -139,7 +139,7 @@ export default function PatientGarbhaSanskarPage() {
       <div className="flex items-center gap-3">
         <Baby className="h-8 w-8 text-purple-600" />
         <div>
-          <h1 className="text-2xl font-bold">Garbha Sanskar</h1>
+          <h1 className="text-2xl font-bold">{plan?.title ?? "Plan"}</h1>
           <p className="text-slate-500">તમારા માટે assign કરેલો week wise plan</p>
         </div>
       </div>
