@@ -65,12 +65,12 @@ export const LIFESTYLE_SECTIONS = [
   },
   {
     id: 4,
-    title: "Stress Assessment (Last 2 Weeks)",
+    title: "Stress Assessment Questionnaire (Last One Month)",
     type: "stress-screening" as const,
     fields: STRESS_QUESTION_KEYS.map((key, index) => ({
       key,
       label: `Question ${index + 1}`,
-      type: "likert" as const,
+      type: "yesno" as const,
     })),
   },
   {
@@ -210,6 +210,11 @@ export type LifestyleAssessmentData = {
   stressQ3: number;
   stressQ4: number;
   stressQ5: number;
+  stressQ6: number;
+  stressQ7: number;
+  stressQ8: number;
+  stressQ9: number;
+  stressQ10: number;
   stressScreeningScore: number;
   stressLevel: string;
   dietType: string;
@@ -271,7 +276,6 @@ export function calculateLifestyleScore(data: LifestyleAssessmentData) {
   if (data.sleepQuality === "Poor" || data.sleepQuality === "Fair") score -= 8;
   if (data.stressLevel === "Moderate Stress") score -= 8;
   if (data.stressLevel === "High Stress") score -= 15;
-  if (data.stressLevel === "Mild Stress") score -= 4;
   if (data.fastFood === "Daily" || data.fastFood === "2-3 Times/Week") score -= 8;
   if (data.waterIntake === "< 5 glasses") score -= 8;
   if (data.coldDrinks === "Weekly" || data.coldDrinks === "Daily") score -= 8;
@@ -306,11 +310,9 @@ export function getLifestyleHighlights(data: Partial<LifestyleAssessmentData>): 
   if (data.nightShift === "Yes") add("nightShift", "Night Shift", "Night shift affects hormones", "medium");
 
   if (data.stressLevel === "High Stress")
-    add("stressLevel", "Stress Level", `High stress (score ${data.stressScreeningScore}/20)`, "high");
+    add("stressLevel", "Stress Level", `High stress (score ${data.stressScreeningScore}/10)`, "high");
   if (data.stressLevel === "Moderate Stress")
-    add("stressLevel", "Stress Level", `Moderate stress (score ${data.stressScreeningScore}/20)`, "medium");
-  if (data.stressLevel === "Mild Stress")
-    add("stressLevel", "Stress Level", `Mild stress (score ${data.stressScreeningScore}/20)`, "medium");
+    add("stressLevel", "Stress Level", `Moderate stress (score ${data.stressScreeningScore}/10)`, "medium");
 
   if (data.breakfast === "Always Skip") add("breakfast", "Breakfast", "Always skips breakfast", "medium");
   if (data.fastFood === "Daily") add("fastFood", "Outside Food", "Daily outside food intake", "high");
@@ -395,7 +397,7 @@ export function getLifestyleAnalyticsSummary(
     {
       label: "Stress",
       value: data.stressLevel
-        ? `${data.stressScreeningScore}/20 · ${data.stressLevel}`
+        ? `${data.stressScreeningScore}/10 · ${data.stressLevel}`
         : "—",
       section: "Stress",
       flagged: flagged("stressLevel"),
@@ -594,6 +596,11 @@ export function assessmentToDisplayData(record: {
   stressQ3: number | null;
   stressQ4: number | null;
   stressQ5: number | null;
+  stressQ6: number | null;
+  stressQ7: number | null;
+  stressQ8: number | null;
+  stressQ9: number | null;
+  stressQ10: number | null;
   stressScreeningScore: number | null;
   stressLevel: string | null;
   dietType: string | null;
@@ -630,6 +637,11 @@ export function assessmentToDisplayData(record: {
     stressQ3: record.stressQ3 ?? 0,
     stressQ4: record.stressQ4 ?? 0,
     stressQ5: record.stressQ5 ?? 0,
+    stressQ6: record.stressQ6 ?? 0,
+    stressQ7: record.stressQ7 ?? 0,
+    stressQ8: record.stressQ8 ?? 0,
+    stressQ9: record.stressQ9 ?? 0,
+    stressQ10: record.stressQ10 ?? 0,
     stressScreeningScore:
       record.stressScreeningScore ??
       calculateStressScreeningScore({
@@ -638,6 +650,11 @@ export function assessmentToDisplayData(record: {
         stressQ3: record.stressQ3 ?? undefined,
         stressQ4: record.stressQ4 ?? undefined,
         stressQ5: record.stressQ5 ?? undefined,
+        stressQ6: record.stressQ6 ?? undefined,
+        stressQ7: record.stressQ7 ?? undefined,
+        stressQ8: record.stressQ8 ?? undefined,
+        stressQ9: record.stressQ9 ?? undefined,
+        stressQ10: record.stressQ10 ?? undefined,
       }),
     stressLevel:
       record.stressLevel ??
@@ -649,6 +666,11 @@ export function assessmentToDisplayData(record: {
             stressQ3: record.stressQ3 ?? undefined,
             stressQ4: record.stressQ4 ?? undefined,
             stressQ5: record.stressQ5 ?? undefined,
+            stressQ6: record.stressQ6 ?? undefined,
+            stressQ7: record.stressQ7 ?? undefined,
+            stressQ8: record.stressQ8 ?? undefined,
+            stressQ9: record.stressQ9 ?? undefined,
+            stressQ10: record.stressQ10 ?? undefined,
           })
       ),
     dietType: record.dietType ?? "",
@@ -685,6 +707,11 @@ export function dataToDbFields(data: LifestyleAssessmentData) {
     stressQ3: data.stressQ3,
     stressQ4: data.stressQ4,
     stressQ5: data.stressQ5,
+    stressQ6: data.stressQ6,
+    stressQ7: data.stressQ7,
+    stressQ8: data.stressQ8,
+    stressQ9: data.stressQ9,
+    stressQ10: data.stressQ10,
     stressScreeningScore: data.stressScreeningScore,
     stressLevel: data.stressLevel,
     dietType: data.dietType,

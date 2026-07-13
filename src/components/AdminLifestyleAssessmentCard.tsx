@@ -9,10 +9,11 @@ import {
   type LifestyleAnalyticsSummary,
 } from "@/lib/lifestyle-assessment";
 import {
-  LIKERT_OPTIONS,
+  STRESS_MAX_SCORE,
   STRESS_QUESTIONS,
   STRESS_QUESTION_KEYS,
   STRESS_RECOMMENDATIONS,
+  YES_NO_OPTIONS,
 } from "@/lib/stress-screening";
 import { formatDisplayDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -236,15 +237,13 @@ export function AdminLifestyleAssessmentCard({
                           <div className="divide-y divide-slate-100">
                             {STRESS_QUESTION_KEYS.map((key, index) => {
                               const answer = data[key] as number | undefined;
-                              const option = LIKERT_OPTIONS.find((o) => o.value === answer);
+                              const option = YES_NO_OPTIONS.find((o) => o.value === answer);
                               return (
                                 <div key={key} className="flex flex-wrap justify-between gap-2 px-4 py-2.5 text-sm">
                                   <span className="font-medium text-slate-700">
                                     {index + 1}. {STRESS_QUESTIONS[key].en}
                                   </span>
-                                  <span className="text-slate-900">
-                                    {option ? `${option.en} (${option.value})` : "—"}
-                                  </span>
+                                  <span className="text-slate-900">{option ? option.en : "—"}</span>
                                 </div>
                               );
                             })}
@@ -257,7 +256,7 @@ export function AdminLifestyleAssessmentCard({
                             >
                               <span className="font-semibold text-slate-800">Stress Score</span>
                               <span className="font-semibold text-slate-900">
-                                {score != null ? `${score}/20` : "—"}
+                                {score != null ? `${score}/${STRESS_MAX_SCORE}` : "—"}
                                 {level && ` · ${level}`}
                               </span>
                             </div>

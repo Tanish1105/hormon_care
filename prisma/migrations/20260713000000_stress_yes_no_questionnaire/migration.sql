@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE `LifestyleAssessment` ADD COLUMN `stressQ6` INTEGER NULL,
+    ADD COLUMN `stressQ7` INTEGER NULL,
+    ADD COLUMN `stressQ8` INTEGER NULL,
+    ADD COLUMN `stressQ9` INTEGER NULL,
+    ADD COLUMN `stressQ10` INTEGER NULL;

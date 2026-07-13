@@ -13,9 +13,11 @@ import {
 } from "@/lib/lifestyle-assessment-i18n";
 import type { PatientLocale } from "@/lib/patient-locale";
 import {
-  LIKERT_OPTIONS,
+  STRESS_CATEGORIES,
+  STRESS_MAX_SCORE,
   STRESS_QUESTIONS,
   STRESS_QUESTION_KEYS,
+  YES_NO_OPTIONS,
   interpretStressScreening,
   stressLevelLabel,
   stressSectionSubtitle,
@@ -254,7 +256,7 @@ function StressScreeningSection({
       const raw = values[key];
       if (raw === "") continue;
       const num = Number(raw);
-      if (Number.isInteger(num) && num >= 0 && num <= 4) answers[key] = num;
+      if (num === 0 || num === 1) answers[key] = num;
     }
     return answers;
   }, [values]);
@@ -268,46 +270,50 @@ function StressScreeningSection({
         <p className="mt-1 text-sm text-blue-800/80">{stressSectionSubtitle(locale)}</p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left">
-          <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
-              <th className="px-3 py-2 w-[40%]">
-                {locale === "gu" ? "પ્રશ્ન" : "Question"}
-              </th>
-              {LIKERT_OPTIONS.map((option) => (
-                <th key={option.value} className="px-2 py-2 text-center">
-                  <div>{option[locale]}</div>
-                  <div className="font-normal normal-case text-slate-400">({option.value})</div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {STRESS_QUESTION_KEYS.map((key, index) => (
-              <tr key={key} className="border-b border-slate-100">
-                <td className="px-3 py-3 text-sm font-medium text-slate-700 align-top">
-                  {index + 1}. {STRESS_QUESTIONS[key][locale]}
-                </td>
-                {LIKERT_OPTIONS.map((option) => (
-                  <td key={option.value} className="px-2 py-3 text-center align-middle">
-                    <label className="inline-flex cursor-pointer items-center justify-center">
-                      <input
-                        type="radio"
-                        name={key}
-                        value={option.value}
-                        checked={values[key] === String(option.value)}
-                        onChange={() => onChange(key, String(option.value))}
-                        className="h-4 w-4 accent-pink-600"
-                        required
-                      />
-                    </label>
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="divide-y divide-slate-100">
+        {STRESS_CATEGORIES.map((category) => (
+          <div key={category.id}>
+            <div className="bg-slate-50 px-4 py-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {category[locale]}
+              </h3>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {category.keys.map((key) => {
+                const questionIndex = STRESS_QUESTION_KEYS.indexOf(key) + 1;
+                return (
+                  <div
+                    key={key}
+                    className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-start sm:justify-between"
+                  >
+                    <p className="text-sm font-medium text-slate-700 sm:max-w-[70%]">
+                      {questionIndex}. {STRESS_QUESTIONS[key][locale]}
+                    </p>
+                    <div className="flex shrink-0 gap-4">
+                      {YES_NO_OPTIONS.map((option) => (
+                        <label
+                          key={option.value}
+                          className="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-700"
+                        >
+                          <input
+                            type="radio"
+                            name={key}
+                            value={option.value}
+                            checked={values[key] === String(option.value)}
+                            onChange={() => onChange(key, String(option.value))}
+                            className="h-4 w-4 accent-pink-600"
+                            required
+                          />
+                          {option[locale]}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {result && (
@@ -316,21 +322,21 @@ function StressScreeningSection({
             "border-t px-4 py-4",
             result.level === "High Stress" && "border-red-200 bg-red-50",
             result.level === "Moderate Stress" && "border-amber-200 bg-amber-50",
-            result.level === "Mild Stress" && "border-yellow-200 bg-yellow-50",
             result.level === "Low Stress" && "border-green-200 bg-green-50"
           )}
         >
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-sm font-semibold text-slate-900">
               {locale === "gu" ? "તમારો તણાવ સ્કોર:" : "Your Stress Score:"}{" "}
-              <span className="text-lg">{result.score}/20</span>
+              <span className="text-lg">
+                {result.score}/{STRESS_MAX_SCORE}
+              </span>
             </p>
             <span
               className={cn(
                 "rounded-full px-3 py-1 text-sm font-semibold",
                 result.level === "High Stress" && "bg-red-200 text-red-900",
                 result.level === "Moderate Stress" && "bg-amber-200 text-amber-900",
-                result.level === "Mild Stress" && "bg-yellow-200 text-yellow-900",
                 result.level === "Low Stress" && "bg-green-200 text-green-900"
               )}
             >
@@ -358,6 +364,11 @@ const initialForm = (): Record<string, string | string[]> => ({
   stressQ3: "",
   stressQ4: "",
   stressQ5: "",
+  stressQ6: "",
+  stressQ7: "",
+  stressQ8: "",
+  stressQ9: "",
+  stressQ10: "",
   dietType: "",
   breakfast: "",
   fastFood: "",
@@ -457,6 +468,11 @@ export function LifestyleAssessmentForm({
                 stressQ3: form.stressQ3 as string,
                 stressQ4: form.stressQ4 as string,
                 stressQ5: form.stressQ5 as string,
+                stressQ6: form.stressQ6 as string,
+                stressQ7: form.stressQ7 as string,
+                stressQ8: form.stressQ8 as string,
+                stressQ9: form.stressQ9 as string,
+                stressQ10: form.stressQ10 as string,
               }}
               onChange={(key, value) => setField(key, value)}
             />

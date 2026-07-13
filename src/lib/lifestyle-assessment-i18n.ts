@@ -5,6 +5,8 @@ const SECTION_TITLES_GU: Record<string, string> = {
   "Physical Activity": "શારીરિક પ્રવૃત્તિ",
   "BMI & Weight": "BMI અને વજન",
   Sleep: "ઊંઘ",
+  "Stress Assessment Questionnaire (Last One Month)":
+    "તણાવ માપવા માટેની પ્રશ્નાવલી (છેલ્લા એક મહિના)",
   "Stress Assessment (Last 2 Weeks)": "તણાવ મૂલ્યાંકન (છેલ્લા ૨ અઠવાડિયા)",
   Diet: "આહાર",
   Habits: "આદતો",

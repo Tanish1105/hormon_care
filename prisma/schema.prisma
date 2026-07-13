@@ -59,11 +59,16 @@ model LifestyleAssessment {
   sleepQuality String?
   nightShift   String?
 
-  stressQ1 Int?
-  stressQ2 Int?
-  stressQ3 Int?
-  stressQ4 Int?
-  stressQ5 Int?
+  stressQ1  Int?
+  stressQ2  Int?
+  stressQ3  Int?
+  stressQ4  Int?
+  stressQ5  Int?
+  stressQ6  Int?
+  stressQ7  Int?
+  stressQ8  Int?
+  stressQ9  Int?
+  stressQ10 Int?
   stressScreeningScore Int?
   stressLevel  String?
   stressReason String? @db.Text
