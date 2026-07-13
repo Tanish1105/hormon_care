@@ -400,7 +400,7 @@ export function WeeklyFollowupForm({
             rows={compact ? 2 : 3}
             value={form.feedbackDislikedNotes}
             onChange={(e) => setForm({ ...form, feedbackDislikedNotes: e.target.value })}
-            placeholder={locale === "gu" ? "શું સુધારવું જોઈએ તે લખો..." : "What could be improved..."}
+            placeholder={locale === "gu" ? "શું ખરાબ લાગ્યું..." : "What felt bad..."}
             className="bg-white"
           />
         </div>

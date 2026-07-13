@@ -29,7 +29,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       launchOptions: launchOptions
     )
 
+    // Best-effort: blank screenshots / screen recordings (iOS has no FLAG_SECURE).
+    window?.makeSecureAgainstCapture()
+
     return true
+  }
+}
+
+private extension UIWindow {
+  func makeSecureAgainstCapture() {
+    let field = UITextField()
+    field.isSecureTextEntry = true
+    addSubview(field)
+    field.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+      field.centerXAnchor.constraint(equalTo: centerXAnchor),
+      field.centerYAnchor.constraint(equalTo: centerYAnchor),
+      field.widthAnchor.constraint(equalToConstant: 0),
+      field.heightAnchor.constraint(equalToConstant: 0),
+    ])
+    layer.superlayer?.addSublayer(field.layer)
+    field.layer.sublayers?.last?.addSublayer(layer)
   }
 }
 

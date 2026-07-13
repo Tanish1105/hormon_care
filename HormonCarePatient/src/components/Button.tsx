@@ -4,10 +4,9 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  View,
   ViewStyle,
 } from 'react-native';
-import { colors, radius } from '../theme';
+import { colors, radius, shadows } from '../theme';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -43,11 +42,17 @@ export default function Button({
         variantStyles[variant],
         fullWidth && { width: '100%' },
         isDisabled && { opacity: 0.55 },
-        pressed && !isDisabled && { transform: [{ scale: 0.98 }] },
+        pressed && !isDisabled && { transform: [{ scale: 0.985 }], opacity: 0.92 },
         style,
       ]}>
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? '#fff' : colors.primary} />
+        <ActivityIndicator
+          color={
+            variant === 'primary' || variant === 'danger'
+              ? '#fff'
+              : colors.primary
+          }
+        />
       ) : (
         <Text style={[styles.text, textStyles[variant]]}>{title}</Text>
       )}
@@ -57,30 +62,26 @@ export default function Button({
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 48,
-    paddingHorizontal: 20,
-    borderRadius: radius.md,
+    minHeight: 50,
+    paddingHorizontal: 22,
+    borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
   },
-  text: { fontSize: 15, fontWeight: '600' },
+  text: { fontSize: 15, fontWeight: '700', letterSpacing: 0.2 },
 });
 
 const variantStyles: Record<Variant, ViewStyle> = {
   primary: {
     backgroundColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    ...shadows.glow,
   },
   secondary: {
     backgroundColor: colors.primaryTint,
   },
   ghost: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },

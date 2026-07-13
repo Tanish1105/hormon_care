@@ -49,7 +49,7 @@ export function followupUi(locale: PatientLocale) {
     mealsDeviated: pickLocale(
       locale,
       "How many meals did you deviate last week from what was agreed?",
-      "ગયા સપ્તાહે કેટલા ભોજન સહમતિ મુજબ નહોતા?"
+      "ગયા સપ્તાહે કેટલા ભોજન પ્લાન મુજબ નહોતા?"
     ),
     submit: pickLocale(locale, "Submit", "સબમિટ"),
     submitting: pickLocale(locale, "Submitting...", "સબમિટ થઈ રહ્યું છે..."),
@@ -92,18 +92,18 @@ export function followupUi(locale: PatientLocale) {
     ),
     feedbackPoorNotes: pickLocale(
       locale,
-      "What was poor?",
-      "શું ખરાબ લાગ્યું? (લખો)"
+      "What felt bad?",
+      "શું ખરાબ લાગ્યું?"
     ),
     feedbackBadNotes: pickLocale(
       locale,
       "What felt bad?",
-      "શું ખરાબ લાગ્યું? (લખો)"
+      "શું ખરાબ લાગ્યું?"
     ),
     feedbackGoodNotes: pickLocale(
       locale,
       "What felt good?",
-      "શું સારું લાગ્યું? (લખો)"
+      "શું સારું લાગ્યું?"
     ),
   };
 }

@@ -149,13 +149,21 @@ export type PlanContent = {
   sortOrder: number;
 };
 
+export type PlanDay = {
+  id: string;
+  dayNumber: number;
+  title: string | null;
+  description: string | null;
+  contents: PlanContent[];
+};
+
 export type PlanWeek = {
   id: string;
   weekNumber: number;
   title: string | null;
   description: string | null;
   contents: PlanContent[];
-  days: any[];
+  days: PlanDay[];
 };
 
 export type Plan = {
@@ -163,6 +171,7 @@ export type Plan = {
   title: string;
   description: string | null;
   imageUrl: string | null;
+  videoUrl?: string | null;
   totalWeeks: number;
   isCustom: boolean;
   isDayWise: boolean;
@@ -180,7 +189,43 @@ export type DashboardResponse = {
     user: { name: string; username: string };
     plan: Plan | null;
   };
+  unlockedWeek: number;
+  unlockedDay?: number;
 };
+
+/**
+ * Uploads are stored as `/uploads/...` relative paths. React Native Image
+ * needs an absolute URL.
+ */
+export function resolveMediaUrl(url?: string | null): string | null {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url) || url.startsWith('data:')) return url;
+  if (url.startsWith('/')) return `${BASE_URL}${url}`;
+  return `${BASE_URL}/${url}`;
+}
+
+/** Secure YouTube player page (session cookie required in WebView headers). */
+export function youtubeEmbedPageUrl(
+  contentId: string,
+  source: 'plan' | 'garbha' | 'child-guidance' = 'plan',
+): string {
+  return `${BASE_URL}/api/patient/youtube-embed/${contentId}?source=${source}`;
+}
+
+export function youtubeThumbUrl(
+  contentId: string,
+  source: 'plan' | 'garbha' | 'child-guidance' = 'plan',
+): string {
+  return `${BASE_URL}/api/patient/youtube-thumb/${contentId}?source=${source}`;
+}
+
+/** Count contents for week-wise or day-wise plans. */
+export function countWeekContents(week: PlanWeek, isDayWise?: boolean): number {
+  if (isDayWise && week.days?.length) {
+    return week.days.reduce((sum, d) => sum + (d.contents?.length || 0), 0);
+  }
+  return week.contents?.length || 0;
+}
 
 export function getDashboard() {
   return apiFetch<DashboardResponse>('/api/patient/dashboard');
@@ -261,4 +306,59 @@ export function submitFollowup(payload: FollowupPayload) {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export type FollowupDelta = {
+  delta: number;
+  direction: 'up' | 'down' | 'same';
+} | null;
+
+export type FollowupHistoryWeek = {
+  id: string;
+  weekNumber: number;
+  currentWeight: number;
+  exerciseDays: number;
+  lowWaterDays: number;
+  shortSleepDays: number;
+  missedSupplementDays: number;
+  mealsDeviated: string | null;
+  planFeedback: string | null;
+  feedbackLikedNotes: string | null;
+  feedbackDislikedNotes: string | null;
+  feedbackBadNotes: string | null;
+  feedbackGoodNotes: string | null;
+  waist: number | null;
+  chest: number | null;
+  thigh: number | null;
+  hip: number | null;
+  arm: number | null;
+  neck: number | null;
+  submittedAt: string;
+  comparison: {
+    weight: FollowupDelta;
+    waist: FollowupDelta;
+    chest: FollowupDelta;
+    thigh: FollowupDelta;
+    hip: FollowupDelta;
+    arm: FollowupDelta;
+    neck: FollowupDelta;
+    exerciseDays: FollowupDelta;
+    lowWaterDays: FollowupDelta;
+    shortSleepDays: FollowupDelta;
+    missedSupplementDays: FollowupDelta;
+  };
+};
+
+export type FollowupHistory = {
+  planTitle: string;
+  totalWeeks: number;
+  submissionCount: number;
+  latestWeight: number | null;
+  firstWeight: number | null;
+  weightChange: number | null;
+  followups: FollowupHistoryWeek[];
+};
+
+export function getFollowupHistory() {
+  return apiFetch<FollowupHistory>('/api/patient/followup/history');
 }

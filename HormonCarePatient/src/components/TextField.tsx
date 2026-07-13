@@ -13,6 +13,7 @@ type Props = TextInputProps & {
   error?: string;
   hint?: string;
   required?: boolean;
+  suffix?: string;
 };
 
 export default function TextField({
@@ -20,6 +21,7 @@ export default function TextField({
   error,
   hint,
   required,
+  suffix,
   style,
   ...rest
 }: Props) {
@@ -32,24 +34,28 @@ export default function TextField({
           {required ? <Text style={{ color: colors.danger }}> *</Text> : null}
         </Text>
       ) : null}
-      <TextInput
-        placeholderTextColor={colors.textMuted}
-        {...rest}
-        onFocus={e => {
-          setFocused(true);
-          rest.onFocus?.(e);
-        }}
-        onBlur={e => {
-          setFocused(false);
-          rest.onBlur?.(e);
-        }}
-        style={[
-          styles.input,
-          focused && styles.inputFocused,
-          !!error && styles.inputError,
-          style,
-        ]}
-      />
+      <View>
+        <TextInput
+          placeholderTextColor={colors.textMuted}
+          {...rest}
+          onFocus={e => {
+            setFocused(true);
+            rest.onFocus?.(e);
+          }}
+          onBlur={e => {
+            setFocused(false);
+            rest.onBlur?.(e);
+          }}
+          style={[
+            styles.input,
+            !!suffix && styles.inputWithSuffix,
+            focused && styles.inputFocused,
+            !!error && styles.inputError,
+            style,
+          ]}
+        />
+        {suffix ? <Text style={styles.suffix}>{suffix}</Text> : null}
+      </View>
       {error ? (
         <Text style={styles.error}>{error}</Text>
       ) : hint ? (
@@ -64,27 +70,38 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.text,
-    marginBottom: 6,
+    color: colors.textSoft,
+    marginBottom: 7,
   },
   input: {
     backgroundColor: colors.surface,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderRadius: radius.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
     fontSize: 15,
     color: colors.text,
   },
+  inputWithSuffix: {
+    paddingRight: 44,
+  },
+  suffix: {
+    position: 'absolute',
+    right: 14,
+    bottom: 14,
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
   inputFocused: {
     borderColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: colors.primarySoft,
   },
-  inputError: { borderColor: colors.danger },
-  error: { color: colors.danger, fontSize: 12, marginTop: 6 },
+  inputError: {
+    borderColor: colors.danger,
+    backgroundColor: colors.dangerSoft,
+  },
+  error: { color: colors.danger, fontSize: 12, marginTop: 6, fontWeight: '500' },
   hint: { color: colors.textMuted, fontSize: 12, marginTop: 6 },
 });

@@ -2,13 +2,20 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius } from '../theme';
 
+export type CheckboxOption = string | { value: string; label: string };
+
 type Props = {
   label: string;
-  options: string[];
+  options: CheckboxOption[];
   values: string[];
   onChange: (values: string[]) => void;
   columns?: number;
 };
+
+function normalize(opt: CheckboxOption): { value: string; label: string } {
+  if (typeof opt === 'string') return { value: opt, label: opt };
+  return opt;
+}
 
 export default function CheckboxGroup({
   label,
@@ -17,30 +24,36 @@ export default function CheckboxGroup({
   onChange,
   columns = 2,
 }: Props) {
-  function toggle(opt: string) {
-    if (values.includes(opt)) onChange(values.filter(v => v !== opt));
-    else onChange([...values, opt]);
+  function toggle(optValue: string) {
+    if (values.includes(optValue)) onChange(values.filter(v => v !== optValue));
+    else onChange([...values, optValue]);
   }
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.grid}>
-        {options.map(opt => {
-          const active = values.includes(opt);
+        {options.map(raw => {
+          const opt = normalize(raw);
+          const active = values.includes(opt.value);
           return (
             <Pressable
-              key={opt}
-              onPress={() => toggle(opt)}
-              style={[
+              key={opt.value}
+              onPress={() => toggle(opt.value)}
+              style={({ pressed }) => [
                 styles.chip,
-                columns === 1 ? { width: '100%' } : { width: `${100 / columns - 2}%` },
+                columns === 1
+                  ? { width: '100%' }
+                  : { width: `${100 / columns - 2}%` as any },
                 active && styles.chipActive,
+                pressed && { opacity: 0.9 },
               ]}>
               <View style={[styles.box, active && styles.boxActive]}>
                 {active ? <Text style={styles.tick}>✓</Text> : null}
               </View>
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {opt}
+              <Text
+                style={[styles.chipText, active && styles.chipTextActive]}
+                numberOfLines={2}>
+                {opt.label}
               </Text>
             </Pressable>
           );
@@ -60,7 +73,7 @@ const styles = StyleSheet.create({
   },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: radius.md,
     paddingVertical: 10,
@@ -77,7 +90,7 @@ const styles = StyleSheet.create({
   box: {
     width: 18,
     height: 18,
-    borderRadius: 4,
+    borderRadius: 5,
     borderWidth: 1.5,
     borderColor: colors.border,
     alignItems: 'center',
@@ -88,7 +101,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
-  tick: { color: '#fff', fontSize: 12, fontWeight: '700' },
-  chipText: { color: colors.text, fontSize: 13, fontWeight: '500', flexShrink: 1 },
+  tick: { color: '#fff', fontSize: 11, fontWeight: '800' },
+  chipText: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '500',
+    flexShrink: 1,
+  },
   chipTextActive: { color: colors.primary, fontWeight: '700' },
 });

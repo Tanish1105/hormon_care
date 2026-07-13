@@ -1,21 +1,28 @@
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { colors, radius } from '../theme';
+import { colors, radius, shadows } from '../theme';
 
 type Props = {
   title?: string;
   subtitle?: string;
   children: React.ReactNode;
   style?: ViewStyle;
-  accent?: 'default' | 'warm';
+  accent?: 'default' | 'warm' | 'success';
 };
 
-export default function Card({ title, subtitle, children, style, accent = 'default' }: Props) {
+export default function Card({
+  title,
+  subtitle,
+  children,
+  style,
+  accent = 'default',
+}: Props) {
   return (
     <View
       style={[
         styles.card,
         accent === 'warm' && styles.warm,
+        accent === 'success' && styles.success,
         style,
       ]}>
       {title ? <Text style={styles.title}>{title}</Text> : null}
@@ -28,26 +35,32 @@ export default function Card({ title, subtitle, children, style, accent = 'defau
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.xl,
     padding: 18,
     borderWidth: 1,
     borderColor: colors.borderLight,
-    shadowColor: colors.shadow,
-    shadowOpacity: 1,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 2,
+    ...shadows.soft,
     marginBottom: 14,
   },
   warm: {
     backgroundColor: colors.bgSoft,
     borderColor: '#f9d5e3',
   },
+  success: {
+    backgroundColor: colors.successSoft,
+    borderColor: '#a7f3d0',
+  },
   title: {
     fontSize: 16,
     fontWeight: '700',
     color: colors.text,
     marginBottom: 4,
+    letterSpacing: -0.2,
   },
-  subtitle: { fontSize: 13, color: colors.textSoft, marginBottom: 12 },
+  subtitle: {
+    fontSize: 13,
+    color: colors.textSoft,
+    marginBottom: 12,
+    lineHeight: 18,
+  },
 });

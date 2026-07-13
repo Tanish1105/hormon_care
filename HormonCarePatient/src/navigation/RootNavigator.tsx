@@ -1,18 +1,20 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import type { NavigatorScreenParams } from '@react-navigation/native';
 import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useLocale } from '../context/LocaleContext';
 import { colors } from '../theme';
 import LoginScreen from '../screens/LoginScreen';
-import DashboardScreen from '../screens/DashboardScreen';
 import WeekDetailScreen from '../screens/WeekDetailScreen';
 import LifestyleAssessmentScreen from '../screens/LifestyleAssessmentScreen';
 import FollowupScreen from '../screens/FollowupScreen';
+import MainTabs, { type MainTabParamList } from './MainTabs';
 
 export type RootStackParamList = {
   Login: undefined;
-  Dashboard: undefined;
+  Main: NavigatorScreenParams<MainTabParamList> | undefined;
   WeekDetail: { weekNumber: number };
   LifestyleAssessment: undefined;
   Followup: { week?: number } | undefined;
@@ -22,8 +24,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   const { user, loading } = useAuth();
+  const { t, ready } = useLocale();
 
-  if (loading) {
+  if (loading || !ready) {
     return (
       <View
         style={{
@@ -42,32 +45,39 @@ export default function RootNavigator() {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: colors.surface },
+          headerStyle: {
+            backgroundColor: colors.surface,
+          },
+          headerShadowVisible: false,
           headerTintColor: colors.primary,
-          headerTitleStyle: { fontWeight: '700' },
+          headerTitleStyle: {
+            fontWeight: '700',
+            fontSize: 17,
+            color: colors.text,
+          },
           contentStyle: { backgroundColor: colors.bg },
         }}>
         {user ? (
           <>
             <Stack.Screen
-              name="Dashboard"
-              component={DashboardScreen}
+              name="Main"
+              component={MainTabs}
               options={{ headerShown: false }}
             />
             <Stack.Screen
               name="WeekDetail"
               component={WeekDetailScreen}
-              options={{ title: 'Week Detail' }}
+              options={{ title: t('weekDetailTitle') }}
             />
             <Stack.Screen
               name="LifestyleAssessment"
               component={LifestyleAssessmentScreen}
-              options={{ title: 'જીવનશૈલી મૂલ્યાંકન' }}
+              options={{ title: t('lifestyleTitle') }}
             />
             <Stack.Screen
               name="Followup"
               component={FollowupScreen}
-              options={{ title: 'સાપ્તાહિક ફોલોઅપ' }}
+              options={{ title: t('followupNavTitle') }}
             />
           </>
         ) : (

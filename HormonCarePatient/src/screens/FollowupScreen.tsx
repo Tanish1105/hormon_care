@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -9,17 +9,21 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import * as api from '../api/client';
+import { useLocale } from '../context/LocaleContext';
+import { translate, type TranslationKey } from '../i18n/translations';
+import type { Locale } from '../i18n/types';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import TextField from '../components/TextField';
-import RadioGroup from '../components/RadioGroup';
-import { colors } from '../theme';
+import DayScaleField from '../components/DayScaleField';
+import FeedbackPicker, {
+  type PlanFeedback,
+} from '../components/FeedbackPicker';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import { colors, radius } from '../theme';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 
 type RParam = RouteProp<RootStackParamList, 'Followup'>;
-
-const DAY_OPTIONS = ['0', '1', '2', '3', '4', '5', '6', '7'];
-const FEEDBACK_OPTIONS = ['Excellent', 'Good', 'Okay', 'Difficult'];
 
 type State = {
   currentWeight: string;
@@ -49,14 +53,39 @@ const initial: State = {
   feedbackGoodNotes: '',
 };
 
+function normalizeFeedback(value: string | null | undefined): string {
+  if (!value) return '';
+  if (value === 'excellent' || value === 'moderate' || value === 'poor') {
+    return value;
+  }
+  const legacy: Record<string, PlanFeedback> = {
+    liked: 'excellent',
+    average: 'moderate',
+    not_liked: 'poor',
+    Excellent: 'excellent',
+    Good: 'moderate',
+    Okay: 'moderate',
+    Difficult: 'poor',
+  };
+  return legacy[value] ?? '';
+}
+
 export default function FollowupScreen() {
   const route = useRoute<RParam>();
   const nav = useNavigation();
+  const { t: appT, locale: appLocale } = useLocale();
+  const [formLocale, setFormLocale] = useState<Locale>(appLocale);
   const [form, setForm] = useState<State>(initial);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [week, setWeek] = useState<number>(route.params?.week || 1);
   const [status, setStatus] = useState<api.GateStatus['followup'] | null>(null);
+
+  const t = useCallback(
+    (key: TranslationKey, vars?: Record<string, string | number>) =>
+      translate(formLocale, key, vars),
+    [formLocale],
+  );
 
   useEffect(() => {
     (async () => {
@@ -64,10 +93,7 @@ export default function FollowupScreen() {
         const s = await api.getFollowupStatus();
         setStatus(s);
         const w =
-          route.params?.week ||
-          s.nextDueWeek ||
-          s.pendingWeeks?.[0] ||
-          1;
+          route.params?.week || s.nextDueWeek || s.pendingWeeks?.[0] || 1;
         setWeek(w);
         const existing = await api.getFollowupForWeek(w);
         if (existing?.followup) {
@@ -80,9 +106,10 @@ export default function FollowupScreen() {
               existing.followup.missedSupplementDays ?? '',
             ),
             mealsDeviated: String(existing.followup.mealsDeviated ?? ''),
-            planFeedback: String(existing.followup.planFeedback ?? ''),
+            planFeedback: normalizeFeedback(existing.followup.planFeedback),
             feedbackLikedNotes: existing.followup.feedbackLikedNotes ?? '',
-            feedbackDislikedNotes: existing.followup.feedbackDislikedNotes ?? '',
+            feedbackDislikedNotes:
+              existing.followup.feedbackDislikedNotes ?? '',
             feedbackBadNotes: existing.followup.feedbackBadNotes ?? '',
             feedbackGoodNotes: existing.followup.feedbackGoodNotes ?? '',
           });
@@ -95,12 +122,29 @@ export default function FollowupScreen() {
     })();
   }, [route.params?.week]);
 
+  useEffect(() => {
+    nav.setOptions?.({ title: appT('followupNavTitle') } as any);
+  }, [nav, appT]);
+
   const setField = <K extends keyof State>(k: K, v: string) =>
     setForm(prev => ({ ...prev, [k]: v }));
 
+  function setPlanFeedback(value: PlanFeedback) {
+    setForm(prev => ({
+      ...prev,
+      planFeedback: value,
+      feedbackLikedNotes:
+        value === 'excellent' ? prev.feedbackLikedNotes : '',
+      feedbackDislikedNotes:
+        value === 'poor' ? prev.feedbackDislikedNotes : '',
+      feedbackBadNotes: value === 'moderate' ? prev.feedbackBadNotes : '',
+      feedbackGoodNotes: value === 'moderate' ? prev.feedbackGoodNotes : '',
+    }));
+  }
+
   async function onSubmit() {
-    if (!form.currentWeight) {
-      Alert.alert('Missing', 'Current Weight જરૂરી છે');
+    if (!form.currentWeight.trim()) {
+      Alert.alert(t('missing'), t('currentWeightRequired'));
       return;
     }
     const requiredDays: (keyof State)[] = [
@@ -109,22 +153,63 @@ export default function FollowupScreen() {
       'shortSleepDays',
       'missedSupplementDays',
     ];
+    const dayLabels: Record<string, string> = {
+      exerciseDays: t('exerciseDaysQ'),
+      lowWaterDays: t('lowWaterDaysQ'),
+      shortSleepDays: t('shortSleepDaysQ'),
+      missedSupplementDays: t('missedSupplementDaysQ'),
+    };
     for (const k of requiredDays) {
-      if (!form[k]) {
-        Alert.alert('Missing', `${k} જરૂરી છે`);
+      if (form[k] === '') {
+        Alert.alert(
+          t('missing'),
+          t('fieldRequired', { field: dayLabels[k] || k }),
+        );
         return;
       }
     }
+    if (form.mealsDeviated.trim() === '') {
+      Alert.alert(t('missing'), t('mealsRequired'));
+      return;
+    }
+    if (
+      form.planFeedback !== 'excellent' &&
+      form.planFeedback !== 'moderate' &&
+      form.planFeedback !== 'poor'
+    ) {
+      Alert.alert(t('missing'), t('feedbackRequired'));
+      return;
+    }
+    if (
+      form.planFeedback === 'excellent' &&
+      !form.feedbackLikedNotes.trim()
+    ) {
+      Alert.alert(t('missing'), t('notesRequired'));
+      return;
+    }
+    if (
+      form.planFeedback === 'poor' &&
+      !form.feedbackDislikedNotes.trim()
+    ) {
+      Alert.alert(t('missing'), t('notesRequired'));
+      return;
+    }
+    if (
+      form.planFeedback === 'moderate' &&
+      (!form.feedbackBadNotes.trim() || !form.feedbackGoodNotes.trim())
+    ) {
+      Alert.alert(t('missing'), t('notesRequired'));
+      return;
+    }
+
     setSubmitting(true);
     try {
       await api.submitFollowup({ weekNumber: week, ...form });
-      Alert.alert(
-        'સફળ',
-        'તમારો સાપ્તાહિક ફોલોઅપ સફળતાપૂર્વક સબમિટ થયો.',
-        [{ text: 'OK', onPress: () => nav.goBack() }],
-      );
+      Alert.alert(t('success'), t('followupSubmitSuccess'), [
+        { text: t('ok'), onPress: () => nav.goBack() },
+      ]);
     } catch (e: any) {
-      Alert.alert('Error', e?.message || 'Submit failed');
+      Alert.alert(t('error'), e?.message || t('submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -138,117 +223,153 @@ export default function FollowupScreen() {
     );
   }
 
+  const notesStyle = {
+    height: 90,
+    textAlignVertical: 'top' as const,
+  };
+
   return (
     <ScrollView
       contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       keyboardShouldPersistTaps="handled"
       testID="followup-form">
       <View style={styles.hero}>
-        <Text style={styles.kicker}>Weekly Check-in</Text>
-        <Text style={styles.title}>સપ્તાહ {week} ફોલોઅપ</Text>
-        <Text style={styles.desc}>
-          ટૂંકું સાપ્તાહિક ચેક-ઇન. તૈયાર હો ત્યારે સબમિટ કરો.
-        </Text>
+        <View style={styles.heroTop}>
+          <View style={styles.heroText}>
+            <Text style={styles.kicker}>{t('followupNavTitle')}</Text>
+            <Text style={styles.title}>{t('weekCheckIn', { week })}</Text>
+          </View>
+          <LanguageSwitcher
+            compact
+            value={formLocale}
+            onChange={setFormLocale}
+          />
+        </View>
+        <Text style={styles.desc}>{t('followupDesc')}</Text>
         {status?.pendingWeeks?.length ? (
           <View style={styles.pill}>
             <Text style={styles.pillText}>
-              Pending: Week {status.pendingWeeks.join(', ')}
+              {t('pendingWeeks', { weeks: status.pendingWeeks.join(', ') })}
             </Text>
           </View>
         ) : null}
       </View>
 
-      <Card title="Weekly Habits">
+      <Card title={t('weeklyHabits')}>
         <TextField
-          label="Current Weight (kg)"
+          label={t('currentWeight')}
           required
-          keyboardType="numeric"
+          keyboardType="decimal-pad"
           value={form.currentWeight}
           onChangeText={v => setField('currentWeight', v)}
+          suffix={t('weightUnit')}
         />
-        <RadioGroup
-          label="ગયા સપ્તાહે તમે કેટલા દિવસ વ્યાયામ કર્યું?"
+        <DayScaleField
+          label={t('exerciseDaysQ')}
           required
-          columns={4}
-          options={DAY_OPTIONS}
+          locale={formLocale}
           value={form.exerciseDays}
           onChange={v => setField('exerciseDays', v)}
         />
-        <RadioGroup
-          label="ગયા સપ્તાહે કેટલા દિવસ પાણીની માત્રા ઓછી પીધી?"
+        <DayScaleField
+          label={t('lowWaterDaysQ')}
           required
-          columns={4}
-          options={DAY_OPTIONS}
+          locale={formLocale}
           value={form.lowWaterDays}
           onChange={v => setField('lowWaterDays', v)}
         />
-        <RadioGroup
-          label="ગયા સપ્તાહે કેટલા દિવસ ૬ કલાકથી ઓછી ઊંઘ લીધી?"
+        <DayScaleField
+          label={t('shortSleepDaysQ')}
           required
-          columns={4}
-          options={DAY_OPTIONS}
+          locale={formLocale}
           value={form.shortSleepDays}
           onChange={v => setField('shortSleepDays', v)}
         />
-        <RadioGroup
-          label="કેટલા દિવસ સપ્લિમેન્ટ ચૂકી ગયા?"
+        <DayScaleField
+          label={t('missedSupplementDaysQ')}
           required
-          columns={4}
-          options={DAY_OPTIONS}
+          locale={formLocale}
           value={form.missedSupplementDays}
           onChange={v => setField('missedSupplementDays', v)}
         />
         <TextField
-          label="ગયા સપ્તાહે કેટલા ભોજન સહમતિ મુજબ નહોતા?"
-          keyboardType="numeric"
+          label={t('mealsDeviatedQ')}
+          required
+          keyboardType="number-pad"
           value={form.mealsDeviated}
           onChangeText={v => setField('mealsDeviated', v)}
         />
       </Card>
 
-      <Card title="આ સપ્તાહના પ્લાન વિશે તમને કેવું લાગ્યું?">
-        <RadioGroup
-          label=""
-          options={FEEDBACK_OPTIONS}
+      <Card title={t('feedbackTitle')}>
+        <Text style={styles.prompt}>
+          {t('planFeedbackTitle')}
+          <Text style={{ color: colors.danger }}> *</Text>
+        </Text>
+        <FeedbackPicker
           value={form.planFeedback}
-          onChange={v => setField('planFeedback', v)}
+          onChange={setPlanFeedback}
+          locale={formLocale}
         />
-        <TextField
-          label="શું ઉત્તમ લાગ્યું? (લખો)"
-          multiline
-          numberOfLines={3}
-          value={form.feedbackGoodNotes}
-          onChangeText={v => setField('feedbackGoodNotes', v)}
-          style={{ height: 90, textAlignVertical: 'top' }}
-        />
-        <TextField
-          label="શું ગમ્યું?"
-          multiline
-          numberOfLines={3}
-          value={form.feedbackLikedNotes}
-          onChangeText={v => setField('feedbackLikedNotes', v)}
-          style={{ height: 90, textAlignVertical: 'top' }}
-        />
-        <TextField
-          label="શું ના ગમ્યું?"
-          multiline
-          numberOfLines={3}
-          value={form.feedbackDislikedNotes}
-          onChangeText={v => setField('feedbackDislikedNotes', v)}
-          style={{ height: 90, textAlignVertical: 'top' }}
-        />
-        <TextField
-          label="કઈ વસ્તુ મુશ્કેલ લાગી?"
-          multiline
-          numberOfLines={3}
-          value={form.feedbackBadNotes}
-          onChangeText={v => setField('feedbackBadNotes', v)}
-          style={{ height: 90, textAlignVertical: 'top' }}
-        />
+
+        {form.planFeedback === 'excellent' ? (
+          <View style={[styles.notesBox, styles.notesExcellent]}>
+            <TextField
+              label={t('feedbackExcellentNotes')}
+              required
+              multiline
+              numberOfLines={3}
+              placeholder={t('feedbackPlaceholderExcellent')}
+              value={form.feedbackLikedNotes}
+              onChangeText={v => setField('feedbackLikedNotes', v)}
+              style={notesStyle}
+            />
+          </View>
+        ) : null}
+
+        {form.planFeedback === 'poor' ? (
+          <View style={[styles.notesBox, styles.notesPoor]}>
+            <TextField
+              label={t('feedbackPoorNotes')}
+              required
+              multiline
+              numberOfLines={3}
+              placeholder={t('feedbackPlaceholderPoor')}
+              value={form.feedbackDislikedNotes}
+              onChangeText={v => setField('feedbackDislikedNotes', v)}
+              style={notesStyle}
+            />
+          </View>
+        ) : null}
+
+        {form.planFeedback === 'moderate' ? (
+          <View style={[styles.notesBox, styles.notesModerate]}>
+            <TextField
+              label={t('feedbackBadNotes')}
+              required
+              multiline
+              numberOfLines={3}
+              placeholder={t('feedbackPlaceholderBad')}
+              value={form.feedbackBadNotes}
+              onChangeText={v => setField('feedbackBadNotes', v)}
+              style={notesStyle}
+            />
+            <TextField
+              label={t('feedbackGoodNotes')}
+              required
+              multiline
+              numberOfLines={3}
+              placeholder={t('feedbackPlaceholderGood')}
+              value={form.feedbackGoodNotes}
+              onChangeText={v => setField('feedbackGoodNotes', v)}
+              style={notesStyle}
+            />
+          </View>
+        ) : null}
       </Card>
 
       <Button
-        title="Followup સબમિટ કરો"
+        title={submitting ? t('followupSubmitting') : t('followupSubmit')}
         loading={submitting}
         onPress={onSubmit}
         fullWidth
@@ -267,31 +388,71 @@ const styles = StyleSheet.create({
   },
   hero: {
     backgroundColor: colors.primary,
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 28,
+    padding: 22,
     marginBottom: 16,
   },
+  heroTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  heroText: {
+    flex: 1,
+    minWidth: 0,
+  },
   kicker: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 12,
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 0.8,
   },
   title: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
-    marginTop: 4,
+    marginTop: 6,
+    letterSpacing: -0.4,
   },
-  desc: { color: 'rgba(255,255,255,0.9)', marginTop: 8, fontSize: 13 },
+  desc: {
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+  },
   pill: {
-    marginTop: 12,
+    marginTop: 14,
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 999,
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
-  pillText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  pillText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  prompt: {
+    fontSize: 13,
+    color: colors.textSoft,
+    marginBottom: 10,
+    lineHeight: 18,
+  },
+  notesBox: {
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 4,
+  },
+  notesExcellent: {
+    backgroundColor: colors.successSoft,
+    borderColor: '#a7f3d0',
+  },
+  notesPoor: {
+    backgroundColor: colors.dangerSoft,
+    borderColor: '#fecdd3',
+  },
+  notesModerate: {
+    backgroundColor: colors.warningSoft,
+    borderColor: '#fde68a',
+  },
 });

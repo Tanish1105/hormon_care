@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as api from '../api/client';
+import { useLocale } from '../context/LocaleContext';
+import { labeledOptions } from '../i18n/translations';
+import type { TranslationKey } from '../i18n/translations';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import TextField from '../components/TextField';
@@ -16,53 +19,20 @@ import RadioGroup from '../components/RadioGroup';
 import CheckboxGroup from '../components/CheckboxGroup';
 import { colors } from '../theme';
 
-/**
- * Section definitions mirror those from the web app (Physical Activity, BMI,
- * Sleep, Stress Screening, Diet, Habits, Medical History, Family History,
- * Partner Lifestyle).
- */
-
-const STRESS_QUESTIONS: { key: string; text: string }[] = [
-  {
-    key: 'stressQ1',
-    text: 'શું તમે નાની-નાની વાતોમાં ચિડાઈ જાવ છો અથવા ગુસ્સે થઈ જાવ છો?',
-  },
-  {
-    key: 'stressQ2',
-    text: 'શું તમને કોઈ પણ કારણ વગર સતત ચિંતા અથવા ગભરામણ અનુભવાય છે?',
-  },
-  {
-    key: 'stressQ3',
-    text: 'શું તમને એવું લાગે છે કે તમે તમારી પરિસ્થિતિઓ પર નિયંત્રણ ગુમાવી રહ્યા છો?',
-  },
-  {
-    key: 'stressQ4',
-    text: 'શું તણાવને કારણે તમને વારંવાર માથાનો દુખાવો કે સ્નાયુઓમાં દુખાવો થાય છે?',
-  },
-  {
-    key: 'stressQ5',
-    text: 'શું તમને પૂરતી ઊંઘ લેવામાં તકલીફ પડે છે અથવા સવારે ઉઠતી વખતે થાક લાગે છે?',
-  },
-  {
-    key: 'stressQ6',
-    text: 'શું તમને વારંવાર ખૂબ જ થાક અથવા શરીરમાં નબળાઈ અનુભવાય છે?',
-  },
-  {
-    key: 'stressQ7',
-    text: 'શું તમને કામ પર ધ્યાન કેન્દ્રિત કરવામાં મુશ્કેલી પડે છે?',
-  },
-  {
-    key: 'stressQ8',
-    text: 'શું તણાવના કારણે તમારી ભૂખમાં ફેરફાર થયો છે?',
-  },
-  {
-    key: 'stressQ9',
-    text: 'શું તમે લોકો સાથે મળવાનું ટાળો છો અને એકલા રહેવાનું પસંદ કરો છો?',
-  },
-  {
-    key: 'stressQ10',
-    text: 'શું તમને એવું લાગે છે કે જવાબદારીઓનો બોજ સંભાળી શકતા નથી?',
-  },
+const STRESS_KEYS: {
+  key: string;
+  labelKey: TranslationKey;
+}[] = [
+  { key: 'stressQ1', labelKey: 'stressQ1' },
+  { key: 'stressQ2', labelKey: 'stressQ2' },
+  { key: 'stressQ3', labelKey: 'stressQ3' },
+  { key: 'stressQ4', labelKey: 'stressQ4' },
+  { key: 'stressQ5', labelKey: 'stressQ5' },
+  { key: 'stressQ6', labelKey: 'stressQ6' },
+  { key: 'stressQ7', labelKey: 'stressQ7' },
+  { key: 'stressQ8', labelKey: 'stressQ8' },
+  { key: 'stressQ9', labelKey: 'stressQ9' },
+  { key: 'stressQ10', labelKey: 'stressQ10' },
 ];
 
 type FormState = {
@@ -130,6 +100,7 @@ const initialForm: FormState = {
 
 export default function LifestyleAssessmentScreen() {
   const nav = useNavigation();
+  const { locale, t } = useLocale();
   const [form, setForm] = useState<FormState>(initialForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -138,6 +109,22 @@ export default function LifestyleAssessmentScreen() {
     submitted?: boolean;
     patientName: string;
   } | null>(null);
+
+  const L = (values: string[]) => labeledOptions(locale, values);
+  const yesNo = useMemo(
+    () => [
+      { value: 'Yes', label: t('yes') },
+      { value: 'No', label: t('no') },
+    ],
+    [t],
+  );
+  const stressYesNo = useMemo(
+    () => [
+      { value: '1', label: t('yes') },
+      { value: '0', label: t('no') },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     (async () => {
@@ -152,6 +139,10 @@ export default function LifestyleAssessmentScreen() {
     })();
   }, []);
 
+  useEffect(() => {
+    nav.setOptions?.({ title: t('lifestyleTitle') } as any);
+  }, [nav, t]);
+
   const setField = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm(prev => ({ ...prev, [k]: v }));
 
@@ -164,7 +155,6 @@ export default function LifestyleAssessmentScreen() {
   }, [form.heightCm, form.weightKg]);
 
   async function onSubmit() {
-    // Simple validation on required radios
     const required: (keyof FormState)[] = [
       'exerciseFrequency',
       'exerciseDuration',
@@ -187,13 +177,16 @@ export default function LifestyleAssessmentScreen() {
     for (const k of required) {
       const v = (form as any)[k];
       if (!v || (Array.isArray(v) && v.length === 0)) {
-        Alert.alert('Missing field', `Please fill "${k}"`);
+        Alert.alert(t('missingField'), `${t('pleaseFill')} "${k}"`);
         return;
       }
     }
-    for (const q of STRESS_QUESTIONS) {
+    for (const q of STRESS_KEYS) {
       if (!form[q.key]) {
-        Alert.alert('Missing answer', `Please answer: ${q.text}`);
+        Alert.alert(
+          t('missingAnswer'),
+          `${t('pleaseAnswer')}: ${t(q.labelKey)}`,
+        );
         return;
       }
     }
@@ -201,13 +194,11 @@ export default function LifestyleAssessmentScreen() {
     setSubmitting(true);
     try {
       await api.submitLifestyleAssessment({ ...form, bmi });
-      Alert.alert(
-        'સફળ',
-        'તમારું જીવનશૈલી મૂલ્યાંકન સફળતાપૂર્વક સબમિટ થયું.',
-        [{ text: 'OK', onPress: () => nav.goBack() }],
-      );
+      Alert.alert(t('success'), t('lifestyleSubmitSuccess'), [
+        { text: t('ok'), onPress: () => nav.goBack() },
+      ]);
     } catch (e: any) {
-      Alert.alert('Error', e?.message || 'Submit failed');
+      Alert.alert(t('error'), e?.message || t('submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -224,9 +215,9 @@ export default function LifestyleAssessmentScreen() {
   if (status && status.submitted) {
     return (
       <View style={styles.centerPad}>
-        <Card title="સબમિટ થઈ ગયું">
+        <Card title={t('lifestyleSubmittedTitle')}>
           <Text style={{ color: colors.textSoft }}>
-            તમારું જીવનશૈલી મૂલ્યાંકન સફળતાપૂર્વક સબમિટ થયું.
+            {t('lifestyleSubmittedBody')}
           </Text>
         </Card>
       </View>
@@ -239,31 +230,29 @@ export default function LifestyleAssessmentScreen() {
       keyboardShouldPersistTaps="handled"
       testID="lifestyle-form">
       <View style={styles.hero}>
-        <Text style={styles.heroKicker}>Lifestyle Assessment</Text>
-        <Text style={styles.heroTitle}>જીવનશૈલી મૂલ્યાંકન</Text>
-        <Text style={styles.heroDesc}>
-          તમારા ડૉક્ટરને શ્રેષ્ઠ સારવાર planning માટે નીચેની માહિતી ભરો.
-        </Text>
+        <Text style={styles.heroKicker}>{t('lifestyleTitle')}</Text>
+        <Text style={styles.heroTitle}>{t('lifestyleHeroTitle')}</Text>
+        <Text style={styles.heroDesc}>{t('lifestyleHeroDesc')}</Text>
       </View>
 
-      <Card title="1. Physical Activity">
+      <Card title={t('sectionPhysicalActivity')}>
         <RadioGroup
-          label="Exercise Frequency"
+          label={t('exerciseFrequency')}
           required
-          options={['Never', '1-2 Days/Week', '3-5 Days/Week', 'Daily']}
+          options={L(['Never', '1-2 Days/Week', '3-5 Days/Week', 'Daily'])}
           value={form.exerciseFrequency}
           onChange={v => setField('exerciseFrequency', v)}
         />
         <RadioGroup
-          label="Exercise Duration"
+          label={t('exerciseDuration')}
           required
-          options={['<15 min', '15-30 min', '30-60 min', '>60 min']}
+          options={L(['<15 min', '15-30 min', '30-60 min', '>60 min'])}
           value={form.exerciseDuration}
           onChange={v => setField('exerciseDuration', v)}
         />
         <CheckboxGroup
-          label="Exercise Type"
-          options={[
+          label={t('exerciseType')}
+          options={L([
             'Walking',
             'Yoga',
             'Gym',
@@ -271,141 +260,141 @@ export default function LifestyleAssessmentScreen() {
             'Cycling',
             'Swimming',
             'Other',
-          ]}
+          ])}
           values={form.exerciseType}
           onChange={v => setField('exerciseType', v)}
         />
       </Card>
 
-      <Card title="2. BMI & Weight">
+      <Card title={t('sectionBmi')}>
         <TextField
-          label="Height (cm)"
+          label={t('heightCm')}
           required
           keyboardType="numeric"
           value={form.heightCm}
           onChangeText={v => setField('heightCm', v)}
         />
         <TextField
-          label="Weight (kg)"
+          label={t('weightKg')}
           required
           keyboardType="numeric"
           value={form.weightKg}
           onChangeText={v => setField('weightKg', v)}
         />
         <TextField
-          label="BMI"
+          label={t('bmi')}
           value={bmi}
           editable={false}
-          hint="ઊંચાઈ અને વજન પછી આપમેળે ગણાશે"
+          hint={t('bmiAutoHint')}
         />
       </Card>
 
-      <Card title="3. Sleep">
+      <Card title={t('sectionSleep')}>
         <RadioGroup
-          label="Sleep Hours"
+          label={t('sleepHours')}
           required
-          options={['<5', '5-6', '6-7', '7-8', '>8']}
+          options={L(['<5', '5-6', '6-7', '7-8', '>8'])}
           value={form.sleepHours}
           onChange={v => setField('sleepHours', v)}
         />
         <RadioGroup
-          label="Sleep Quality"
+          label={t('sleepQuality')}
           required
-          options={['Poor', 'Fair', 'Good', 'Excellent']}
+          options={L(['Poor', 'Fair', 'Good', 'Excellent'])}
           value={form.sleepQuality}
           onChange={v => setField('sleepQuality', v)}
         />
         <RadioGroup
-          label="Night Shift"
+          label={t('nightShift')}
           required
-          options={['Yes', 'No']}
+          options={yesNo}
           value={form.nightShift}
           onChange={v => setField('nightShift', v)}
         />
       </Card>
 
-      <Card title="4. તણાવ મૂલ્યાંકન (છેલ્લા એક મહિના)">
+      <Card title={t('sectionStress')}>
         <Text style={{ color: colors.textSoft, marginBottom: 10, fontSize: 12 }}>
-          કૃપા કરીને છેલ્લા એક મહિનાના તમારા અનુભવના આધારે «હા» અથવા «ના» માં જવાબ આપો.
+          {t('stressHint')}
         </Text>
-        {STRESS_QUESTIONS.map((q, idx) => (
+        {STRESS_KEYS.map((q, idx) => (
           <RadioGroup
             key={q.key}
-            label={`${idx + 1}. ${q.text}`}
+            label={`${idx + 1}. ${t(q.labelKey)}`}
             required
-            options={['હા', 'ના']}
+            options={stressYesNo}
             value={form[q.key]}
             onChange={v => setField(q.key as any, v)}
           />
         ))}
       </Card>
 
-      <Card title="5. Diet">
+      <Card title={t('sectionDiet')}>
         <RadioGroup
-          label="Diet Type"
+          label={t('dietType')}
           required
-          options={['Vegetarian', 'Eggetarian', 'Vegan']}
+          options={L(['Vegetarian', 'Eggetarian', 'Vegan'])}
           value={form.dietType}
           onChange={v => setField('dietType', v)}
         />
         <RadioGroup
-          label="Breakfast"
+          label={t('breakfast')}
           required
-          options={['Daily', 'Sometimes Skip', 'Always Skip']}
+          options={L(['Daily', 'Sometimes Skip', 'Always Skip'])}
           value={form.breakfast}
           onChange={v => setField('breakfast', v)}
         />
         <RadioGroup
-          label="Outside Food"
+          label={t('outsideFood')}
           required
-          options={['Never', 'Weekly', '2-3 Times/Week', 'Daily']}
+          options={L(['Never', 'Weekly', '2-3 Times/Week', 'Daily'])}
           value={form.fastFood}
           onChange={v => setField('fastFood', v)}
         />
         <RadioGroup
-          label="Water Intake (glasses)"
+          label={t('waterIntake')}
           required
           columns={1}
-          options={[
+          options={L([
             '< 5 glasses',
             '5-10 glasses',
             '10-15 glasses',
             '15-20 glasses',
             '> 20 glasses',
-          ]}
+          ])}
           value={form.waterIntake}
           onChange={v => setField('waterIntake', v)}
         />
       </Card>
 
-      <Card title="6. Habits">
+      <Card title={t('sectionHabits')}>
         <RadioGroup
-          label="Tea/Coffee"
+          label={t('teaCoffee')}
           required
-          options={['None', '1 Cup', '2 Cups', '3+ Cups']}
+          options={L(['None', '1 Cup', '2 Cups', '3+ Cups'])}
           value={form.teaCoffee}
           onChange={v => setField('teaCoffee', v)}
         />
         <RadioGroup
-          label="Cold Drinks"
+          label={t('coldDrinks')}
           required
-          options={['None', 'Occasionally', 'Weekly', 'Daily']}
+          options={L(['None', 'Occasionally', 'Weekly', 'Daily'])}
           value={form.coldDrinks}
           onChange={v => setField('coldDrinks', v)}
         />
         <RadioGroup
-          label="શુગર આઇટમ્સ (આઇસ ક્રીમ વગેરે)"
+          label={t('sugarItems')}
           required
-          options={['None', 'Occasionally', 'Weekly', 'Daily']}
+          options={L(['None', 'Occasionally', 'Weekly', 'Daily'])}
           value={form.sugarItems}
           onChange={v => setField('sugarItems', v)}
         />
       </Card>
 
-      <Card title="7. Medical History">
+      <Card title={t('sectionMedical')}>
         <CheckboxGroup
-          label="Known Conditions"
-          options={[
+          label={t('knownConditions')}
+          options={L([
             'PCOD',
             'Thyroid',
             'Diabetes',
@@ -413,19 +402,19 @@ export default function LifestyleAssessmentScreen() {
             'Hypertension',
             'Fibroids',
             'None',
-          ]}
+          ])}
           values={form.knownConditions}
           onChange={v => setField('knownConditions', v)}
         />
         <CheckboxGroup
-          label="Irregular Menses"
-          options={['Heavy', 'Painful', 'None']}
+          label={t('irregularMenses')}
+          options={L(['Heavy', 'Painful', 'None'])}
           values={form.irregularMenses}
           onChange={v => setField('irregularMenses', v)}
         />
         <CheckboxGroup
-          label="Supplements"
-          options={[
+          label={t('supplements')}
+          options={L([
             'Folic Acid',
             'Vitamin D',
             'Iron',
@@ -433,53 +422,53 @@ export default function LifestyleAssessmentScreen() {
             'Vit B12',
             'Other',
             'None',
-          ]}
+          ])}
           values={form.supplements}
           onChange={v => setField('supplements', v)}
         />
       </Card>
 
-      <Card title="8. Family History">
+      <Card title={t('sectionFamily')}>
         <CheckboxGroup
-          label="Mother"
-          options={['Diabetes', 'Hypertension', 'Thyroid', 'None']}
+          label={t('mother')}
+          options={L(['Diabetes', 'Hypertension', 'Thyroid', 'None'])}
           values={form.motherFamilyHistory}
           onChange={v => setField('motherFamilyHistory', v)}
         />
         <CheckboxGroup
-          label="Father"
-          options={['Diabetes', 'BP', 'None']}
+          label={t('father')}
+          options={L(['Diabetes', 'BP', 'None'])}
           values={form.fatherFamilyHistory}
           onChange={v => setField('fatherFamilyHistory', v)}
         />
       </Card>
 
-      <Card title="9. Partner Lifestyle">
+      <Card title={t('sectionPartner')}>
         <RadioGroup
-          label="Smoking"
+          label={t('smoking')}
           required
-          options={['Yes', 'No']}
+          options={yesNo}
           value={form.partnerSmoking}
           onChange={v => setField('partnerSmoking', v)}
         />
         <RadioGroup
-          label="Alcohol"
+          label={t('alcohol')}
           required
-          options={['Yes', 'No']}
+          options={yesNo}
           value={form.partnerAlcohol}
           onChange={v => setField('partnerAlcohol', v)}
         />
         <RadioGroup
-          label="Exercise"
+          label={t('exercise')}
           required
-          options={['Regular', 'Occasional', 'None']}
+          options={L(['Regular', 'Occasional', 'None'])}
           value={form.partnerExercise}
           onChange={v => setField('partnerExercise', v)}
         />
       </Card>
 
       <Button
-        title="ફોર્મ સબમિટ કરો"
+        title={t('lifestyleSubmit')}
         loading={submitting}
         onPress={onSubmit}
         fullWidth
@@ -499,22 +488,28 @@ const styles = StyleSheet.create({
   centerPad: { flex: 1, padding: 16, backgroundColor: colors.bg },
   hero: {
     backgroundColor: colors.primary,
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 28,
+    padding: 22,
     marginBottom: 16,
   },
   heroKicker: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 12,
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 0.8,
   },
   heroTitle: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
-    marginTop: 4,
+    marginTop: 6,
+    letterSpacing: -0.4,
   },
-  heroDesc: { color: 'rgba(255,255,255,0.9)', marginTop: 8, fontSize: 13 },
+  heroDesc: {
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+  },
 });
