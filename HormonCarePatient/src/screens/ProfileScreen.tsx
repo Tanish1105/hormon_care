@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,19 +11,14 @@ import { useLocale } from '../context/LocaleContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import ConfirmModal from '../components/ConfirmModal';
 import FollowupProgressCard from '../components/FollowupProgressCard';
 import { colors, radius, shadows } from '../theme';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { t } = useLocale();
-
-  function confirmLogout() {
-    Alert.alert(t('logoutConfirmTitle'), t('logoutConfirmMessage'), [
-      { text: t('no'), style: 'cancel' },
-      { text: t('yes'), style: 'destructive', onPress: signOut },
-    ]);
-  }
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']} testID="profile-screen">
@@ -69,12 +63,26 @@ export default function ProfileScreen() {
         <Button
           title={t('logout')}
           variant="danger"
-          onPress={confirmLogout}
+          onPress={() => setLogoutOpen(true)}
           fullWidth
           testID="profile-logout-button"
           style={{ marginTop: 4 }}
         />
       </ScrollView>
+
+      <ConfirmModal
+        visible={logoutOpen}
+        title={t('logoutConfirmTitle')}
+        message={t('logoutConfirmMessage')}
+        cancelLabel={t('cancel')}
+        confirmLabel={t('logout')}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={() => {
+          setLogoutOpen(false);
+          signOut();
+        }}
+        testID="logout-confirm-modal"
+      />
     </SafeAreaView>
   );
 }

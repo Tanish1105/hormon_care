@@ -278,14 +278,30 @@ export function getProgramFromDashboard(
 }
 
 /**
- * Uploads are stored as `/uploads/...` relative paths. React Native Image
- * needs an absolute URL.
+ * Uploads are stored as `/uploads/...` or `/api/media/...` relative paths.
+ * React Native Image needs an absolute URL.
  */
 export function resolveMediaUrl(url?: string | null): string | null {
   if (!url) return null;
-  if (/^https?:\/\//i.test(url) || url.startsWith('data:')) return url;
-  if (url.startsWith('/')) return `${BASE_URL}${url}`;
-  return `${BASE_URL}/${url}`;
+  const trimmed = String(url).trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('data:')) {
+    return trimmed;
+  }
+
+  // Legacy `/uploads/x` → serve via API media route when possible
+  let path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  const uploadMatch = path.match(/^\/uploads\/([^/?#]+)$/i);
+  if (uploadMatch) {
+    path = `/api/media/${uploadMatch[1]}`;
+  }
+
+  const absolute = `${BASE_URL}${path}`;
+  try {
+    return encodeURI(decodeURI(absolute));
+  } catch {
+    return absolute;
+  }
 }
 
 /** Secure YouTube player page (session cookie required in WebView headers). */

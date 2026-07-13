@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/AdminLayout";
 import { Button, Card, Input, Textarea, Badge } from "@/components/ui";
 import { FileUpload } from "@/components/FileUpload";
 import { Plus, Trash2, ChevronRight } from "lucide-react";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type Plan = {
   id: string;
@@ -136,7 +137,7 @@ export default function PlansPage() {
           <Card key={plan.id} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 gap-3 sm:gap-4">
               {plan.imageUrl && (
-                <img src={plan.imageUrl} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover sm:h-16 sm:w-16" />
+                <img src={resolvePublicMediaUrl(plan.imageUrl)} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover sm:h-16 sm:w-16" />
               )}
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">

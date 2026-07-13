@@ -25,5 +25,6 @@ export async function saveUpload(file: File, type: "image" | "video") {
   const filename = `${randomUUID()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-  return `/uploads/${filename}`;
+  // Prefer API media URL so mobile / some hosts can load files reliably
+  return `/api/media/${filename}`;
 }

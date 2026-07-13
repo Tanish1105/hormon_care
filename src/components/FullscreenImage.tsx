@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type FullscreenImageProps = {
   src: string;
@@ -15,6 +16,7 @@ type FullscreenImageProps = {
 export function FullscreenImage({ src, alt = "", className, protected: isProtected = false }: FullscreenImageProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const resolvedSrc = resolvePublicMediaUrl(src);
 
   useEffect(() => setMounted(true), []);
 
@@ -60,7 +62,7 @@ export function FullscreenImage({ src, alt = "", className, protected: isProtect
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={src}
+                src={resolvedSrc}
                 alt={alt}
                 className="block max-h-[90dvh] max-w-[95vw] object-contain select-none"
                 draggable={false}
@@ -85,7 +87,7 @@ export function FullscreenImage({ src, alt = "", className, protected: isProtect
         aria-label="Image popup ma jovo"
         onContextMenu={isProtected ? (e) => e.preventDefault() : undefined}
       >
-        <img src={src} alt={alt} className={cn(className, isProtected && "select-none pointer-events-none")} draggable={false} />
+        <img src={resolvedSrc} alt={alt} className={cn(className, isProtected && "select-none pointer-events-none")} draggable={false} />
         <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-[10px] font-medium text-white opacity-80 backdrop-blur-sm">
           <ZoomIn className="h-3 w-3" />
           View

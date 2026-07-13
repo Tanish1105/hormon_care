@@ -146,6 +146,11 @@ export default function HomeScreen() {
                   uri={planImage}
                   style={styles.planBanner}
                   resizeMode="cover"
+                  fallback={
+                    <View style={styles.planBannerPlaceholder}>
+                      <Text style={styles.planBannerMark}>HC</Text>
+                    </View>
+                  }
                 />
               ) : (
                 <View style={styles.planBannerPlaceholder}>

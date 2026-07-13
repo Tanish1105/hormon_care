@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type FileUploadProps = {
   label: string;
@@ -51,9 +52,9 @@ export function FileUpload({ label, accept, value, onChange, className }: FileUp
       {value ? (
         <div className="relative rounded-lg border border-slate-200 bg-slate-50 p-2">
           {accept === "image" ? (
-            <img src={value} alt="Uploaded" className="max-h-40 rounded object-contain" />
+            <img src={resolvePublicMediaUrl(value)} alt="Uploaded" className="max-h-40 rounded object-contain" />
           ) : (
-            <video src={value} controls className="max-h-40 w-full rounded" />
+            <video src={resolvePublicMediaUrl(value)} controls className="max-h-40 w-full rounded" />
           )}
           <button
             type="button"

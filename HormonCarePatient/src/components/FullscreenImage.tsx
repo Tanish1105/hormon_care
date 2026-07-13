@@ -9,16 +9,19 @@ import {
   View,
   ViewStyle,
   StatusBar,
+  StyleProp,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocale } from '../context/LocaleContext';
+import { colors } from '../theme';
 
 type Props = {
   uri: string;
-  style?: ImageStyle | ImageStyle[];
-  containerStyle?: ViewStyle;
+  style?: StyleProp<ImageStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
   resizeMode?: 'cover' | 'contain' | 'stretch' | 'center';
   accessibilityLabel?: string;
+  fallback?: React.ReactNode;
 };
 
 export default function FullscreenImage({
@@ -27,19 +30,30 @@ export default function FullscreenImage({
   containerStyle,
   resizeMode = 'cover',
   accessibilityLabel,
+  fallback,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [failed, setFailed] = useState(false);
   const insets = useSafeAreaInsets();
   const { t } = useLocale();
+
+  if (failed) {
+    return fallback ? <>{fallback}</> : <View style={[styles.failed, style as ViewStyle]} />;
+  }
 
   return (
     <>
       <Pressable
         onPress={() => setOpen(true)}
-        style={containerStyle}
+        style={[styles.thumbWrap, containerStyle, style as ViewStyle]}
         accessibilityRole="imagebutton"
         accessibilityLabel={accessibilityLabel || t('tapToFullscreen')}>
-        <Image source={{ uri }} style={style} resizeMode={resizeMode} />
+        <Image
+          source={{ uri }}
+          style={styles.thumbImage}
+          resizeMode={resizeMode}
+          onError={() => setFailed(true)}
+        />
       </Pressable>
 
       <Modal
@@ -58,13 +72,12 @@ export default function FullscreenImage({
             <Text style={styles.closeText}>✕</Text>
           </Pressable>
 
-          <Pressable
-            style={styles.imageArea}
-            onPress={() => setOpen(false)}>
+          <Pressable style={styles.imageArea} onPress={() => setOpen(false)}>
             <Image
               source={{ uri }}
               style={styles.fullImage}
               resizeMode="contain"
+              onError={() => setFailed(true)}
             />
           </Pressable>
 
@@ -78,6 +91,17 @@ export default function FullscreenImage({
 }
 
 const styles = StyleSheet.create({
+  thumbWrap: {
+    overflow: 'hidden',
+    backgroundColor: colors.borderLight,
+  },
+  thumbImage: {
+    width: '100%',
+    height: '100%',
+  },
+  failed: {
+    backgroundColor: colors.borderLight,
+  },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.94)',
