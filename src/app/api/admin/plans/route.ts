@@ -3,10 +3,21 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { planInclude, createWeeksData } from "@/lib/plan-includes";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await getSession();
   if (!session || session.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const lite = new URL(request.url).searchParams.get("lite") === "1";
+
+  if (lite) {
+    const plans = await prisma.plan.findMany({
+      where: { isCustom: false },
+      select: { id: true, title: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(plans);
   }
 
   const plans = await prisma.plan.findMany({

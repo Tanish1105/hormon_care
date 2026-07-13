@@ -95,9 +95,9 @@ export default function PatientsPage() {
     try {
       const [pRes, plRes, gRes, cgRes] = await Promise.all([
         fetch("/api/admin/patients"),
-        fetch("/api/admin/plans"),
-        fetch("/api/admin/garbha-plans"),
-        fetch("/api/admin/child-guidance-plans"),
+        fetch("/api/admin/plans?lite=1"),
+        fetch("/api/admin/garbha-plans?lite=1"),
+        fetch("/api/admin/child-guidance-plans?lite=1"),
       ]);
 
       const patientsData = await pRes.json();

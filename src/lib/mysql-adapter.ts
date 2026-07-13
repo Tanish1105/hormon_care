@@ -24,7 +24,7 @@ function configFromParts() {
     user,
     password,
     database,
-    connectionLimit: Number(env("DATABASE_POOL_SIZE") ?? 2),
+    connectionLimit: Number(env("DATABASE_POOL_SIZE") ?? 5),
   };
 }
 
@@ -39,7 +39,7 @@ function configFromUrl() {
     user: decodeURIComponent(parsed.username),
     password: decodeURIComponent(parsed.password),
     database: decodeURIComponent(parsed.pathname.replace(/^\//, "")),
-    connectionLimit: Number(env("DATABASE_POOL_SIZE") ?? 2),
+    connectionLimit: Number(env("DATABASE_POOL_SIZE") ?? 5),
   };
 }
 
