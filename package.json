@@ -14,7 +14,7 @@
     "db:export-sql": "prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script -o prisma/mysql-init.sql"
   },
   "engines": {
-    "node": ">=20 <=22"
+    "node": ">=22"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",
