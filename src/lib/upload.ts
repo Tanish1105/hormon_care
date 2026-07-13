@@ -1,13 +1,24 @@
-import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { prisma } from "@/lib/prisma";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public/uploads");
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 40 * 1024 * 1024;
 
 const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/quicktime", "video/mpeg"];
+
+const EXT_MIME: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mov: "video/quicktime",
+  mpeg: "video/mpeg",
+};
 
 export async function saveUpload(file: File, type: "image" | "video") {
   const allowed = type === "image" ? ALLOWED_IMAGE : ALLOWED_VIDEO;
@@ -17,14 +28,32 @@ export async function saveUpload(file: File, type: "image" | "video") {
     throw new Error(`Invalid ${type} file type`);
   }
   if (file.size > maxSize) {
-    throw new Error(`File too large (max ${type === "image" ? "10MB" : "100MB"})`);
+    throw new Error(
+      `File too large (max ${type === "image" ? "10MB" : "40MB"})`
+    );
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  const ext = file.name.split(".").pop()?.toLowerCase() || (type === "image" ? "jpg" : "mp4");
+  const ext =
+    file.name.split(".").pop()?.toLowerCase() ||
+    (type === "image" ? "jpg" : "mp4");
   const filename = `${randomUUID()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-  // Prefer API media URL so mobile / some hosts can load files reliably
+  const mimeType = file.type || EXT_MIME[ext] || "application/octet-stream";
+
+  await prisma.mediaFile.create({
+    data: {
+      filename,
+      mimeType,
+      size: buffer.length,
+      data: buffer,
+    },
+  });
+
   return `/api/media/${filename}`;
+}
+
+export function mediaContentType(filename: string, mimeType?: string | null) {
+  if (mimeType) return mimeType;
+  const ext = path.extname(filename).slice(1).toLowerCase();
+  return EXT_MIME[ext] || "application/octet-stream";
 }

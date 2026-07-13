@@ -1,27 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { prisma } from "@/lib/prisma";
+import { mediaContentType } from "@/lib/upload";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public/uploads");
-
-const CONTENT_TYPES: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  webp: "image/webp",
-  gif: "image/gif",
-  mp4: "video/mp4",
-  webm: "video/webm",
-  mov: "video/quicktime",
-  mpeg: "video/mpeg",
-};
 
 type Params = { params: Promise<{ filename: string }> };
 
 /**
- * Serves uploaded media for environments where static `/uploads` files
- * are not reliably exposed (e.g. some Node host build layouts).
- * Falls through style: `/api/media/<file>` → public/uploads/<file>
+ * Serve media from MySQL (primary) with legacy disk fallback.
+ * Hostinger redeploys wipe public/uploads, so DB storage is durable.
  */
 export async function GET(_req: NextRequest, { params }: Params) {
   const { filename } = await params;
@@ -30,15 +19,31 @@ export async function GET(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const filePath = path.join(UPLOAD_DIR, safe);
   try {
-    const data = await fs.readFile(filePath);
-    const ext = safe.split(".").pop()?.toLowerCase() || "";
-    const contentType = CONTENT_TYPES[ext] || "application/octet-stream";
+    const row = await prisma.mediaFile.findUnique({
+      where: { filename: safe },
+      select: { data: true, mimeType: true },
+    });
+    if (row) {
+      return new NextResponse(Buffer.from(row.data), {
+        status: 200,
+        headers: {
+          "Content-Type": mediaContentType(safe, row.mimeType),
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
+    }
+  } catch (error) {
+    console.error("media db read error:", error);
+  }
+
+  // Legacy files that still exist on disk
+  try {
+    const data = await fs.readFile(path.join(UPLOAD_DIR, safe));
     return new NextResponse(data, {
       status: 200,
       headers: {
-        "Content-Type": contentType,
+        "Content-Type": mediaContentType(safe),
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
