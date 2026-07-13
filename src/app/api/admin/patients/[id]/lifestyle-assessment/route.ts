@@ -59,38 +59,55 @@ export async function POST(req: Request, { params }: RouteParams) {
   }
 
   const { id: patientProfileId } = await params;
-  const profile = await prisma.patientProfile.findUnique({
-    where: { id: patientProfileId },
-    include: { lifestyleAssessment: true },
-  });
 
-  if (!profile) {
-    return NextResponse.json({ error: "Patient not found" }, { status: 404 });
+  try {
+    const profile = await prisma.patientProfile.findUnique({
+      where: { id: patientProfileId },
+      include: { lifestyleAssessment: true },
+    });
+
+    if (!profile) {
+      return NextResponse.json({ error: "Patient not found" }, { status: 404 });
+    }
+
+    const accessToken = generateAssessmentAccessToken();
+    const origin = new URL(req.url).origin;
+
+    const assessment = await prisma.lifestyleAssessment.upsert({
+      where: { patientProfileId },
+      create: {
+        patientProfileId,
+        accessToken,
+        ...RESET_FIELDS,
+      },
+      update: {
+        accessToken,
+        ...RESET_FIELDS,
+      },
+    });
+
+    const formLink = buildAssessmentFormUrl(accessToken, origin);
+
+    return NextResponse.json({
+      assessment,
+      formLink,
+      message: "Lifestyle assessment sent to patient",
+    });
+  } catch (error) {
+    console.error("[send-lifestyle-assessment]", error);
+    const message = error instanceof Error ? error.message : "Could not send assessment";
+    const needsMigration =
+      /Unknown column|stressQ(6|7|8|9|10)/i.test(message) ||
+      /doesn't exist|does not exist/i.test(message);
+    return NextResponse.json(
+      {
+        error: needsMigration
+          ? "Database needs update: run stress questionnaire migration (add stressQ6–stressQ10), then try again."
+          : message,
+      },
+      { status: 500 }
+    );
   }
-
-  const accessToken = generateAssessmentAccessToken();
-  const origin = new URL(req.url).origin;
-
-  const assessment = await prisma.lifestyleAssessment.upsert({
-    where: { patientProfileId },
-    create: {
-      patientProfileId,
-      accessToken,
-      ...RESET_FIELDS,
-    },
-    update: {
-      accessToken,
-      ...RESET_FIELDS,
-    },
-  });
-
-  const formLink = buildAssessmentFormUrl(accessToken, origin);
-
-  return NextResponse.json({
-    assessment,
-    formLink,
-    message: "Lifestyle assessment sent to patient",
-  });
 }
 
 export async function DELETE(_req: Request, { params }: RouteParams) {
