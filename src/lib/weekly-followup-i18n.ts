@@ -57,10 +57,10 @@ export function followupUi(locale: PatientLocale) {
       pickLocale(locale, `Week ${week} followup due`, `સપ્તાહ ${week} ફોલોઅપ બાકી છે`),
     modalHint: pickLocale(
       locale,
-      "Please complete this form. It stays due until you submit — you can still view your plan anytime.",
-      "કૃપા કરીને આ ફોર્મ પૂર્ણ કરો. સબમિટ થાય ત્યાં સુધી બાકી રહેશે — તમે ક્યારેય પણ પ્લાન જોઈ શકો છો."
+      "A short weekly check-in. Submit when ready — you can still open your plan anytime.",
+      "ટૂંકું સાપ્તાહિક ચેક-ઇન. તૈયાર હો ત્યારે સબમિટ કરો — પ્લાન ક્યારેય પણ જોઈ શકો છો."
     ),
-    viewPlanFirst: pickLocale(locale, "View My Plan first", "પહેલા મારો પ્લાન જુઓ"),
+    viewPlanFirst: pickLocale(locale, "View my plan first", "પહેલા મારો પ્લાન જુઓ"),
     thankYou: pickLocale(locale, "Thank you!", "આભાર!"),
     thankYouBody: pickLocale(
       locale,

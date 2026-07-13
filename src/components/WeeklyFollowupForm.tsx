@@ -8,7 +8,7 @@ import type { PatientLocale } from "@/lib/patient-locale";
 import { DAY_SCALE_OPTIONS, type PlanFeedbackType } from "@/lib/weekly-followup";
 import { followupDayLabel, followupUi } from "@/lib/weekly-followup-i18n";
 import { cn } from "@/lib/utils";
-import { ClipboardList, MessageSquare } from "lucide-react";
+import { ClipboardList, Frown, Meh, MessageSquare, Smile } from "lucide-react";
 
 type WeeklyFollowupFormProps = {
   weekNumber: number;
@@ -23,27 +23,32 @@ type WeeklyFollowupFormProps = {
   onLocaleChange?: (locale: PatientLocale) => void;
 };
 
-const FEEDBACK_STYLES = {
-  excellent: {
-    active: "border-emerald-500 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-200",
-    idle: "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/50",
+const FEEDBACK_OPTIONS = [
+  {
+    value: "excellent" as const,
+    icon: Smile,
+    active: "border-emerald-400 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-100",
+    idle: "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/40",
+    iconActive: "text-emerald-600",
   },
-  moderate: {
-    active: "border-amber-500 bg-amber-50 text-amber-800 ring-2 ring-amber-200",
-    idle: "border-slate-200 bg-white text-slate-600 hover:border-amber-200 hover:bg-amber-50/50",
+  {
+    value: "moderate" as const,
+    icon: Meh,
+    active: "border-amber-400 bg-amber-50 text-amber-900 ring-2 ring-amber-100",
+    idle: "border-slate-200 bg-white text-slate-600 hover:border-amber-200 hover:bg-amber-50/40",
+    iconActive: "text-amber-600",
   },
-  poor: {
-    active: "border-rose-500 bg-rose-50 text-rose-800 ring-2 ring-rose-200",
-    idle: "border-slate-200 bg-white text-slate-600 hover:border-rose-200 hover:bg-rose-50/50",
+  {
+    value: "poor" as const,
+    icon: Frown,
+    active: "border-rose-400 bg-rose-50 text-rose-900 ring-2 ring-rose-100",
+    idle: "border-slate-200 bg-white text-slate-600 hover:border-rose-200 hover:bg-rose-50/40",
+    iconActive: "text-rose-600",
   },
-} as const;
+] as const;
 
-function RequiredLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span>
-      {children} <span className="text-red-500">*</span>
-    </span>
-  );
+function RequiredMark() {
+  return <span className="text-pink-600">*</span>;
 }
 
 function FormSection({
@@ -51,40 +56,43 @@ function FormSection({
   icon: Icon,
   title,
   children,
-  className,
 }: {
   compact?: boolean;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   children: React.ReactNode;
-  className?: string;
 }) {
   if (compact) {
     return (
-      <section className={cn("space-y-4 border-b border-slate-100 pb-6 last:border-0 last:pb-0", className)}>
-        <div className="flex items-center gap-2.5">
-          {Icon && (
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
-              <Icon className="h-4 w-4" />
-            </span>
-          )}
-          <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-pink-50 text-pink-700">
+            <Icon className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-[15px] font-semibold text-slate-900">{title}</h3>
+            <div className="mt-1 h-0.5 w-8 rounded-full bg-pink-400/80" />
+          </div>
         </div>
-        {children}
+        <div className="space-y-5">{children}</div>
       </section>
     );
   }
 
   return (
-    <Card>
-      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-      <div className="mt-4 space-y-6">{children}</div>
-    </Card>
+    <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+      <div className="flex items-center gap-3 border-b border-slate-100 bg-gradient-to-r from-pink-50/80 to-white px-5 py-4">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-pink-700 shadow-sm ring-1 ring-pink-100">
+          <Icon className="h-5 w-5" />
+        </span>
+        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+      </div>
+      <div className="space-y-6 px-5 py-5">{children}</div>
+    </section>
   );
 }
 
 function DayScaleField({
-  compact,
   locale,
   label,
   name,
@@ -92,7 +100,6 @@ function DayScaleField({
   onChange,
   required,
 }: {
-  compact?: boolean;
   locale: PatientLocale;
   label: string;
   name: string;
@@ -103,71 +110,71 @@ function DayScaleField({
   return (
     <fieldset className="space-y-2.5">
       <legend className="text-sm font-medium leading-snug text-slate-700">
-        {required ? <RequiredLabel>{label}</RequiredLabel> : label}
+        {label}
+        {required ? (
+          <>
+            {" "}
+            <RequiredMark />
+          </>
+        ) : null}
       </legend>
-      <div
-        className={cn(
-          "grid gap-1.5",
-          compact ? "grid-cols-4 sm:grid-cols-8" : "flex flex-wrap gap-2"
-        )}
-      >
-        {DAY_SCALE_OPTIONS.map((option) => (
-          <label
-            key={option.value}
-            className={cn(
-              "flex cursor-pointer items-center justify-center rounded-lg border text-center font-medium transition",
-              compact ? "px-1 py-2 text-xs" : "px-3 py-2 text-sm",
-              value === option.value
-                ? "border-pink-500 bg-pink-50 text-pink-700 shadow-sm"
-                : "border-slate-200 bg-white text-slate-600 hover:border-pink-200"
-            )}
-          >
-            <input
-              type="radio"
-              name={name}
-              value={option.value}
-              checked={value === option.value}
-              onChange={() => onChange(option.value)}
-              className="sr-only"
-              required={required}
-            />
-            {followupDayLabel(locale, option.label)}
-          </label>
-        ))}
+      <div className="grid grid-cols-8 overflow-hidden rounded-xl border border-slate-200 bg-slate-50/70 p-1">
+        {DAY_SCALE_OPTIONS.map((option) => {
+          const selected = value === option.value;
+          return (
+            <label
+              key={option.value}
+              className={cn(
+                "flex cursor-pointer items-center justify-center rounded-lg py-2.5 text-center text-[11px] font-semibold transition sm:text-xs",
+                selected
+                  ? "bg-pink-600 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-white hover:text-slate-900"
+              )}
+            >
+              <input
+                type="radio"
+                name={name}
+                value={option.value}
+                checked={selected}
+                onChange={() => onChange(option.value)}
+                className="sr-only"
+                required={required}
+              />
+              {followupDayLabel(locale, option.label)}
+            </label>
+          );
+        })}
       </div>
     </fieldset>
   );
 }
 
 function FeedbackOptions({
-  compact,
   value,
   onChange,
   ui,
 }: {
-  compact?: boolean;
   value: PlanFeedbackType | "";
   onChange: (v: PlanFeedbackType) => void;
   ui: ReturnType<typeof followupUi>;
 }) {
-  const options = [
-    { value: "excellent" as const, label: ui.feedbackExcellent },
-    { value: "moderate" as const, label: ui.feedbackModerate },
-    { value: "poor" as const, label: ui.feedbackPoor },
-  ];
+  const labels = {
+    excellent: ui.feedbackExcellent,
+    moderate: ui.feedbackModerate,
+    poor: ui.feedbackPoor,
+  };
 
   return (
-    <div className={cn("grid gap-2", compact ? "grid-cols-3" : "flex flex-wrap")}>
-      {options.map((option) => {
-        const styles = FEEDBACK_STYLES[option.value];
+    <div className="grid grid-cols-3 gap-2">
+      {FEEDBACK_OPTIONS.map((option) => {
         const selected = value === option.value;
+        const Icon = option.icon;
         return (
           <label
             key={option.value}
             className={cn(
-              "flex cursor-pointer items-center justify-center rounded-xl border px-2 py-3 text-center text-sm font-semibold transition",
-              compact && "min-h-[3rem]",
-              selected ? styles.active : styles.idle
+              "flex min-h-[4.5rem] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-center transition",
+              selected ? option.active : option.idle
             )}
           >
             <input
@@ -179,7 +186,13 @@ function FeedbackOptions({
               className="sr-only"
               required
             />
-            {option.label}
+            <Icon
+              className={cn("h-5 w-5", selected ? option.iconActive : "text-slate-400")}
+              strokeWidth={1.75}
+            />
+            <span className="text-xs font-semibold leading-tight sm:text-sm">
+              {labels[option.value]}
+            </span>
           </label>
         );
       })}
@@ -277,18 +290,27 @@ export function WeeklyFollowupForm({
 
   const habitsFields = (
     <>
-      <Input
-        label={<RequiredLabel>{ui.currentWeight}</RequiredLabel>}
-        type="number"
-        step="0.1"
-        min="0"
-        required
-        value={form.currentWeight}
-        onChange={(e) => setForm({ ...form, currentWeight: e.target.value })}
-      />
+      <div className="relative">
+        <Input
+          label={
+            <>
+              {ui.currentWeight} <RequiredMark />
+            </>
+          }
+          type="number"
+          step="0.1"
+          min="0"
+          required
+          value={form.currentWeight}
+          onChange={(e) => setForm({ ...form, currentWeight: e.target.value })}
+          className="pr-12"
+        />
+        <span className="pointer-events-none absolute bottom-2.5 right-3 text-xs font-medium text-slate-400">
+          kg
+        </span>
+      </div>
 
       <DayScaleField
-        compact={compact}
         locale={locale}
         label={ui.exerciseDays}
         name="exerciseDays"
@@ -298,7 +320,6 @@ export function WeeklyFollowupForm({
       />
 
       <DayScaleField
-        compact={compact}
         locale={locale}
         label={ui.lowWaterDays}
         name="lowWaterDays"
@@ -308,7 +329,6 @@ export function WeeklyFollowupForm({
       />
 
       <DayScaleField
-        compact={compact}
         locale={locale}
         label={ui.shortSleepDays}
         name="shortSleepDays"
@@ -318,7 +338,6 @@ export function WeeklyFollowupForm({
       />
 
       <DayScaleField
-        compact={compact}
         locale={locale}
         label={ui.missedSupplementDays}
         name="missedSupplementDays"
@@ -328,7 +347,11 @@ export function WeeklyFollowupForm({
       />
 
       <Input
-        label={<RequiredLabel>{ui.mealsDeviated}</RequiredLabel>}
+        label={
+          <>
+            {ui.mealsDeviated} <RequiredMark />
+          </>
+        }
         type="number"
         min="0"
         required
@@ -341,59 +364,74 @@ export function WeeklyFollowupForm({
   const feedbackFields = (
     <>
       <p className="text-sm leading-relaxed text-slate-600">
-        <RequiredLabel>{ui.feedbackPrompt}</RequiredLabel>
+        {ui.feedbackPrompt} <RequiredMark />
       </p>
 
-      <FeedbackOptions
-        compact={compact}
-        value={form.planFeedback}
-        onChange={setPlanFeedback}
-        ui={ui}
-      />
+      <FeedbackOptions value={form.planFeedback} onChange={setPlanFeedback} ui={ui} />
 
       {form.planFeedback === "excellent" && (
-        <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 transition">
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-3.5">
           <Textarea
-            label={<RequiredLabel>{ui.feedbackExcellentNotes}</RequiredLabel>}
+            label={
+              <>
+                {ui.feedbackExcellentNotes} <RequiredMark />
+              </>
+            }
             required
             rows={compact ? 2 : 3}
             value={form.feedbackLikedNotes}
             onChange={(e) => setForm({ ...form, feedbackLikedNotes: e.target.value })}
             placeholder={locale === "gu" ? "તમારો અનુભવ લખો..." : "Share your experience..."}
+            className="bg-white"
           />
         </div>
       )}
 
       {form.planFeedback === "poor" && (
-        <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 transition">
+        <div className="rounded-2xl border border-rose-100 bg-rose-50/40 p-3.5">
           <Textarea
-            label={<RequiredLabel>{ui.feedbackPoorNotes}</RequiredLabel>}
+            label={
+              <>
+                {ui.feedbackPoorNotes} <RequiredMark />
+              </>
+            }
             required
             rows={compact ? 2 : 3}
             value={form.feedbackDislikedNotes}
             onChange={(e) => setForm({ ...form, feedbackDislikedNotes: e.target.value })}
             placeholder={locale === "gu" ? "શું સુધારવું જોઈએ તે લખો..." : "What could be improved..."}
+            className="bg-white"
           />
         </div>
       )}
 
       {form.planFeedback === "moderate" && (
-        <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/80 p-3 transition">
+        <div className="space-y-4 rounded-2xl border border-amber-100 bg-amber-50/40 p-3.5">
           <Textarea
-            label={<RequiredLabel>{ui.feedbackBadNotes}</RequiredLabel>}
+            label={
+              <>
+                {ui.feedbackBadNotes} <RequiredMark />
+              </>
+            }
             required
             rows={compact ? 2 : 3}
             value={form.feedbackBadNotes}
             onChange={(e) => setForm({ ...form, feedbackBadNotes: e.target.value })}
             placeholder={locale === "gu" ? "શું ખરાબ લાગ્યું..." : "What felt difficult..."}
+            className="bg-white"
           />
           <Textarea
-            label={<RequiredLabel>{ui.feedbackGoodNotes}</RequiredLabel>}
+            label={
+              <>
+                {ui.feedbackGoodNotes} <RequiredMark />
+              </>
+            }
             required
             rows={compact ? 2 : 3}
             value={form.feedbackGoodNotes}
             onChange={(e) => setForm({ ...form, feedbackGoodNotes: e.target.value })}
             placeholder={locale === "gu" ? "શું સારું લાગ્યું..." : "What worked well..."}
+            className="bg-white"
           />
         </div>
       )}
@@ -404,44 +442,52 @@ export function WeeklyFollowupForm({
     <form
       id={formId}
       onSubmit={handleSubmit}
-      className={compact ? "space-y-6" : "space-y-8"}
+      className={compact ? "space-y-8" : "space-y-6"}
     >
       {!compact && (
-        <Card>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">{ui.title}</h1>
-              <p className="mt-1 text-sm text-slate-500">{ui.weekCheckIn(weekNumber)}</p>
+        <Card className="!overflow-hidden !p-0">
+          <div className="bg-[linear-gradient(160deg,#fff1f5_0%,#ffffff_60%,#fff7ed_100%)] px-5 py-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-700/80">
+                  Hormon Care
+                </p>
+                <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+                  {ui.title}
+                </h1>
+                <p className="mt-1 text-sm text-slate-600">{ui.weekCheckIn(weekNumber)}</p>
+              </div>
+              {!localeProp && <LocaleToggle locale={locale} onChange={setLocale} />}
             </div>
-            {!localeProp && <LocaleToggle locale={locale} onChange={setLocale} />}
-          </div>
-
-          <div className="mt-6">
-            <Input label={ui.patientName} value={patientName} readOnly className="bg-slate-50" />
+            <div className="mt-5">
+              <Input label={ui.patientName} value={patientName} readOnly className="bg-white" />
+            </div>
           </div>
         </Card>
       )}
 
       <FormSection compact={compact} icon={ClipboardList} title={ui.weeklyHabits}>
-        {compact ? <div className="space-y-5">{habitsFields}</div> : habitsFields}
+        {habitsFields}
       </FormSection>
 
+      {compact ? <div className="h-px bg-slate-100" /> : null}
+
       <FormSection compact={compact} icon={MessageSquare} title={ui.feedbackTitle}>
-        {compact ? <div className="space-y-4">{feedbackFields}</div> : feedbackFields}
+        {feedbackFields}
       </FormSection>
 
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
           {error}
         </p>
       )}
 
       {!hideSubmit && (
-        <div className={compact ? "flex justify-center pb-2" : "flex justify-center pb-8"}>
+        <div className="flex justify-center pb-6 pt-1">
           <Button
             type="submit"
             disabled={loading}
-            className="min-w-40 px-8 py-3 text-base font-semibold uppercase tracking-wide"
+            className="min-w-44 rounded-xl px-8 py-3.5 text-sm font-semibold tracking-wide shadow-sm shadow-pink-600/20"
           >
             {loading ? ui.submitting : ui.submit}
           </Button>

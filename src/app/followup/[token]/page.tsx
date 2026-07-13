@@ -92,12 +92,14 @@ export default function PublicFollowupPage() {
   const ui = followupUi(locale);
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-purple-50 to-white">
-      <header className="border-b border-purple-100 bg-white/90 px-4 py-4 backdrop-blur">
+    <div className="min-h-full bg-[linear-gradient(180deg,#fff1f5_0%,#f8fafc_42%,#ffffff_100%)]">
+      <header className="border-b border-pink-100/80 bg-white/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-purple-600">Hormon Care</p>
-            <h1 className="text-lg font-bold text-slate-900">{ui.title}</h1>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-700/80">
+              Hormon Care
+            </p>
+            <h1 className="mt-0.5 text-lg font-bold tracking-tight text-slate-900">{ui.title}</h1>
           </div>
           <LocaleToggle locale={locale} onChange={setLocale} />
         </div>
