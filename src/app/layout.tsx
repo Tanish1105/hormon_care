@@ -10,6 +10,14 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: "Hormon Care - Gynecology Patient Care",
   description: "Gynecology doctor patient care management system",
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "48x48", type: "image/png" },
+      { url: "/hormon-care-logo.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/hormon-care-logo.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.png",
+  },
 };
 
 export const viewport = {

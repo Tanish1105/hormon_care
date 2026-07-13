@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { WeeklyFollowupForm } from "@/components/WeeklyFollowupForm";
 import { LocaleToggle } from "@/components/LocaleToggle";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Card } from "@/components/ui";
 import type { PatientLocale } from "@/lib/patient-locale";
 import { followupUi } from "@/lib/weekly-followup-i18n";
@@ -95,11 +96,12 @@ export default function PublicFollowupPage() {
     <div className="min-h-full bg-[linear-gradient(180deg,#fff1f5_0%,#f8fafc_42%,#ffffff_100%)]">
       <header className="border-b border-pink-100/80 bg-white/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-700/80">
-              Hormon Care
-            </p>
-            <h1 className="mt-0.5 text-lg font-bold tracking-tight text-slate-900">{ui.title}</h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <BrandLogo size="sm" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900">Hormon Care</p>
+              <h1 className="truncate text-base font-bold text-slate-700">{ui.title}</h1>
+            </div>
           </div>
           <LocaleToggle locale={locale} onChange={setLocale} />
         </div>

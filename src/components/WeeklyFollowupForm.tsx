@@ -9,6 +9,7 @@ import { DAY_SCALE_OPTIONS, type PlanFeedbackType } from "@/lib/weekly-followup"
 import { followupDayLabel, followupUi } from "@/lib/weekly-followup-i18n";
 import { cn } from "@/lib/utils";
 import { ClipboardList, Frown, Meh, MessageSquare, Smile } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 type WeeklyFollowupFormProps = {
   weekNumber: number;
@@ -449,9 +450,7 @@ export function WeeklyFollowupForm({
           <div className="bg-[linear-gradient(160deg,#fff1f5_0%,#ffffff_60%,#fff7ed_100%)] px-5 py-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-700/80">
-                  Hormon Care
-                </p>
+                <BrandLogo size="md" className="mb-3" />
                 <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
                   {ui.title}
                 </h1>

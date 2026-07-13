@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Heart } from "lucide-react";
-import { Button, Input, Card } from "@/components/ui";
+import Link from "next/link";
+import { BrandLogo } from "@/components/BrandLogo";
+import { Button, Input } from "@/components/ui";
 
 export function PatientLoginForm() {
   const [username, setUsername] = useState("");
@@ -34,17 +35,21 @@ export function PatientLoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-50 to-white p-4">
-      <Card className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <Heart className="mx-auto h-10 w-10 text-purple-600" />
-          <h1 className="mt-3 text-2xl font-bold text-slate-900">Hormon Care</h1>
-          <p className="mt-1 text-sm text-slate-500">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#faf6f3] p-4">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(190,24,93,0.14),_transparent_50%),radial-gradient(ellipse_at_bottom_right,_rgba(251,146,60,0.12),_transparent_45%)]"
+      />
+
+      <div className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[#eadfd6] bg-white/95 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+        <div className="bg-[linear-gradient(160deg,#fff1f5_0%,#ffffff_60%,#fff7ed_100%)] px-6 pb-2 pt-8 text-center">
+          <BrandLogo size="xl" className="mx-auto" priority />
+          <p className="mt-4 text-sm text-slate-500">
             Doctor દ્વારા આપેલ ID અને Password થી login કરો
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-6">
           <Input
             label="Patient ID"
             value={username}
@@ -60,11 +65,30 @@ export function PatientLoginForm() {
             required
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit" variant="secondary" className="w-full" disabled={loading}>
+          <Button
+            type="submit"
+            className="w-full rounded-xl py-3 font-semibold shadow-sm shadow-pink-600/20"
+            disabled={loading}
+          >
             {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
-      </Card>
+
+        <div className="border-t border-[#f0e8e1] px-6 py-4 text-center text-xs leading-relaxed text-slate-500">
+          Login કરીને તમે અમારી{" "}
+          <Link href="/terms" className="font-medium text-pink-700 underline-offset-2 hover:underline">
+            Terms &amp; Conditions
+          </Link>{" "}
+          અને{" "}
+          <Link
+            href="/privacy"
+            className="font-medium text-pink-700 underline-offset-2 hover:underline"
+          >
+            Privacy Policy
+          </Link>{" "}
+          સાથે સહમત છો.
+        </div>
+      </div>
     </div>
   );
 }

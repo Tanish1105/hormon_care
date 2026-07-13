@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Heart } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Button, Input, Card } from "@/components/ui";
 
 export function AdminLoginForm() {
@@ -37,8 +37,8 @@ export function AdminLoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-white p-4">
       <Card className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <Heart className="mx-auto h-10 w-10 text-pink-600" />
-          <h1 className="mt-3 text-2xl font-bold text-slate-900">Admin Login</h1>
+          <BrandLogo size="lg" className="mx-auto" priority />
+          <h1 className="mt-4 text-2xl font-bold text-slate-900">Admin Login</h1>
           <p className="text-sm text-slate-500">Doctor / Admin panel</p>
         </div>
 

@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Heart, LogOut, LayoutDashboard, ClipboardList, Users, Baby, GraduationCap, BarChart3, FileText } from "lucide-react";
+import {
+  LogOut,
+  LayoutDashboard,
+  ClipboardList,
+  Users,
+  Baby,
+  GraduationCap,
+  BarChart3,
+  FileText,
+} from "lucide-react";
+import { BrandMark } from "@/components/BrandLogo";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -31,12 +41,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="relative hidden w-64 flex-col border-r border-slate-200 bg-white md:flex">
-        <div className="flex items-center gap-2 border-b border-slate-200 px-6 py-5">
-          <Heart className="h-7 w-7 text-pink-600" />
-          <div>
-            <p className="font-bold text-pink-700">Hormon Care</p>
-            <p className="text-xs text-slate-500">Admin Panel</p>
-          </div>
+        <div className="border-b border-slate-200 px-5 py-4">
+          <BrandMark subtitle="Admin Panel" size="md" />
         </div>
         <nav className="flex-1 space-y-1 p-4">
           {navItems.map((item) => {
@@ -71,13 +77,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
-        <div className="flex items-center gap-2">
-          <Heart className="h-6 w-6 text-pink-600" />
-          <div>
-            <p className="font-bold text-pink-700">Hormon Care</p>
-            <p className="text-[10px] text-slate-500">Admin Panel</p>
-          </div>
-        </div>
+        <BrandMark subtitle="Admin Panel" size="sm" />
         <button
           onClick={logout}
           className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"

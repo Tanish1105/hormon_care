@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { LifestyleAssessmentForm } from "@/components/LifestyleAssessmentForm";
 import { LocaleToggle } from "@/components/LocaleToggle";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Card } from "@/components/ui";
 import { lifestyleFormUi } from "@/lib/lifestyle-assessment-i18n";
 import type { PatientLocale } from "@/lib/patient-locale";
@@ -43,9 +44,12 @@ export default function PublicAssessmentPage() {
     <div className="min-h-full bg-gradient-to-b from-pink-50 to-white">
       <header className="border-b border-pink-100 bg-white/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium text-pink-600">Hormon Care</p>
-            <h1 className="text-lg font-bold text-slate-900">{ui.title}</h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <BrandLogo size="sm" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900">Hormon Care</p>
+              <h1 className="truncate text-base font-bold text-slate-700">{ui.title}</h1>
+            </div>
           </div>
           <LocaleToggle locale={locale} onChange={setLocale} />
         </div>

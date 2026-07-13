@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { WeeklyFollowupForm } from "@/components/WeeklyFollowupForm";
 import { LocaleToggle } from "@/components/LocaleToggle";
 import { Button } from "@/components/ui";
+import { BrandLogo } from "@/components/BrandLogo";
 import type { PatientLocale } from "@/lib/patient-locale";
 import { followupUi } from "@/lib/weekly-followup-i18n";
 import { cn } from "@/lib/utils";
@@ -74,9 +75,7 @@ export function FollowupPromptModal({
 
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-700/80">
-                Hormon Care
-              </p>
+              <BrandLogo size="sm" className="mb-2" />
               <h2
                 id="followup-modal-title"
                 className="mt-1 text-xl font-bold tracking-tight text-slate-900"
