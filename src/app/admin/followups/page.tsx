@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { AdminFollowupList, type AdminFollowupRow } from "@/components/AdminFollowupWeekCard";
 import { PatientFollowupCharts } from "@/components/PatientFollowupCharts";
-import { Badge, Button, Card, Input } from "@/components/ui";
+import { Badge, Button, Card } from "@/components/ui";
+import { ShareFormLink } from "@/components/ShareFormLink";
 import { formatDisplayDate } from "@/lib/utils";
-import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type PatientAnalytics = {
@@ -39,7 +40,6 @@ export default function AdminFollowupsPage() {
   const [compulsory, setCompulsory] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [expandedPatient, setExpandedPatient] = useState<string | null>(null);
-  const [linkCopiedId, setLinkCopiedId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState("");
 
   async function load() {
@@ -203,39 +203,23 @@ export default function AdminFollowupsPage() {
                     {expanded && (
                       <div className="mt-4 border-t border-slate-100 pt-4">
                         {patient.pendingWeeks.length > 0 && (
-                          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                            <p className="text-sm text-amber-900">
-                              Week {patient.nextDueWeek ?? patient.pendingWeeks[0]} followup due —
-                              share link with patient (stays due until submitted).
-                            </p>
-                            {patient.formLink && (
-                              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-                                <Input
-                                  readOnly
-                                  value={patient.formLink}
-                                  className="bg-white font-mono text-xs"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  onClick={async () => {
-                                    await navigator.clipboard.writeText(patient.formLink!);
-                                    setLinkCopiedId(patient.id);
-                                    setTimeout(() => setLinkCopiedId(null), 2000);
-                                  }}
-                                >
-                                  {linkCopiedId === patient.id ? (
-                                    <Check className="mr-1 h-4 w-4" />
-                                  ) : (
-                                    <Copy className="mr-1 h-4 w-4" />
-                                  )}
-                                  {linkCopiedId === patient.id ? "Copied!" : "Copy Link"}
-                                </Button>
-                              </div>
-                            )}
-                            <p className="mt-2 text-xs text-amber-800">
-                              Pending weeks: {patient.pendingWeeks.join(", ")}
-                            </p>
+                          <div className="mb-4 space-y-3">
+                            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                              <p className="text-sm text-amber-900">
+                                Week {patient.nextDueWeek ?? patient.pendingWeeks[0]} followup due —
+                                share the direct link with the patient (stays due until submitted).
+                              </p>
+                              <p className="mt-2 text-xs text-amber-800">
+                                Pending weeks: {patient.pendingWeeks.join(", ")}
+                              </p>
+                            </div>
+                            {patient.formLink ? (
+                              <ShareFormLink
+                                url={patient.formLink}
+                                label="Followup form link"
+                                hint="Patient can open without login — Copy or WhatsApp."
+                              />
+                            ) : null}
                           </div>
                         )}
                         <PatientFollowupCharts followups={patient.followups} />

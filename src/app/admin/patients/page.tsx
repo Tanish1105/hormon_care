@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Button, Card, Input, Textarea, Select, Badge } from "@/components/ui";
 import { Plus, Trash2, Key, Copy, Check, Sparkles, SquarePen, Send, FileText, Link2 } from "lucide-react";
+import { ShareFormLink } from "@/components/ShareFormLink";
+import { APP_PUBLIC_URL, buildAssessmentFormUrl } from "@/lib/assessment-link";
 import { formatDateInputValue, formatDisplayDate } from "@/lib/utils";
 
 type AssignedPlan = { id: string; title: string; totalWeeks: number; isCustom: boolean };
@@ -25,6 +27,8 @@ type Patient = {
     lifestyleScore: number | null;
     accessToken: string | null;
   } | null;
+  assessmentFormLink?: string | null;
+  followupFormLink?: string | null;
 };
 
 type Plan = { id: string; title: string };
@@ -322,10 +326,10 @@ export default function PatientsPage() {
   }
 
   function getAssessmentFormLink(patient: Patient) {
+    if (patient.assessmentFormLink) return patient.assessmentFormLink;
     const token = patient.lifestyleAssessment?.accessToken;
     if (!token) return null;
-    if (typeof window === "undefined") return null;
-    return `${window.location.origin}/assessment/${token}`;
+    return buildAssessmentFormUrl(token);
   }
 
   async function copyAssessmentLink(patient: Patient) {
@@ -539,7 +543,7 @@ export default function PatientsPage() {
                     ? "Re-send Assessment"
                     : "Send Assessment"}
               </Button>
-              {lifestyleStatus(patient) === "pending" && patient.lifestyleAssessment?.accessToken && (
+              {lifestyleStatus(patient) === "pending" && getAssessmentFormLink(patient) && (
                 <Button
                   variant="secondary"
                   className="!py-1.5 text-xs"
@@ -550,7 +554,7 @@ export default function PatientsPage() {
                   ) : (
                     <Link2 className="mr-1 h-3.5 w-3.5" />
                   )}
-                  {linkCopiedId === patient.id ? "Link Copied!" : "Copy Form Link"}
+                  {linkCopiedId === patient.id ? "Link Copied!" : "Copy Assessment Link"}
                 </Button>
               )}
               {lifestyleStatus(patient) === "submitted" && (
@@ -563,6 +567,25 @@ export default function PatientsPage() {
                 </a>
               )}
             </div>
+
+            {(getAssessmentFormLink(patient) || patient.followupFormLink) && (
+              <div className="mt-4 space-y-3">
+                {lifestyleStatus(patient) === "pending" && getAssessmentFormLink(patient) && (
+                  <ShareFormLink
+                    url={getAssessmentFormLink(patient)!}
+                    label="Assessment form link"
+                    hint={`Direct link · ${APP_PUBLIC_URL}/assessment/...`}
+                  />
+                )}
+                {patient.followupFormLink && patient.plan && (
+                  <ShareFormLink
+                    url={patient.followupFormLink}
+                    label="Followup form link"
+                    hint={`Direct link · ${APP_PUBLIC_URL}/followup/...`}
+                  />
+                )}
+              </div>
+            )}
 
             <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {programMeta.map(({ program, label, emptyLabel }) => {

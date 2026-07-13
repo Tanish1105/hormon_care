@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateAssessmentAccessToken } from "@/lib/assessment-link";
+import {
+  generateAssessmentAccessToken,
+  buildAssessmentFormUrl,
+  buildFollowupFormUrl,
+} from "@/lib/assessment-link";
 import {
   getSession,
   hashPassword,
@@ -22,6 +26,37 @@ const patientListInclude = {
     },
   },
 } as const;
+
+function withShareLinks<
+  T extends {
+    followupAccessToken: string | null;
+    plan: { id: string } | null;
+    lifestyleAssessment: {
+      id: string;
+      requestedAt: Date | null;
+      submittedAt: Date | null;
+      lifestyleScore: number | null;
+      accessToken: string | null;
+    } | null;
+  },
+>(patient: T) {
+  const assessmentToken = patient.lifestyleAssessment?.accessToken ?? null;
+  const assessmentPending =
+    Boolean(patient.lifestyleAssessment?.requestedAt) &&
+    !patient.lifestyleAssessment?.submittedAt;
+
+  return {
+    ...patient,
+    assessmentFormLink:
+      assessmentPending && assessmentToken
+        ? buildAssessmentFormUrl(assessmentToken)
+        : null,
+    followupFormLink:
+      patient.plan && patient.followupAccessToken
+        ? buildFollowupFormUrl(patient.followupAccessToken)
+        : null,
+  };
+}
 
 export async function GET() {
   const session = await getSession();
@@ -66,7 +101,29 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json(patients);
+    // Ensure followup share tokens exist for patients with a care plan
+    const needFollowupToken = patients.filter((p) => p.plan && !p.followupAccessToken);
+    if (needFollowupToken.length > 0) {
+      await Promise.all(
+        needFollowupToken.map((p) =>
+          prisma.patientProfile.update({
+            where: { id: p.id },
+            data: { followupAccessToken: generateAssessmentAccessToken() },
+          })
+        )
+      );
+      const refreshed = await prisma.patientProfile.findMany({
+        where: { id: { in: needFollowupToken.map((p) => p.id) } },
+        select: { id: true, followupAccessToken: true },
+      });
+      const tokenByPatient = new Map(refreshed.map((r) => [r.id, r.followupAccessToken]));
+      for (const p of patients) {
+        const token = tokenByPatient.get(p.id);
+        if (token) p.followupAccessToken = token;
+      }
+    }
+
+    return NextResponse.json(patients.map(withShareLinks));
   } catch (error) {
     console.error("[admin/patients]", error);
     const message = error instanceof Error ? error.message : "Could not load patients";

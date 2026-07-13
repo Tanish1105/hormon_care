@@ -15,9 +15,10 @@ import {
   STRESS_RECOMMENDATIONS,
   YES_NO_OPTIONS,
 } from "@/lib/stress-screening";
+import { ShareFormLink } from "@/components/ShareFormLink";
 import { formatDisplayDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, ChevronDown, ChevronUp, Copy, Check, Pencil } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 
 type Highlight = { field: string; label: string; reason: string; severity: "high" | "medium" };
 
@@ -66,7 +67,6 @@ export function AdminLifestyleAssessmentCard({
   const [editingRec, setEditingRec] = useState(false);
   const [rec, setRec] = useState(item.doctorRecommendation ?? "");
   const [saving, setSaving] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
 
   async function saveRecommendation() {
     setSaving(true);
@@ -78,13 +78,6 @@ export function AdminLifestyleAssessmentCard({
     setSaving(false);
     setEditingRec(false);
     onUpdated();
-  }
-
-  async function copyFormLink() {
-    if (!item.formLink) return;
-    await navigator.clipboard.writeText(item.formLink);
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2000);
   }
 
   const data = item.data as Record<string, unknown> | null;
@@ -138,32 +131,20 @@ export function AdminLifestyleAssessmentCard({
       {expanded && (
         <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
           {item.pending && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm text-amber-900">
-                Patient has not submitted yet. Share the form link below — no login required.
-              </p>
-              {item.formLink ? (
-                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <Input
-                    readOnly
-                    value={item.formLink}
-                    className="bg-white font-mono text-xs"
-                  />
-                  <Button type="button" variant="secondary" onClick={copyFormLink}>
-                    {linkCopied ? (
-                      <Check className="mr-1 h-4 w-4" />
-                    ) : (
-                      <Copy className="mr-1 h-4 w-4" />
-                    )}
-                    {linkCopied ? "Copied!" : "Copy Link"}
-                  </Button>
-                </div>
-              ) : (
-                <p className="mt-2 text-xs text-amber-700">
-                  Re-send assessment from Patients to generate a shareable link.
+            item.formLink ? (
+              <ShareFormLink
+                url={item.formLink}
+                label="Assessment direct link"
+                hint="Patient can open this without login — share via WhatsApp or copy."
+              />
+            ) : (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm text-amber-900">
+                  Patient has not submitted yet. Re-send assessment from Patients to generate a
+                  shareable link.
                 </p>
-              )}
-            </div>
+              </div>
+            )
           )}
 
           {analytics && !item.pending && (
