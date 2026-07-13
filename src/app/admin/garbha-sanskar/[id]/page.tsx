@@ -171,7 +171,7 @@ export default function GarbhaDetailPage({ params }: { params: Promise<{ id: str
   return (
     <AdminLayout>
       <Link href="/admin/garbha-sanskar" className="flex items-center gap-1 text-sm text-pink-600 hover:underline">
-        <ArrowLeft className="h-4 w-4" /> Back to Garbha Sanskar
+        <ArrowLeft className="h-4 w-4" /> Back to Garbh Sanskruti
       </Link>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">

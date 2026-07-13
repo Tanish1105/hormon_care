@@ -17,6 +17,10 @@ type Patient = {
   requirements: string | null;
   currentWeek: number;
   startDate: string;
+  garbhaStartDate?: string;
+  garbhaCurrentWeek?: number;
+  childGuidanceStartDate?: string;
+  childGuidanceCurrentWeek?: number;
   user: { id: string; username: string; name: string; createdAt: string };
   plan: AssignedPlan | null;
   garbhaPlan: AssignedPlan | null;
@@ -75,6 +79,10 @@ export default function PatientsPage() {
     childGuidancePlanId: "",
     currentWeek: "1",
     startDate: formatDateInputValue(),
+    garbhaCurrentWeek: "1",
+    garbhaStartDate: formatDateInputValue(),
+    childGuidanceCurrentWeek: "1",
+    childGuidanceStartDate: formatDateInputValue(),
     username: "",
     password: "",
   });
@@ -152,9 +160,13 @@ export default function PatientsPage() {
       requirements: "",
       planId: "",
       garbhaPlanId: "",
-    childGuidancePlanId: "",
+      childGuidancePlanId: "",
       currentWeek: "1",
       startDate: formatDateInputValue(),
+      garbhaCurrentWeek: "1",
+      garbhaStartDate: formatDateInputValue(),
+      childGuidanceCurrentWeek: "1",
+      childGuidanceStartDate: formatDateInputValue(),
       username: "",
       password: "",
     });
@@ -226,8 +238,8 @@ export default function PatientsPage() {
       program === "care"
         ? `${patient.user.name} - Custom Plan`
         : program === "garbha"
-          ? `${patient.user.name} - Custom Garbha Plan`
-          : `${patient.user.name} - Custom Child Guidance`;
+          ? `${patient.user.name} - Custom Garbh Sanskruti Plan`
+          : `${patient.user.name} - Custom Parenting Sanskruti`;
     setCustomForm({ ...emptyCustomForm, title: defaultTitle });
     setCustomPatientId(patient.id);
     setCustomProgram(program);
@@ -420,26 +432,64 @@ export default function PatientsPage() {
               <p className="mt-2 text-xs text-slate-500">બંને ખાલી હોય તો create કરતી વખતે auto-generate થશે.</p>
             </div>
             <Textarea label="Requirements / Notes" value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} rows={3} placeholder="Patient's special requirements..." />
-            <Input
-              label="Plan Start Date"
-              type="date"
-              value={form.startDate}
-              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-              required
-            />
-            <Select label="Care Plan" value={form.planId} onChange={(e) => setForm({ ...form, planId: e.target.value })}>
-              <option value="">-- Select Plan --</option>
-              {plans.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
-            </Select>
-            <Select label="Garbha Sanskar Plan" value={form.garbhaPlanId} onChange={(e) => setForm({ ...form, garbhaPlanId: e.target.value })}>
-              <option value="">-- Select Garbha Plan --</option>
-              {garbhaPlans.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
-            </Select>
-            <Select label="Child Guidance Plan" value={form.childGuidancePlanId} onChange={(e) => setForm({ ...form, childGuidancePlanId: e.target.value })}>
-              <option value="">-- Select Child Guidance Plan --</option>
-              {childGuidancePlans.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
-            </Select>
-            <Input label="Starting Week (override)" type="number" min="1" value={form.currentWeek} onChange={(e) => setForm({ ...form, currentWeek: e.target.value })} />
+            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 md:grid-cols-2">
+              <Select label="Care Plan" value={form.planId} onChange={(e) => setForm({ ...form, planId: e.target.value })}>
+                <option value="">-- Select Plan --</option>
+                {plans.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
+              </Select>
+              <Input
+                label="Care Start Date"
+                type="date"
+                value={form.startDate}
+                onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                required
+              />
+              <Input
+                label="Care Starting Week"
+                type="number"
+                min="1"
+                value={form.currentWeek}
+                onChange={(e) => setForm({ ...form, currentWeek: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 md:grid-cols-2">
+              <Select label="Garbh Sanskruti Plan" value={form.garbhaPlanId} onChange={(e) => setForm({ ...form, garbhaPlanId: e.target.value })}>
+                <option value="">-- Select Garbh Sanskruti Plan --</option>
+                {garbhaPlans.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
+              </Select>
+              <Input
+                label="Garbh Sanskruti Start Date"
+                type="date"
+                value={form.garbhaStartDate}
+                onChange={(e) => setForm({ ...form, garbhaStartDate: e.target.value })}
+              />
+              <Input
+                label="Garbh Sanskruti Starting Week"
+                type="number"
+                min="1"
+                value={form.garbhaCurrentWeek}
+                onChange={(e) => setForm({ ...form, garbhaCurrentWeek: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 md:grid-cols-2">
+              <Select label="Parenting Sanskruti Plan" value={form.childGuidancePlanId} onChange={(e) => setForm({ ...form, childGuidancePlanId: e.target.value })}>
+                <option value="">-- Select Parenting Sanskruti Plan --</option>
+                {childGuidancePlans.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
+              </Select>
+              <Input
+                label="Parenting Sanskruti Start Date"
+                type="date"
+                value={form.childGuidanceStartDate}
+                onChange={(e) => setForm({ ...form, childGuidanceStartDate: e.target.value })}
+              />
+              <Input
+                label="Parenting Sanskruti Starting Week"
+                type="number"
+                min="1"
+                value={form.childGuidanceCurrentWeek}
+                onChange={(e) => setForm({ ...form, childGuidanceCurrentWeek: e.target.value })}
+              />
+            </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={loading}>{loading ? "Creating..." : "Create Patient"}</Button>
               <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
@@ -452,8 +502,8 @@ export default function PatientsPage() {
         {patients.map((patient) => {
           const programMeta: { program: PatientProgram; label: string; emptyLabel: string }[] = [
             { program: "care", label: "Care Plan", emptyLabel: "-- No Plan --" },
-            { program: "garbha", label: "Garbha Sanskar Plan", emptyLabel: "-- No Garbha Plan --" },
-            { program: "child", label: "Child Guidance Plan", emptyLabel: "-- No Child Guidance --" },
+            { program: "garbha", label: "Garbh Sanskruti Plan", emptyLabel: "-- No Garbh Sanskruti Plan --" },
+            { program: "child", label: "Parenting Sanskruti Plan", emptyLabel: "-- No Parenting Sanskruti --" },
           ];
 
           return (
@@ -478,7 +528,13 @@ export default function PatientsPage() {
                   <p className="mt-2 text-sm text-slate-600"><strong>Requirements:</strong> {patient.requirements}</p>
                 )}
                 <p className="mt-1 text-sm text-slate-500">
-                  Plan: {patient.plan?.title || "Not assigned"} | Garbha: {patient.garbhaPlan?.title || "Not assigned"} | Child: {patient.childGuidancePlan?.title || "Not assigned"} | Week: {patient.currentWeek} | Start: {formatDisplayDate(patient.startDate)}
+                  Plan: {patient.plan?.title || "Not assigned"} | Garbh Sanskruti: {patient.garbhaPlan?.title || "Not assigned"} | Parenting Sanskruti: {patient.childGuidancePlan?.title || "Not assigned"}
+                  <br />
+                  Care start: {formatDisplayDate(patient.startDate)} (W{patient.currentWeek})
+                  {" · "}
+                  Garbh Sanskruti start: {formatDisplayDate(patient.garbhaStartDate || patient.startDate)} (W{patient.garbhaCurrentWeek ?? patient.currentWeek})
+                  {" · "}
+                  Parenting Sanskruti start: {formatDisplayDate(patient.childGuidanceStartDate || patient.startDate)} (W{patient.childGuidanceCurrentWeek ?? patient.currentWeek})
                 </p>
               </div>
               <div className="flex shrink-0 gap-2 self-end sm:self-start">
@@ -658,20 +714,54 @@ export default function PatientsPage() {
               })}
             </div>
 
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <Input
-                label="Plan Start Date"
-                type="date"
-                defaultValue={formatDateInputValue(patient.startDate)}
-                onBlur={(e) => updatePatient(patient.id, { startDate: e.target.value })}
-              />
-              <Input
-                label="Current Week"
-                type="number"
-                min="1"
-                defaultValue={patient.currentWeek}
-                onBlur={(e) => updatePatient(patient.id, { currentWeek: e.target.value })}
-              />
+            <div className="mt-4 space-y-3">
+              <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3 md:grid-cols-2">
+                <Input
+                  label="Care Start Date"
+                  type="date"
+                  defaultValue={formatDateInputValue(patient.startDate)}
+                  onBlur={(e) => updatePatient(patient.id, { startDate: e.target.value })}
+                />
+                <Input
+                  label="Care Current Week"
+                  type="number"
+                  min="1"
+                  defaultValue={patient.currentWeek}
+                  onBlur={(e) => updatePatient(patient.id, { currentWeek: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3 md:grid-cols-2">
+                <Input
+                  label="Garbh Sanskruti Start Date"
+                  type="date"
+                  defaultValue={formatDateInputValue(patient.garbhaStartDate || patient.startDate)}
+                  onBlur={(e) => updatePatient(patient.id, { garbhaStartDate: e.target.value })}
+                />
+                <Input
+                  label="Garbh Sanskruti Current Week"
+                  type="number"
+                  min="1"
+                  defaultValue={patient.garbhaCurrentWeek ?? patient.currentWeek}
+                  onBlur={(e) => updatePatient(patient.id, { garbhaCurrentWeek: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3 md:grid-cols-2">
+                <Input
+                  label="Parenting Sanskruti Start Date"
+                  type="date"
+                  defaultValue={formatDateInputValue(patient.childGuidanceStartDate || patient.startDate)}
+                  onBlur={(e) => updatePatient(patient.id, { childGuidanceStartDate: e.target.value })}
+                />
+                <Input
+                  label="Parenting Sanskruti Current Week"
+                  type="number"
+                  min="1"
+                  defaultValue={patient.childGuidanceCurrentWeek ?? patient.currentWeek}
+                  onBlur={(e) =>
+                    updatePatient(patient.id, { childGuidanceCurrentWeek: e.target.value })
+                  }
+                />
+              </div>
             </div>
 
             {customPatientId === patient.id && (
@@ -679,7 +769,7 @@ export default function PatientsPage() {
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-pink-600" />
                   <h4 className="text-sm font-semibold text-slate-800">
-                    Custom {customProgram === "care" ? "Care" : customProgram === "garbha" ? "Garbha" : "Child Guidance"} Plan for {patient.user.name}
+                    Custom {customProgram === "care" ? "Care" : customProgram === "garbha" ? "Garbh Sanskruti" : "Parenting Sanskruti"} Plan for {patient.user.name}
                   </h4>
                 </div>
 

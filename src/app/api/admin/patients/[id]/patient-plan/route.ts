@@ -47,8 +47,8 @@ export async function POST(
     program === "care"
       ? `${patient.user.name} - Custom Plan`
       : program === "garbha"
-        ? `${patient.user.name} - Custom Garbha Plan`
-        : `${patient.user.name} - Custom Child Guidance`;
+        ? `${patient.user.name} - Custom Garbh Sanskruti Plan`
+        : `${patient.user.name} - Custom Parenting Sanskruti`;
   const title = (body.title && String(body.title).trim()) || defaultTitle;
 
   let plan;

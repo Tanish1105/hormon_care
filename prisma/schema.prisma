@@ -30,8 +30,13 @@ model PatientProfile {
   garbhaPlan   GarbhaPlan? @relation(fields: [garbhaPlanId], references: [id])
   childGuidancePlanId String?
   childGuidancePlan   ChildGuidancePlan? @relation(fields: [childGuidancePlanId], references: [id])
+  /// Care plan start (also used for weekly followups)
   startDate    DateTime @default(now())
   currentWeek  Int      @default(1)
+  garbhaStartDate DateTime @default(now())
+  garbhaCurrentWeek Int @default(1)
+  childGuidanceStartDate DateTime @default(now())
+  childGuidanceCurrentWeek Int @default(1)
   followupAccessToken String? @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

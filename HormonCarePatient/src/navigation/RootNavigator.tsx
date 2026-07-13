@@ -11,11 +11,12 @@ import WeekDetailScreen from '../screens/WeekDetailScreen';
 import LifestyleAssessmentScreen from '../screens/LifestyleAssessmentScreen';
 import FollowupScreen from '../screens/FollowupScreen';
 import MainTabs, { type MainTabParamList } from './MainTabs';
+import type { PlanProgram } from '../api/client';
 
 export type RootStackParamList = {
   Login: undefined;
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
-  WeekDetail: { weekNumber: number };
+  WeekDetail: { weekNumber: number; program?: PlanProgram };
   LifestyleAssessment: undefined;
   Followup: { week?: number } | undefined;
 };

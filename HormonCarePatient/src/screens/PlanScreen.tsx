@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -9,7 +9,11 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  type RouteProp,
+} from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +21,7 @@ import { useLocale } from '../context/LocaleContext';
 import * as api from '../api/client';
 import {
   formatStartDate,
+  programLabelKey,
   usePatientDashboard,
 } from '../hooks/usePatientDashboard';
 import type { RootStackParamList } from '../navigation/RootNavigator';
@@ -29,20 +34,52 @@ type Nav = CompositeNavigationProp<
   NativeStackNavigationProp<RootStackParamList>
 >;
 
+type PlanRoute = RouteProp<MainTabParamList, 'Plan'>;
+
 export default function PlanScreen() {
   const { t } = useLocale();
   const nav = useNavigation<Nav>();
+  const route = useRoute<PlanRoute>();
   const {
     loading,
     refreshing,
     onRefresh,
     error,
-    plan,
-    unlockedWeek,
-    currentWeek,
-    historyWeeks,
-    startDate,
+    assignedPrograms,
   } = usePatientDashboard();
+
+  const [selectedProgram, setSelectedProgram] = useState<api.PlanProgram>(
+    route.params?.program || 'care',
+  );
+
+  useEffect(() => {
+    if (route.params?.program) {
+      setSelectedProgram(route.params.program);
+    }
+  }, [route.params?.program]);
+
+  useEffect(() => {
+    if (!assignedPrograms.length) return;
+    const exists = assignedPrograms.some(p => p.program === selectedProgram);
+    if (!exists) {
+      setSelectedProgram(assignedPrograms[0].program);
+    }
+  }, [assignedPrograms, selectedProgram]);
+
+  const active = useMemo(
+    () =>
+      assignedPrograms.find(p => p.program === selectedProgram) ??
+      assignedPrograms[0] ??
+      null,
+    [assignedPrograms, selectedProgram],
+  );
+
+  const plan = active?.plan ?? null;
+  const unlockedWeek = active?.unlockedWeek ?? 0;
+  const currentWeek =
+    plan?.weeks?.find(w => w.weekNumber === unlockedWeek) ?? null;
+  const historyWeeks =
+    plan?.weeks?.filter(w => w.weekNumber < unlockedWeek) ?? [];
 
   if (loading) {
     return (
@@ -79,6 +116,32 @@ export default function PlanScreen() {
           </Card>
         ) : null}
 
+        {assignedPrograms.length > 1 ? (
+          <View style={styles.programRow}>
+            {assignedPrograms.map(item => {
+              const activeChip = item.program === selectedProgram;
+              return (
+                <Pressable
+                  key={item.program}
+                  onPress={() => setSelectedProgram(item.program)}
+                  style={[
+                    styles.programChip,
+                    activeChip && styles.programChipActive,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.programChipText,
+                      activeChip && styles.programChipTextActive,
+                    ]}
+                    numberOfLines={1}>
+                    {t(programLabelKey(item.program))}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
+
         {!plan ? (
           <Card title={t('noPlanTitle')}>
             <Text style={styles.muted}>{t('noPlanBody')}</Text>
@@ -89,7 +152,7 @@ export default function PlanScreen() {
           <Card accent="warm" title={t('planNotStartedTitle')}>
             <Text style={styles.muted}>
               {t('planNotStartedBody', {
-                date: formatStartDate(startDate),
+                date: formatStartDate(active?.startDate),
               })}
             </Text>
           </Card>
@@ -102,6 +165,7 @@ export default function PlanScreen() {
               onPress={() =>
                 nav.navigate('WeekDetail', {
                   weekNumber: currentWeek.weekNumber,
+                  program: selectedProgram,
                 })
               }
               style={({ pressed }) => [
@@ -152,7 +216,10 @@ export default function PlanScreen() {
                   <Pressable
                     key={w.id}
                     onPress={() =>
-                      nav.navigate('WeekDetail', { weekNumber: w.weekNumber })
+                      nav.navigate('WeekDetail', {
+                        weekNumber: w.weekNumber,
+                        program: selectedProgram,
+                      })
                     }
                     style={({ pressed }) => [
                       styles.weekCard,
@@ -208,6 +275,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   scroll: { padding: 16, paddingBottom: 40 },
+  programRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  programChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  programChipActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryTint,
+  },
+  programChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.textSoft,
+  },
+  programChipTextActive: {
+    color: colors.primary,
+  },
   sectionTitle: {
     fontSize: 13,
     fontWeight: '800',

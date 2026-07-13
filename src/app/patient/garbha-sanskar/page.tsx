@@ -42,6 +42,7 @@ type Week = {
 type GarbhaData = {
   profile: {
     startDate: string;
+    garbhaStartDate?: string;
     garbhaPlan: {
       title: string;
       description: string | null;
@@ -140,19 +141,23 @@ export default function PatientGarbhaSanskarPage() {
         <Baby className="h-8 w-8 text-purple-600" />
         <div>
           <h1 className="text-2xl font-bold">{plan?.title ?? "Plan"}</h1>
-          <p className="text-slate-500">તમારા માટે assign કરેલો week wise plan</p>
+          <p className="text-slate-500">તમારા માટે assign કરેલો ગર્ભ સંસ્કૃતિ plan</p>
         </div>
       </div>
 
       {!plan ? (
         <Card className="mt-8 text-center">
-          <p className="text-slate-500">હજુ Garbha Sanskar plan assign નથી. Doctor સાથે contact કરો.</p>
+          <p className="text-slate-500">હજુ ગર્ભ સંસ્કૃતિ plan assign નથી. Doctor સાથે contact કરો.</p>
         </Card>
       ) : garbhaUnlockedWeek === 0 ? (
         <Card className="mt-6 border-amber-200 bg-amber-50 text-center">
           <h2 className="text-lg font-semibold text-amber-900">{plan.title}</h2>
           <p className="mt-3 text-amber-800">
-            Garbha Sanskar plan <strong>{formatDisplayDate(data.profile.startDate)}</strong> થી શરૂ થશે.
+            ગર્ભ સંસ્કૃતિ plan{" "}
+            <strong>
+              {formatDisplayDate(data.profile.garbhaStartDate || data.profile.startDate)}
+            </strong>{" "}
+            થી શરૂ થશે.
           </p>
           <p className="mt-1 text-sm text-amber-700">આ તારીખ સુધી content unlock નહીં થાય.</p>
         </Card>

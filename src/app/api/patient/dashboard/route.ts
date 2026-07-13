@@ -55,19 +55,27 @@ export async function GET() {
     : 0;
 
   const garbhaUnlockedWeek = profile.garbhaPlan
-    ? getUnlockedWeek(profile.startDate, profile.currentWeek, profile.garbhaPlan.totalWeeks)
+    ? getUnlockedWeek(
+        profile.garbhaStartDate ?? profile.startDate,
+        profile.garbhaCurrentWeek ?? profile.currentWeek,
+        profile.garbhaPlan.totalWeeks
+      )
     : 0;
 
   const childGuidanceUnlockedWeek = profile.childGuidancePlan
-    ? getUnlockedWeek(profile.startDate, profile.currentWeek, profile.childGuidancePlan.totalWeeks)
+    ? getUnlockedWeek(
+        profile.childGuidanceStartDate ?? profile.startDate,
+        profile.childGuidanceCurrentWeek ?? profile.currentWeek,
+        profile.childGuidancePlan.totalWeeks
+      )
     : 0;
 
   const unlockedDay = profile.plan?.isDayWise ? getUnlockedDay(profile.startDate) : 0;
   const garbhaUnlockedDay = profile.garbhaPlan?.isDayWise
-    ? getUnlockedDay(profile.startDate)
+    ? getUnlockedDay(profile.garbhaStartDate ?? profile.startDate)
     : 0;
   const childGuidanceUnlockedDay = profile.childGuidancePlan?.isDayWise
-    ? getUnlockedDay(profile.startDate)
+    ? getUnlockedDay(profile.childGuidanceStartDate ?? profile.startDate)
     : 0;
 
   const gate = await buildPatientGateStatus(profile);

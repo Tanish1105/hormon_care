@@ -63,14 +63,14 @@ async function main() {
   }
 
   const existingGarbha = await prisma.garbhaPlan.findFirst({
-    where: { title: "Garbha Sanskar - 2 Weeks" },
+    where: { title: "Garbh Sanskruti - 2 Weeks" },
   });
 
   if (!existingGarbha) {
     const garbha = await prisma.garbhaPlan.create({
       data: {
-        title: "Garbha Sanskar - 2 Weeks",
-        description: "Garbha Sanskar week-wise plan",
+        title: "Garbh Sanskruti - 2 Weeks",
+        description: "Garbh Sanskruti week-wise plan",
         totalWeeks: 2,
         weeks: {
           create: Array.from({ length: 2 }, (_, wi) => ({
@@ -82,7 +82,7 @@ async function main() {
                     create: [
                       {
                         type: "EXERCISE",
-                        title: "Garbha Sanskar Introduction",
+                        title: "Garbh Sanskruti Introduction",
                         content: "Sit calmly and meditate for 10 minutes",
                         sortOrder: 0,
                       },
@@ -93,7 +93,7 @@ async function main() {
         },
       },
     });
-    console.log("Garbha plan created:", garbha.title);
+    console.log("Garbh Sanskruti plan created:", garbha.title);
   }
 }
 

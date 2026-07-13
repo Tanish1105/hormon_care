@@ -21,8 +21,8 @@ const navItems = [
   { href: "/admin/patients", label: "Patients", shortLabel: "Patients", icon: Users },
   { href: "/admin/lifestyle-assessments", label: "Lifestyle", shortLabel: "Lifestyle", icon: FileText },
   { href: "/admin/followups", label: "Followups", shortLabel: "Followup", icon: BarChart3 },
-  { href: "/admin/garbha-sanskar", label: "Garbha Sanskar", shortLabel: "Garbha", icon: Baby },
-  { href: "/admin/child-guidance", label: "Child Guidance", shortLabel: "Child", icon: GraduationCap },
+  { href: "/admin/garbha-sanskar", label: "Garbh Sanskruti", shortLabel: "Garbh", icon: Baby },
+  { href: "/admin/child-guidance", label: "Parenting Sanskruti", shortLabel: "Parenting", icon: GraduationCap },
 ];
 
 function isActive(pathname: string, href: string) {

@@ -45,7 +45,19 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const { name, requirements, planId, garbhaPlanId, childGuidancePlanId, currentWeek, startDate } = await request.json();
+  const {
+    name,
+    requirements,
+    planId,
+    garbhaPlanId,
+    childGuidancePlanId,
+    currentWeek,
+    startDate,
+    garbhaStartDate,
+    garbhaCurrentWeek,
+    childGuidanceStartDate,
+    childGuidanceCurrentWeek,
+  } = await request.json();
 
   const patient = await prisma.patientProfile.findUnique({
     where: { id },
@@ -82,6 +94,18 @@ export async function PUT(
       childGuidancePlanId: childGuidancePlanId !== undefined ? childGuidancePlanId : undefined,
       currentWeek: currentWeek !== undefined ? Number(currentWeek) : undefined,
       startDate: startDate ? new Date(`${startDate}T00:00:00`) : undefined,
+      garbhaStartDate: garbhaStartDate
+        ? new Date(`${garbhaStartDate}T00:00:00`)
+        : undefined,
+      garbhaCurrentWeek:
+        garbhaCurrentWeek !== undefined ? Number(garbhaCurrentWeek) : undefined,
+      childGuidanceStartDate: childGuidanceStartDate
+        ? new Date(`${childGuidanceStartDate}T00:00:00`)
+        : undefined,
+      childGuidanceCurrentWeek:
+        childGuidanceCurrentWeek !== undefined
+          ? Number(childGuidanceCurrentWeek)
+          : undefined,
     },
     include: {
       user: { select: { id: true, username: true, name: true } },

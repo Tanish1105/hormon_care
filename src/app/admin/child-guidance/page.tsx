@@ -33,7 +33,7 @@ export default function ChildGuidancePage() {
     setError("");
     const res = await fetch("/api/admin/child-guidance-plans");
     if (!res.ok) {
-      setError("Could not load Child Guidance plans");
+      setError("Could not load Parenting Sanskruti plans");
       setPlans([]);
       return;
     }
@@ -70,7 +70,7 @@ export default function ChildGuidancePage() {
   }
 
   async function deletePlan(id: string) {
-    if (!confirm("Delete this Child Guidance plan?")) return;
+    if (!confirm("Delete this Parenting Sanskruti plan?")) return;
     await fetch(`/api/admin/child-guidance-plans/${id}`, { method: "DELETE" });
     load();
   }
@@ -79,11 +79,11 @@ export default function ChildGuidancePage() {
     <AdminLayout>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Child Guidance</h1>
-          <p className="text-sm text-slate-500 sm:text-base">Week-wise Child Guidance plans</p>
+          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Parenting Sanskruti</h1>
+          <p className="text-sm text-slate-500 sm:text-base">Week-wise Parenting Sanskruti plans</p>
         </div>
         <Button className="w-full sm:w-auto" onClick={() => setShowForm(!showForm)}>
-          <Plus className="mr-1 h-4 w-4" /> New Child Guidance Plan
+          <Plus className="mr-1 h-4 w-4" /> New Parenting Sanskruti Plan
         </Button>
       </div>
 
@@ -93,7 +93,7 @@ export default function ChildGuidancePage() {
 
       {showForm && (
         <Card className="mt-6">
-          <h2 className="mb-4 font-semibold">Create New Child Guidance Plan</h2>
+          <h2 className="mb-4 font-semibold">Create New Parenting Sanskruti Plan</h2>
           <form onSubmit={createPlan} className="space-y-4">
             <Input label="Plan Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <Textarea label="Description" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
@@ -154,7 +154,7 @@ export default function ChildGuidancePage() {
           </Card>
         ))}
         {plans.length === 0 && (
-          <p className="text-center text-slate-500 py-8">No Child Guidance plans yet. Create a New Plan.</p>
+          <p className="text-center text-slate-500 py-8">No Parenting Sanskruti plans yet. Create a New Plan.</p>
         )}
       </div>
     </AdminLayout>

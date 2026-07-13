@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
 import { useLocale } from '../context/LocaleContext';
 import { colors } from '../theme';
+import type { PlanProgram } from '../api/client';
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
 import PlanScreen from '../screens/PlanScreen';
@@ -10,7 +11,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 
 export type MainTabParamList = {
   Home: undefined;
-  Plan: undefined;
+  Plan: { program?: PlanProgram } | undefined;
   Profile: undefined;
 };
 

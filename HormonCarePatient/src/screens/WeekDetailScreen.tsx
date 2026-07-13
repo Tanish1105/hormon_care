@@ -23,9 +23,11 @@ type RParam = RouteProp<RootStackParamList, 'WeekDetail'>;
 function ContentCard({
   item,
   cookie,
+  youtubeSource = 'plan',
 }: {
   item: api.PlanContent;
   cookie: string | null;
+  youtubeSource?: 'plan' | 'garbha' | 'child-guidance';
 }) {
   const { t } = useLocale();
   const [playYoutube, setPlayYoutube] = useState(false);
@@ -40,10 +42,10 @@ function ContentCard({
 
   const isYoutube = item.type === 'YOUTUBE';
   const youtubePage = isYoutube
-    ? api.youtubeEmbedPageUrl(item.id, 'plan')
+    ? api.youtubeEmbedPageUrl(item.id, youtubeSource)
     : null;
   const youtubeThumb = isYoutube
-    ? api.youtubeThumbUrl(item.id, 'plan')
+    ? api.youtubeThumbUrl(item.id, youtubeSource)
     : null;
 
   return (
@@ -127,6 +129,7 @@ export default function WeekDetailScreen() {
   const route = useRoute<RParam>();
   const nav = useNavigation();
   const { t } = useLocale();
+  const program = route.params.program || 'care';
   const [loading, setLoading] = useState(true);
   const [week, setWeek] = useState<api.PlanWeek | null>(null);
   const [isDayWise, setIsDayWise] = useState(false);
@@ -135,6 +138,9 @@ export default function WeekDetailScreen() {
   const [selectedDay, setSelectedDay] = useState(1);
   const [locked, setLocked] = useState(false);
   const [cookie, setCookie] = useState<string | null>(null);
+  const [youtubeSource, setYoutubeSource] = useState<
+    'plan' | 'garbha' | 'child-guidance'
+  >('plan');
 
   useEffect(() => {
     (async () => {
@@ -144,12 +150,14 @@ export default function WeekDetailScreen() {
           api.loadSession(),
         ]);
         setCookie(session);
-        const unlocked = d.unlockedWeek ?? d.profile.currentWeek ?? 0;
-        const day = d.unlockedDay ?? 7;
+        const assigned = api.getProgramFromDashboard(d, program);
+        const unlocked = assigned?.unlockedWeek ?? 0;
+        const day = assigned?.unlockedDay ?? 7;
         setUnlockedWeek(unlocked);
         setUnlockedDay(day);
+        setYoutubeSource(assigned?.youtubeSource ?? 'plan');
 
-        const plan = d.profile.plan;
+        const plan = assigned?.plan;
         const w = plan?.weeks.find(
           x => x.weekNumber === route.params.weekNumber,
         );
@@ -175,7 +183,7 @@ export default function WeekDetailScreen() {
         setLoading(false);
       }
     })();
-  }, [route.params.weekNumber, nav]);
+  }, [route.params.weekNumber, program, nav]);
 
   const maxSelectableDay = useMemo(() => {
     if (!week) return 1;
@@ -269,7 +277,12 @@ export default function WeekDetailScreen() {
         </Card>
       ) : (
         activeContents.map(c => (
-          <ContentCard key={c.id} item={c} cookie={cookie} />
+          <ContentCard
+            key={c.id}
+            item={c}
+            cookie={cookie}
+            youtubeSource={youtubeSource}
+          />
         ))
       )}
     </ScrollView>

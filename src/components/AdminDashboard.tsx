@@ -28,8 +28,8 @@ export function AdminDashboard() {
   const cards = [
     { label: "Total Patients", value: stats.patients, icon: Users, href: "/admin/patients", color: "pink" },
     { label: "Active Plans", value: stats.plans, icon: ClipboardList, href: "/admin/plans", color: "purple" },
-    { label: "Garbha Sanskar", value: stats.garbha, icon: Baby, href: "/admin/garbha-sanskar", color: "green" },
-    { label: "Child Guidance", value: stats.childGuidance, icon: GraduationCap, href: "/admin/child-guidance", color: "slate" },
+    { label: "Garbh Sanskruti", value: stats.garbha, icon: Baby, href: "/admin/garbha-sanskar", color: "green" },
+    { label: "Parenting Sanskruti", value: stats.childGuidance, icon: GraduationCap, href: "/admin/child-guidance", color: "slate" },
   ];
 
   return (
@@ -62,7 +62,7 @@ export function AdminDashboard() {
             <li>Then add exercises, images and videos to each <strong>Week</strong></li>
             <li>Add <strong>Patients</strong> — the system automatically generates an ID/password</li>
             <li>Assign a plan to each patient based on their requirements</li>
-            <li>Create a week-wise plan in <strong>Garbha Sanskar</strong> or <strong>Child Guidance</strong> and assign it to patients</li>
+            <li>Create a week-wise plan in <strong>Garbh Sanskruti</strong> or <strong>Parenting Sanskruti</strong> and assign it to patients</li>
           </ol>
         </Card>
       </div>

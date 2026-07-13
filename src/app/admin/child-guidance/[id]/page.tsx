@@ -171,7 +171,7 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
   return (
     <AdminLayout>
       <Link href="/admin/child-guidance" className="flex items-center gap-1 text-sm text-pink-600 hover:underline">
-        <ArrowLeft className="h-4 w-4" /> Back to Child Guidance
+        <ArrowLeft className="h-4 w-4" /> Back to Parenting Sanskruti
       </Link>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">

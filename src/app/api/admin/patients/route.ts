@@ -137,8 +137,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { name, requirements, planId, garbhaPlanId, childGuidancePlanId, currentWeek, startDate, username: manualUsername, password: manualPassword } =
-    await request.json();
+  const {
+    name,
+    requirements,
+    planId,
+    garbhaPlanId,
+    childGuidancePlanId,
+    currentWeek,
+    startDate,
+    garbhaStartDate,
+    garbhaCurrentWeek,
+    childGuidanceStartDate,
+    childGuidanceCurrentWeek,
+    username: manualUsername,
+    password: manualPassword,
+  } = await request.json();
 
   if (!name) {
     return NextResponse.json({ error: "Patient name is required" }, { status: 400 });
@@ -184,6 +197,15 @@ export async function POST(request: NextRequest) {
 
   const hashedPassword = await hashPassword(password);
 
+  const careStart = startDate ? new Date(`${startDate}T00:00:00`) : new Date();
+  const garbhaStart = garbhaStartDate
+    ? new Date(`${garbhaStartDate}T00:00:00`)
+    : careStart;
+  const childStart = childGuidanceStartDate
+    ? new Date(`${childGuidanceStartDate}T00:00:00`)
+    : careStart;
+  const careWeek = currentWeek ? Number(currentWeek) : 1;
+
   const user = await prisma.user.create({
     data: {
       username,
@@ -196,8 +218,14 @@ export async function POST(request: NextRequest) {
           planId: planId || null,
           garbhaPlanId: garbhaPlanId || null,
           childGuidancePlanId: childGuidancePlanId || null,
-          currentWeek: currentWeek ? Number(currentWeek) : 1,
-          startDate: startDate ? new Date(`${startDate}T00:00:00`) : new Date(),
+          currentWeek: careWeek,
+          startDate: careStart,
+          garbhaStartDate: garbhaStart,
+          garbhaCurrentWeek: garbhaCurrentWeek ? Number(garbhaCurrentWeek) : careWeek,
+          childGuidanceStartDate: childStart,
+          childGuidanceCurrentWeek: childGuidanceCurrentWeek
+            ? Number(childGuidanceCurrentWeek)
+            : careWeek,
         },
       },
     },

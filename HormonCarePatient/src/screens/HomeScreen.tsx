@@ -18,6 +18,7 @@ import { useLocale } from '../context/LocaleContext';
 import * as api from '../api/client';
 import {
   formatStartDate,
+  programLabelKey,
   usePatientDashboard,
 } from '../hooks/usePatientDashboard';
 import type { RootStackParamList } from '../navigation/RootNavigator';
@@ -42,12 +43,7 @@ export default function HomeScreen() {
     onRefresh,
     gate,
     error,
-    plan,
-    unlockedWeek,
-    currentWeek,
-    progressPct,
-    planImage,
-    startDate,
+    assignedPrograms,
   } = usePatientDashboard();
 
   if (loading) {
@@ -65,15 +61,12 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']} testID="home-screen">
       <View style={styles.header}>
-        <View>
-          <Text style={styles.hello}>{t('hello')}</Text>
-          <Text style={styles.name} numberOfLines={1}>
-            {user?.name}
-          </Text>
-        </View>
-        <View style={styles.brandPill}>
-          <Text style={styles.brandPillText}>Hormon Care</Text>
-        </View>
+        <Text style={styles.name} numberOfLines={1}>
+          {user?.name}
+        </Text>
+        <Text style={styles.brand} numberOfLines={1}>
+          Hormon Care
+        </Text>
       </View>
 
       <ScrollView
@@ -124,110 +117,127 @@ export default function HomeScreen() {
           </Card>
         ) : null}
 
-        <Text style={styles.sectionTitle}>{t('planDetails')}</Text>
+        <Text style={styles.sectionTitle}>
+          {assignedPrograms.length > 1 ? t('yourPlans') : t('planDetails')}
+        </Text>
 
-        {plan ? (
-          <View style={styles.planCard}>
-            {planImage ? (
-              <FullscreenImage
-                uri={planImage}
-                style={styles.planBanner}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={styles.planBannerPlaceholder}>
-                <Text style={styles.planBannerMark}>HC</Text>
-              </View>
-            )}
-            <View style={styles.planHero}>
-              <Text style={styles.planKicker}>{t('yourCurrentPlan')}</Text>
-              <Text style={styles.planTitle}>{plan.title}</Text>
-              {plan.description ? (
-                <Text style={styles.planDesc}>{plan.description}</Text>
-              ) : null}
-
-              <View style={styles.progressTrack}>
-                <View
-                  style={[styles.progressFill, { width: `${progressPct}%` }]}
-                />
-              </View>
-
-              <View style={styles.pillRow}>
-                <View style={styles.pill}>
-                  <Text style={styles.pillText}>
-                    {t('weekOf', {
-                      current: Math.max(unlockedWeek, 0),
-                      total: plan.totalWeeks,
-                    })}
-                  </Text>
-                </View>
-                {plan.isDayWise ? (
-                  <View style={styles.pillWarm}>
-                    <Text style={styles.pillWarmText}>{t('dayWise')}</Text>
-                  </View>
-                ) : null}
-              </View>
-            </View>
-          </View>
-        ) : (
+        {!assignedPrograms.length ? (
           <Card title={t('noPlanTitle')}>
             <Text style={styles.cardBodyMuted}>{t('noPlanBody')}</Text>
           </Card>
-        )}
-
-        {plan && unlockedWeek === 0 ? (
-          <Card accent="warm" title={t('planNotStartedTitle')}>
-            <Text style={styles.cardBody}>
-              {t('planNotStartedBody', {
-                date: formatStartDate(startDate),
-              })}
-            </Text>
-          </Card>
         ) : null}
 
-        {plan && currentWeek ? (
-          <Card title={t('thisWeek')}>
-            <Pressable
-              onPress={() =>
-                nav.navigate('WeekDetail', {
-                  weekNumber: currentWeek.weekNumber,
-                })
-              }
-              style={({ pressed }) => [
-                styles.quickWeek,
-                pressed && { opacity: 0.9 },
-              ]}>
-              <View style={styles.weekNumCurrent}>
-                <Text style={styles.weekNumTextCurrent}>
-                  {currentWeek.weekNumber}
-                </Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.weekTitle} numberOfLines={2}>
-                  {currentWeek.title || `Week ${currentWeek.weekNumber}`}
-                </Text>
-                <Text style={styles.weekMeta}>
-                  {api.countWeekContents(currentWeek, plan.isDayWise) === 1
-                    ? t('contentOne')
-                    : t('contentMany', {
-                        count: api.countWeekContents(
-                          currentWeek,
-                          plan.isDayWise,
-                        ),
+        {assignedPrograms.map(item => {
+          const { plan, program, unlockedWeek } = item;
+          const planImage = api.resolveMediaUrl(plan.imageUrl);
+          const progressPct = Math.min(
+            100,
+            Math.round(
+              (Math.max(unlockedWeek, 0) / Math.max(plan.totalWeeks, 1)) * 100,
+            ),
+          );
+          const currentWeek =
+            plan.weeks?.find(w => w.weekNumber === unlockedWeek) ?? null;
+
+          return (
+            <View key={program} style={styles.planCard}>
+              {planImage ? (
+                <FullscreenImage
+                  uri={planImage}
+                  style={styles.planBanner}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.planBannerPlaceholder}>
+                  <Text style={styles.planBannerMark}>HC</Text>
+                </View>
+              )}
+              <View style={styles.planHero}>
+                <Text style={styles.planKicker}>{t(programLabelKey(program))}</Text>
+                <Text style={styles.planTitle}>{plan.title}</Text>
+                {plan.description ? (
+                  <Text style={styles.planDesc}>{plan.description}</Text>
+                ) : null}
+
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[styles.progressFill, { width: `${progressPct}%` }]}
+                  />
+                </View>
+
+                <View style={styles.pillRow}>
+                  <View style={styles.pill}>
+                    <Text style={styles.pillText}>
+                      {t('weekOf', {
+                        current: Math.max(unlockedWeek, 0),
+                        total: plan.totalWeeks,
                       })}
-                  {` • ${t('current')}`}
-                </Text>
+                    </Text>
+                  </View>
+                  {plan.isDayWise ? (
+                    <View style={styles.pillWarm}>
+                      <Text style={styles.pillWarmText}>{t('dayWise')}</Text>
+                    </View>
+                  ) : null}
+                </View>
+
+                {unlockedWeek === 0 ? (
+                  <Text style={[styles.cardBody, { marginTop: 12 }]}>
+                    {t('planNotStartedBody', {
+                      date: formatStartDate(item.startDate),
+                    })}
+                  </Text>
+                ) : null}
+
+                {currentWeek ? (
+                  <Pressable
+                    onPress={() =>
+                      nav.navigate('WeekDetail', {
+                        weekNumber: currentWeek.weekNumber,
+                        program,
+                      })
+                    }
+                    style={({ pressed }) => [
+                      styles.quickWeek,
+                      { marginTop: 14 },
+                      pressed && { opacity: 0.9 },
+                    ]}>
+                    <View style={styles.weekNumCurrent}>
+                      <Text style={styles.weekNumTextCurrent}>
+                        {currentWeek.weekNumber}
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.weekTitle} numberOfLines={2}>
+                        {currentWeek.title || `Week ${currentWeek.weekNumber}`}
+                      </Text>
+                      <Text style={styles.weekMeta}>
+                        {api.countWeekContents(currentWeek, plan.isDayWise) ===
+                        1
+                          ? t('contentOne')
+                          : t('contentMany', {
+                              count: api.countWeekContents(
+                                currentWeek,
+                                plan.isDayWise,
+                              ),
+                            })}
+                        {` • ${t('current')}`}
+                      </Text>
+                    </View>
+                    <Text style={styles.chev}>›</Text>
+                  </Pressable>
+                ) : null}
+
+                <Button
+                  title={t('viewPlanWeeks')}
+                  variant="secondary"
+                  onPress={() => nav.navigate('Plan', { program })}
+                  style={{ marginTop: 12 }}
+                />
               </View>
-              <Text style={styles.chev}>›</Text>
-            </Pressable>
-            <Button
-              title={t('viewAllWeeks')}
-              variant="secondary"
-              onPress={() => nav.navigate('Plan')}
-              style={{ marginTop: 12 }}
-            />
-          </Card>
-        ) : null}
+            </View>
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -246,23 +256,18 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     gap: 12,
   },
-  hello: { color: colors.textMuted, fontSize: 12, fontWeight: '500' },
   name: {
+    flex: 1,
     color: colors.text,
     fontWeight: '800',
     fontSize: 22,
     letterSpacing: -0.4,
   },
-  brandPill: {
-    backgroundColor: colors.primaryTint,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: radius.pill,
-  },
-  brandPillText: {
+  brand: {
     color: colors.primary,
-    fontSize: 12,
     fontWeight: '800',
+    fontSize: 22,
+    letterSpacing: -0.4,
   },
   sectionTitle: {
     fontSize: 13,

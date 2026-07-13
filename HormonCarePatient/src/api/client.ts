@@ -166,6 +166,8 @@ export type PlanWeek = {
   days: PlanDay[];
 };
 
+export type PlanProgram = 'care' | 'garbha' | 'child';
+
 export type Plan = {
   id: string;
   title: string;
@@ -183,15 +185,97 @@ export type DashboardResponse = {
     id: string;
     userId: string;
     planId: string | null;
+    garbhaPlanId?: string | null;
+    childGuidancePlanId?: string | null;
     startDate: string | null;
+    garbhaStartDate?: string | null;
+    childGuidanceStartDate?: string | null;
     currentWeek: number;
+    garbhaCurrentWeek?: number;
+    childGuidanceCurrentWeek?: number;
     followupAccessToken: string | null;
     user: { name: string; username: string };
     plan: Plan | null;
+    garbhaPlan?: Plan | null;
+    childGuidancePlan?: Plan | null;
   };
   unlockedWeek: number;
+  garbhaUnlockedWeek?: number;
+  childGuidanceUnlockedWeek?: number;
   unlockedDay?: number;
+  garbhaUnlockedDay?: number;
+  childGuidanceUnlockedDay?: number;
 };
+
+export type AssignedProgram = {
+  program: PlanProgram;
+  plan: Plan;
+  unlockedWeek: number;
+  unlockedDay: number;
+  startDate: string | null;
+  youtubeSource: 'plan' | 'garbha' | 'child-guidance';
+};
+
+export function youtubeSourceFor(
+  program: PlanProgram,
+): 'plan' | 'garbha' | 'child-guidance' {
+  if (program === 'garbha') return 'garbha';
+  if (program === 'child') return 'child-guidance';
+  return 'plan';
+}
+
+export function getAssignedPrograms(
+  dashboard: DashboardResponse | null | undefined,
+): AssignedProgram[] {
+  if (!dashboard?.profile) return [];
+  const list: AssignedProgram[] = [];
+  const { profile } = dashboard;
+
+  if (profile.plan) {
+    list.push({
+      program: 'care',
+      plan: profile.plan,
+      unlockedWeek:
+        dashboard.unlockedWeek ?? profile.currentWeek ?? 0,
+      unlockedDay: dashboard.unlockedDay ?? 7,
+      startDate: profile.startDate ?? null,
+      youtubeSource: 'plan',
+    });
+  }
+  if (profile.garbhaPlan) {
+    list.push({
+      program: 'garbha',
+      plan: profile.garbhaPlan,
+      unlockedWeek:
+        dashboard.garbhaUnlockedWeek ?? profile.currentWeek ?? 0,
+      unlockedDay: dashboard.garbhaUnlockedDay ?? 7,
+      startDate: profile.garbhaStartDate ?? profile.startDate ?? null,
+      youtubeSource: 'garbha',
+    });
+  }
+  if (profile.childGuidancePlan) {
+    list.push({
+      program: 'child',
+      plan: profile.childGuidancePlan,
+      unlockedWeek:
+        dashboard.childGuidanceUnlockedWeek ?? profile.currentWeek ?? 0,
+      unlockedDay: dashboard.childGuidanceUnlockedDay ?? 7,
+      startDate:
+        profile.childGuidanceStartDate ?? profile.startDate ?? null,
+      youtubeSource: 'child-guidance',
+    });
+  }
+  return list;
+}
+
+export function getProgramFromDashboard(
+  dashboard: DashboardResponse | null | undefined,
+  program: PlanProgram = 'care',
+): AssignedProgram | null {
+  return (
+    getAssignedPrograms(dashboard).find(p => p.program === program) ?? null
+  );
+}
 
 /**
  * Uploads are stored as `/uploads/...` relative paths. React Native Image

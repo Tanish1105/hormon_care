@@ -7,7 +7,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Bump when schema changes so dev hot-reload picks up new Prisma client
-const PRISMA_SCHEMA_VERSION = 11;
+const PRISMA_SCHEMA_VERSION = 12;
 
 function createPrismaClient() {
   return new PrismaClient({ adapter: createMysqlAdapter() });

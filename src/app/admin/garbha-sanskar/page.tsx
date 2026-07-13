@@ -33,7 +33,7 @@ export default function GarbhaSanskarPage() {
     setError("");
     const res = await fetch("/api/admin/garbha-plans");
     if (!res.ok) {
-      setError("Could not load Garbha plans");
+      setError("Could not load Garbh Sanskruti plans");
       setPlans([]);
       return;
     }
@@ -70,7 +70,7 @@ export default function GarbhaSanskarPage() {
   }
 
   async function deletePlan(id: string) {
-    if (!confirm("Delete this Garbha plan?")) return;
+    if (!confirm("Delete this Garbh Sanskruti plan?")) return;
     await fetch(`/api/admin/garbha-plans/${id}`, { method: "DELETE" });
     load();
   }
@@ -79,11 +79,11 @@ export default function GarbhaSanskarPage() {
     <AdminLayout>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Garbha Sanskar</h1>
-          <p className="text-sm text-slate-500 sm:text-base">Week-wise Garbha Sanskar plans</p>
+          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Garbh Sanskruti</h1>
+          <p className="text-sm text-slate-500 sm:text-base">Week-wise Garbh Sanskruti plans</p>
         </div>
         <Button className="w-full sm:w-auto" onClick={() => setShowForm(!showForm)}>
-          <Plus className="mr-1 h-4 w-4" /> New Garbha Plan
+          <Plus className="mr-1 h-4 w-4" /> New Garbh Plan
         </Button>
       </div>
 
@@ -93,7 +93,7 @@ export default function GarbhaSanskarPage() {
 
       {showForm && (
         <Card className="mt-6">
-          <h2 className="mb-4 font-semibold">Create New Garbha Sanskar Plan</h2>
+          <h2 className="mb-4 font-semibold">Create New Garbh Sanskruti Plan</h2>
           <form onSubmit={createPlan} className="space-y-4">
             <Input label="Plan Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <Textarea label="Description" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
@@ -154,7 +154,7 @@ export default function GarbhaSanskarPage() {
           </Card>
         ))}
         {plans.length === 0 && (
-          <p className="text-center text-slate-500 py-8">No Garbha plans yet. Create a New Garbha Plan.</p>
+          <p className="text-center text-slate-500 py-8">No Garbh Sanskruti plans yet. Create a New Garbh Plan.</p>
         )}
       </div>
     </AdminLayout>
