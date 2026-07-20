@@ -27,7 +27,7 @@ import {
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import type { MainTabParamList } from '../navigation/MainTabs';
 import Card from '../components/Card';
-import { colors, radius, shadows } from '../theme';
+import { colors, layout, radius, shadows } from '../theme';
 
 type Nav = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Plan'>,
@@ -256,25 +256,12 @@ export default function PlanScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: layout.screen,
   center: { alignItems: 'center', justifyContent: 'center' },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 8,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    marginTop: 4,
-    color: colors.textSoft,
-    fontSize: 14,
-  },
-  scroll: { padding: 16, paddingBottom: 40 },
+  header: layout.header,
+  title: layout.headerTitle,
+  subtitle: layout.headerSubtitle,
+  scroll: layout.scroll,
   programRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -301,17 +288,9 @@ const styles = StyleSheet.create({
   programChipTextActive: {
     color: colors.primary,
   },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: colors.textMuted,
-    marginBottom: 10,
-    marginTop: 4,
-    letterSpacing: 0.7,
-    textTransform: 'uppercase',
-  },
+  sectionTitle: layout.sectionTitle,
   errorCard: {
-    borderColor: '#fecaca',
+    borderColor: colors.dangerBorder,
     backgroundColor: colors.dangerSoft,
   },
   errorText: { color: colors.danger, fontWeight: '600' },
@@ -331,22 +310,26 @@ const styles = StyleSheet.create({
   weekCardCurrent: {
     borderColor: colors.primary,
     borderWidth: 1.5,
-    backgroundColor: '#fff',
+    backgroundColor: colors.primarySoft,
     ...shadows.glow,
   },
   weekNumCurrent: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: 16,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  weekNumTextCurrent: { fontSize: 17, fontWeight: '800', color: '#fff' },
+  weekNumTextCurrent: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: colors.textInverse,
+  },
   weekNumDone: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 14,
     backgroundColor: colors.successSoft,
     alignItems: 'center',
     justifyContent: 'center',
@@ -372,7 +355,7 @@ const styles = StyleSheet.create({
   openChip: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 12,
     backgroundColor: colors.primaryTint,
     alignItems: 'center',
     justifyContent: 'center',

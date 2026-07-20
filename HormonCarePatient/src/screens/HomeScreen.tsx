@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -26,7 +27,8 @@ import type { MainTabParamList } from '../navigation/MainTabs';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import FullscreenImage from '../components/FullscreenImage';
-import { colors, radius, shadows } from '../theme';
+import { brandLogo } from '../assets/brand';
+import { colors, layout, radius, shadows } from '../theme';
 
 type Nav = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
@@ -58,17 +60,21 @@ export default function HomeScreen() {
     (gate?.blocked && gate.blockType === 'lifestyle') ||
     (gate?.followup?.showPrompt && !gate.blocked);
 
+  const primaryPlan = assignedPrograms[0] ?? null;
+  const primaryProgress =
+    primaryPlan && primaryPlan.unlockedWeek > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (primaryPlan.unlockedWeek /
+              Math.max(primaryPlan.plan.totalWeeks, 1)) *
+              100,
+          ),
+        )
+      : 0;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']} testID="home-screen">
-      <View style={styles.header}>
-        <Text style={styles.name} numberOfLines={1}>
-          {user?.name}
-        </Text>
-        <Text style={styles.brand} numberOfLines={1}>
-          Hormon Care
-        </Text>
-      </View>
-
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -79,6 +85,54 @@ export default function HomeScreen() {
             tintColor={colors.primary}
           />
         }>
+        <View style={styles.welcome}>
+          <View style={styles.welcomeGlowTop} />
+          <View style={styles.welcomeGlowBottom} />
+          <View style={styles.welcomeLogoWrap}>
+            <Image
+              source={brandLogo}
+              style={styles.welcomeLogo}
+              resizeMode="contain"
+            />
+          </View>
+          <Text style={styles.hello}>
+            {t('hello')} {user?.name}
+          </Text>
+          {user?.username ? (
+            <Text style={styles.patientId}>
+              {t('patientId')} · {user.username}
+            </Text>
+          ) : null}
+
+          {primaryPlan && primaryPlan.unlockedWeek > 0 ? (
+            <View style={styles.welcomeProgress}>
+              <View style={styles.welcomeProgressRow}>
+                <Text style={styles.welcomeProgressTitle} numberOfLines={1}>
+                  {primaryPlan.plan.title}
+                </Text>
+                <Text style={styles.welcomeProgressMeta}>
+                  {t('weekOf', {
+                    current: primaryPlan.unlockedWeek,
+                    total: primaryPlan.plan.totalWeeks,
+                  })}
+                </Text>
+              </View>
+              <View style={styles.welcomeTrack}>
+                <View
+                  style={[
+                    styles.welcomeFill,
+                    { width: `${primaryProgress}%` },
+                  ]}
+                />
+              </View>
+              <Text style={styles.welcomeUnlock}>
+                {t('current')}: Week {primaryPlan.unlockedWeek}
+                {primaryProgress ? ` · ${primaryProgress}%` : ''}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
         {error ? (
           <Card style={styles.errorCard}>
             <Text style={styles.errorText}>{error}</Text>
@@ -90,19 +144,21 @@ export default function HomeScreen() {
         ) : null}
 
         {gate?.blocked && gate.blockType === 'lifestyle' ? (
-          <Card accent="warm" title={t('lifestylePendingTitle')}>
-            <Text style={styles.cardBody}>{gate.blockMessage}</Text>
+          <View style={styles.alertRose}>
+            <Text style={styles.alertTitle}>{t('lifestylePendingTitle')}</Text>
+            <Text style={styles.alertBody}>{gate.blockMessage}</Text>
             <Button
               title={t('fillForm')}
               onPress={() => nav.navigate('LifestyleAssessment')}
               testID="lifestyle-cta-button"
             />
-          </Card>
+          </View>
         ) : null}
 
         {gate?.followup?.showPrompt && !gate.blocked ? (
-          <Card accent="warm" title={t('weeklyFollowup')}>
-            <Text style={styles.cardBody}>
+          <View style={styles.alertAmber}>
+            <Text style={styles.alertAmberTitle}>{t('weeklyFollowup')}</Text>
+            <Text style={styles.alertAmberBody}>
               {t('followupDue', { week: gate.followup.nextDueWeek ?? '' })}
             </Text>
             <Button
@@ -114,7 +170,7 @@ export default function HomeScreen() {
               }
               testID="followup-cta-button"
             />
-          </Card>
+          </View>
         ) : null}
 
         <Text style={styles.sectionTitle}>
@@ -123,21 +179,18 @@ export default function HomeScreen() {
 
         {!assignedPrograms.length ? (
           <Card title={t('noPlanTitle')}>
-            <Text style={styles.cardBodyMuted}>{t('noPlanBody')}</Text>
+            <Text style={styles.muted}>{t('noPlanBody')}</Text>
           </Card>
         ) : null}
 
         {assignedPrograms.map(item => {
           const { plan, program, unlockedWeek } = item;
           const planImage = api.resolveMediaUrl(plan.imageUrl);
-          const progressPct = Math.min(
-            100,
-            Math.round(
-              (Math.max(unlockedWeek, 0) / Math.max(plan.totalWeeks, 1)) * 100,
-            ),
-          );
           const currentWeek =
             plan.weeks?.find(w => w.weekNumber === unlockedWeek) ?? null;
+          const contentCount = currentWeek
+            ? api.countWeekContents(currentWeek, plan.isDayWise)
+            : 0;
 
           return (
             <View key={program} style={styles.planCard}>
@@ -147,32 +200,33 @@ export default function HomeScreen() {
                   style={styles.planBanner}
                   resizeMode="cover"
                   fallback={
-                    <View style={styles.planBannerPlaceholder}>
-                      <Text style={styles.planBannerMark}>HC</Text>
+                    <View style={styles.planBannerEmpty}>
+                      <Text style={styles.planBannerEmptyText}>
+                        {t(programLabelKey(program))}
+                      </Text>
                     </View>
                   }
                 />
               ) : (
-                <View style={styles.planBannerPlaceholder}>
-                  <Text style={styles.planBannerMark}>HC</Text>
+                <View style={styles.planBannerEmpty}>
+                  <Text style={styles.planBannerEmptyText}>
+                    {t(programLabelKey(program))}
+                  </Text>
                 </View>
               )}
-              <View style={styles.planHero}>
-                <Text style={styles.planKicker}>{t(programLabelKey(program))}</Text>
+
+              <View style={styles.planBody}>
+                <Text style={styles.planProgram}>
+                  {t(programLabelKey(program))}
+                </Text>
                 <Text style={styles.planTitle}>{plan.title}</Text>
                 {plan.description ? (
                   <Text style={styles.planDesc}>{plan.description}</Text>
                 ) : null}
 
-                <View style={styles.progressTrack}>
-                  <View
-                    style={[styles.progressFill, { width: `${progressPct}%` }]}
-                  />
-                </View>
-
-                <View style={styles.pillRow}>
-                  <View style={styles.pill}>
-                    <Text style={styles.pillText}>
+                <View style={styles.metaRow}>
+                  <View style={styles.metaChip}>
+                    <Text style={styles.metaChipText}>
                       {t('weekOf', {
                         current: Math.max(unlockedWeek, 0),
                         total: plan.totalWeeks,
@@ -180,18 +234,22 @@ export default function HomeScreen() {
                     </Text>
                   </View>
                   {plan.isDayWise ? (
-                    <View style={styles.pillWarm}>
-                      <Text style={styles.pillWarmText}>{t('dayWise')}</Text>
+                    <View style={styles.metaChipWarm}>
+                      <Text style={styles.metaChipWarmText}>
+                        {t('dayWise')}
+                      </Text>
                     </View>
                   ) : null}
                 </View>
 
                 {unlockedWeek === 0 ? (
-                  <Text style={[styles.cardBody, { marginTop: 12 }]}>
-                    {t('planNotStartedBody', {
-                      date: formatStartDate(item.startDate),
-                    })}
-                  </Text>
+                  <View style={styles.notStarted}>
+                    <Text style={styles.notStartedText}>
+                      {t('planNotStartedBody', {
+                        date: formatStartDate(item.startDate),
+                      })}
+                    </Text>
+                  </View>
                 ) : null}
 
                 {currentWeek ? (
@@ -203,12 +261,11 @@ export default function HomeScreen() {
                       })
                     }
                     style={({ pressed }) => [
-                      styles.quickWeek,
-                      { marginTop: 14 },
-                      pressed && { opacity: 0.9 },
+                      styles.weekRow,
+                      pressed && { opacity: 0.88 },
                     ]}>
-                    <View style={styles.weekNumCurrent}>
-                      <Text style={styles.weekNumTextCurrent}>
+                    <View style={styles.weekBadge}>
+                      <Text style={styles.weekBadgeText}>
                         {currentWeek.weekNumber}
                       </Text>
                     </View>
@@ -217,16 +274,10 @@ export default function HomeScreen() {
                         {currentWeek.title || `Week ${currentWeek.weekNumber}`}
                       </Text>
                       <Text style={styles.weekMeta}>
-                        {api.countWeekContents(currentWeek, plan.isDayWise) ===
-                        1
+                        {contentCount === 1
                           ? t('contentOne')
-                          : t('contentMany', {
-                              count: api.countWeekContents(
-                                currentWeek,
-                                plan.isDayWise,
-                              ),
-                            })}
-                        {` • ${t('current')}`}
+                          : t('contentMany', { count: contentCount })}
+                        {` · ${t('current')}`}
                       </Text>
                     </View>
                     <Text style={styles.chev}>›</Text>
@@ -237,7 +288,7 @@ export default function HomeScreen() {
                   title={t('viewPlanWeeks')}
                   variant="secondary"
                   onPress={() => nav.navigate('Plan', { program })}
-                  style={{ marginTop: 12 }}
+                  style={{ marginTop: 14 }}
                 />
               </View>
             </View>
@@ -249,139 +300,281 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: layout.screen,
   center: { alignItems: 'center', justifyContent: 'center' },
-  scroll: { padding: 16, paddingBottom: 40 },
-  header: {
+  scroll: layout.scroll,
+
+  welcome: {
+    position: 'relative',
+    overflow: 'hidden',
+    ...layout.surfaceCard,
+    paddingHorizontal: 22,
+    paddingVertical: 22,
+    marginBottom: 18,
+  },
+  welcomeGlowTop: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 180,
+    top: -70,
+    right: -40,
+    backgroundColor: colors.primaryTint,
+    opacity: 0.55,
+  },
+  welcomeGlowBottom: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 150,
+    bottom: -60,
+    left: 20,
+    backgroundColor: colors.accentSoft,
+    opacity: 0.8,
+  },
+  welcomeLogoWrap: {
+    alignSelf: 'center',
+    width: 120,
+    height: 120,
+    backgroundColor: colors.surface,
+    marginBottom: 6,
+  },
+  welcomeLogo: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: colors.surface,
+  },
+  hello: {
+    marginTop: 2,
+    color: colors.text,
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.7,
+    textAlign: 'center',
+  },
+  patientId: {
+    marginTop: 6,
+    color: colors.textSoft,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  welcomeProgress: { marginTop: 20 },
+  welcomeProgressRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 10,
     gap: 12,
+    marginBottom: 8,
   },
-  name: {
+  welcomeProgressTitle: {
     flex: 1,
-    color: colors.text,
-    fontWeight: '800',
-    fontSize: 22,
-    letterSpacing: -0.4,
+    color: colors.textSoft,
+    fontSize: 12,
+    fontWeight: '600',
   },
-  brand: {
-    color: colors.primary,
-    fontWeight: '800',
-    fontSize: 22,
-    letterSpacing: -0.4,
+  welcomeProgressMeta: {
+    color: colors.textSoft,
+    fontSize: 12,
+    fontWeight: '700',
   },
-  sectionTitle: {
+  welcomeTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: colors.primaryTint,
+    overflow: 'hidden',
+  },
+  welcomeFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+  },
+  welcomeUnlock: {
+    marginTop: 8,
+    color: colors.success,
     fontSize: 13,
-    fontWeight: '800',
-    color: colors.textMuted,
-    marginBottom: 10,
-    marginTop: 4,
-    letterSpacing: 0.7,
-    textTransform: 'uppercase',
+    fontWeight: '600',
   },
+
+  sectionTitle: layout.sectionTitle,
   errorCard: {
-    borderColor: '#fecaca',
+    borderColor: colors.dangerBorder,
     backgroundColor: colors.dangerSoft,
   },
   errorText: { color: colors.danger, fontWeight: '600' },
-  cardBody: {
-    color: colors.textSoft,
+  muted: { color: colors.textSoft, lineHeight: 20, fontSize: 14 },
+
+  alertRose: {
+    borderRadius: radius.xl,
+    padding: 18,
     marginBottom: 14,
-    lineHeight: 20,
-    fontSize: 14,
+    backgroundColor: colors.primarySoft,
+    borderWidth: 1,
+    borderColor: colors.warmBorder,
   },
-  cardBodyMuted: { color: colors.textSoft, lineHeight: 20, fontSize: 14 },
+  alertTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  alertBody: {
+    color: colors.textSoft,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+  alertAmber: {
+    borderRadius: radius.xl,
+    padding: 18,
+    marginBottom: 14,
+    backgroundColor: colors.accentWarmSoft,
+    borderWidth: 1,
+    borderColor: colors.accentWarm,
+  },
+  alertAmberTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: colors.primaryHover,
+    marginBottom: 8,
+  },
+  alertAmberBody: {
+    color: colors.textSoft,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+
   planCard: {
+    ...layout.surfaceCard,
     borderRadius: radius.xxl,
     overflow: 'hidden',
     marginBottom: 16,
-    backgroundColor: colors.primary,
-    ...shadows.glow,
+    ...shadows.card,
   },
   planBanner: {
     width: '100%',
-    height: 168,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    height: 160,
+    backgroundColor: colors.primarySoft,
   },
-  planBannerPlaceholder: {
+  planBannerEmpty: {
     height: 88,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: colors.primaryTint,
   },
-  planBannerMark: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 28,
-    fontWeight: '900',
-    letterSpacing: 2,
+  planBannerEmptyText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    opacity: 0.7,
   },
-  planHero: { padding: 20 },
-  planKicker: {
-    color: 'rgba(255,255,255,0.72)',
+  planBody: {
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 18,
+    backgroundColor: colors.surface,
+  },
+  planProgram: {
+    color: colors.primary,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
   planTitle: {
-    color: '#fff',
-    fontSize: 24,
+    marginTop: 4,
+    color: colors.text,
+    fontSize: 20,
     fontWeight: '800',
-    marginTop: 6,
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
   },
   planDesc: {
-    color: 'rgba(255,255,255,0.88)',
-    marginTop: 8,
+    marginTop: 6,
+    color: colors.textSoft,
     fontSize: 13,
     lineHeight: 19,
   },
-  progressTrack: {
-    height: 6,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    marginTop: 16,
-    overflow: 'hidden',
+  metaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 14,
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: '#fff',
-  },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  pill: {
-    paddingHorizontal: 12,
+  metaChip: {
+    paddingHorizontal: 11,
     paddingVertical: 6,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: colors.primarySoft,
   },
-  pillText: { color: '#fff', fontSize: 12, fontWeight: '700' },
-  pillWarm: {
-    paddingHorizontal: 12,
+  metaChipText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  metaChipWarm: {
+    paddingHorizontal: 11,
     paddingVertical: 6,
     borderRadius: radius.pill,
-    backgroundColor: '#fef3c7',
+    backgroundColor: colors.accentSoft,
   },
-  pillWarmText: { color: '#92400e', fontSize: 12, fontWeight: '700' },
-  quickWeek: {
+  metaChipWarmText: {
+    color: colors.accent,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  notStarted: {
+    marginTop: 14,
+    borderRadius: radius.lg,
+    padding: 14,
+    backgroundColor: colors.warningSoft,
+    borderWidth: 1,
+    borderColor: colors.warning,
+  },
+  notStartedText: {
+    color: colors.warning,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '500',
+  },
+  weekRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    marginTop: 14,
+    padding: 12,
+    borderRadius: radius.lg,
+    backgroundColor: colors.primarySoft,
+    borderWidth: 1,
+    borderColor: colors.warmBorder,
   },
-  weekNumCurrent: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  weekBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  weekNumTextCurrent: { fontSize: 16, fontWeight: '800', color: '#fff' },
-  weekTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
-  weekMeta: { fontSize: 12, color: colors.textSoft, marginTop: 3 },
-  chev: { fontSize: 24, color: colors.textMuted },
+  weekBadgeText: {
+    color: colors.textInverse,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  weekTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  weekMeta: {
+    marginTop: 3,
+    fontSize: 12,
+    color: colors.textSoft,
+  },
+  chev: {
+    fontSize: 24,
+    color: colors.primary,
+    fontWeight: '300',
+  },
 });

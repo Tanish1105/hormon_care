@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
     borderWidth: 1,
-    borderColor: '#f9d5e3',
+    borderColor: colors.warmBorder,
   },
   weekCard: {
     borderWidth: 1,

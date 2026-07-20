@@ -2,7 +2,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /** Cache-bust when logo asset is regenerated */
-export const BRAND_LOGO_SRC = "/hormon-care-logo.png?v=3";
+export const BRAND_LOGO_SRC = "/hormon-care-logo.png?v=6";
 
 const SIZES = {
   xs: { width: 36, height: 36, className: "h-9 w-9" },
@@ -39,7 +39,7 @@ export function BrandLogo({
     >
       <Image
         src={BRAND_LOGO_SRC}
-        alt="Hormon Care"
+        alt="Hormone care"
         width={dim.width}
         height={dim.height}
         priority={priority}
@@ -65,7 +65,7 @@ export function BrandMark({
       <BrandLogo size={size} />
       <span className="min-w-0">
         <span className="block truncate text-sm font-bold leading-tight text-slate-900 sm:text-base">
-          Hormon Care
+          Hormone care
         </span>
         {subtitle ? (
           <span className="block text-[10px] leading-tight text-slate-500 sm:text-xs">

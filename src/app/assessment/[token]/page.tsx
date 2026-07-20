@@ -47,7 +47,7 @@ export default function PublicAssessmentPage() {
           <div className="flex min-w-0 items-center gap-3">
             <BrandLogo size="sm" />
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900">Hormon Care</p>
+              <p className="text-sm font-semibold text-slate-900">Hormone care</p>
               <h1 className="truncate text-base font-bold text-slate-700">{ui.title}</h1>
             </div>
           </div>

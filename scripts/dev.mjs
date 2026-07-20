@@ -19,14 +19,14 @@ execSync("npx prisma generate", { stdio: "inherit" });
 const ips = getLocalNetworkIPs();
 console.log("\n----------------------------------------");
 console.log("  Hormon Care — Network URLs");
-console.log("  Laptop:  http://localhost:3000");
+console.log("  Laptop:  http://localhost:3001");
 for (const ip of ips) {
-  console.log(`  Phone:   http://${ip}:3000`);
+  console.log(`  Phone:   http://${ip}:3001`);
 }
 console.log("  (Phone ane laptop same WiFi par hova joye)");
 console.log("----------------------------------------\n");
 
-const child = spawn("npx", ["next", "dev", "-H", "0.0.0.0", "-p", "3000"], {
+const child = spawn("npx", ["next", "dev", "-H", "0.0.0.0", "-p", "3001"], {
   stdio: "inherit",
   shell: true,
 });

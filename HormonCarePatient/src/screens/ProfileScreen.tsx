@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,7 +14,8 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import ConfirmModal from '../components/ConfirmModal';
 import FollowupProgressCard from '../components/FollowupProgressCard';
-import { colors, radius, shadows } from '../theme';
+import { brandLogo } from '../assets/brand';
+import { colors, layout, shadows } from '../theme';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -30,6 +32,7 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}>
         <View style={styles.heroCard}>
+          <Image source={brandLogo} style={styles.brandMark} resizeMode="contain" />
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
               {(user?.name || 'P').charAt(0).toUpperCase()}
@@ -88,41 +91,34 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 8,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  scroll: { padding: 16, paddingBottom: 40 },
+  safe: layout.screen,
+  header: layout.header,
+  title: layout.headerTitle,
+  scroll: layout.scroll,
   heroCard: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.xxl,
+    ...layout.surfaceCard,
     paddingVertical: 28,
     paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
     marginBottom: 16,
-    ...shadows.soft,
+  },
+  brandMark: {
+    width: 96,
+    height: 96,
+    marginBottom: 14,
+    backgroundColor: colors.surface,
   },
   avatar: {
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 24,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
     ...shadows.glow,
   },
-  avatarText: { color: '#fff', fontSize: 28, fontWeight: '800' },
+  avatarText: { color: colors.textInverse, fontSize: 28, fontWeight: '800' },
   name: {
     fontSize: 22,
     fontWeight: '800',

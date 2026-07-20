@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocale } from '../context/LocaleContext';
 import { colors } from '../theme';
 import type { PlanProgram } from '../api/client';
@@ -17,17 +18,27 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+const TAB_BAR_CONTENT_HEIGHT = 54;
+
 export default function MainTabs() {
   const { t } = useLocale();
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 6);
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: styles.label,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            height: TAB_BAR_CONTENT_HEIGHT + bottomInset,
+            paddingBottom: bottomInset,
+          },
+        ],
         tabBarHideOnKeyboard: true,
       }}>
       <Tab.Screen
@@ -62,11 +73,9 @@ export default function MainTabs() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#fff',
-    borderTopColor: '#E5E7EB',
+    backgroundColor: colors.surface,
+    borderTopColor: colors.borderLight,
     borderTopWidth: 1,
-    height: 60,
-    paddingBottom: 6,
     paddingTop: 4,
     elevation: 0,
   },

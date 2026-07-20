@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#fecdd3',
+    borderColor: colors.dangerBorder,
   },
   title: {
     fontSize: 20,

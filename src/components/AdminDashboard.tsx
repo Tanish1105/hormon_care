@@ -8,6 +8,12 @@ import { Users, ClipboardList, Baby, GraduationCap } from "lucide-react";
 
 export function AdminDashboard() {
   const [stats, setStats] = useState({ patients: 0, plans: 0, garbha: 0, childGuidance: 0 });
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -24,6 +30,33 @@ export function AdminDashboard() {
       });
     });
   }, []);
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setChangingPassword(true);
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    const res = await fetch("/api/auth/admin/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+    });
+
+    const data = await res.json();
+    setChangingPassword(false);
+
+    if (!res.ok) {
+      setPasswordError(data.error || "Password change failed");
+      return;
+    }
+
+    setPasswordSuccess(data.message || "Password બદલાઈ ગયો");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  }
 
   const cards = [
     { label: "Total Patients", value: stats.patients, icon: Users, href: "/admin/patients", color: "pink" },
@@ -64,6 +97,54 @@ export function AdminDashboard() {
             <li>Assign a plan to each patient based on their requirements</li>
             <li>Create a week-wise plan in <strong>Garbh Sanskruti</strong> or <strong>Parenting Sanskruti</strong> and assign it to patients</li>
           </ol>
+        </Card>
+
+        <Card className="mt-8">
+          <h2 className="font-semibold text-slate-900">Change Admin Password</h2>
+          <p className="mt-1 text-sm text-slate-500">Password change option માત્ર admin portal અંદર ઉપલબ્ધ છે.</p>
+          <form onSubmit={handleChangePassword} className="mt-4 space-y-3">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-slate-700">Current Password</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-slate-700">New Password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                minLength={6}
+                required
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-slate-700">Confirm New Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                minLength={6}
+                required
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+              />
+            </div>
+            {passwordError && <p className="text-sm text-red-600">{passwordError}</p>}
+            {passwordSuccess && <p className="text-sm text-green-600">{passwordSuccess}</p>}
+            <button
+              type="submit"
+              disabled={changingPassword}
+              className="inline-flex items-center justify-center rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-700 disabled:opacity-50"
+            >
+              {changingPassword ? "Changing..." : "Change Password"}
+            </button>
+          </form>
         </Card>
       </div>
     </AdminLayout>

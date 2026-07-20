@@ -1,36 +1,42 @@
 /**
- * Design tokens for Hormon Care.
- * Soft rose + warm cream clinical brand (matches patient web).
+ * Shared design tokens — keep every screen on the same white / soft-brand system.
+ * Palette aligned with Hormon Care logo (lavender, sage, soft rose) on white.
  */
 export const colors = {
-  bg: '#faf6f3',
-  bgSoft: '#fff1f5',
-  bgAlt: '#fff7ed',
-  surface: '#ffffff',
-  border: '#eadfd6',
-  borderLight: '#f0e8e1',
+  bg: '#FFFFFF',
+  bgSoft: '#F7F3FA',
+  bgAlt: '#F4F7F5',
+  surface: '#FFFFFF',
+  border: '#E8E4EE',
+  borderLight: '#F0ECF4',
 
-  primary: '#be185d',
-  primaryHover: '#9d174d',
-  primaryTint: '#fce7f3',
-  primarySoft: '#fdf2f8',
+  primary: '#7A4E8C',
+  primaryHover: '#5F3A6E',
+  primaryTint: '#EFE6F4',
+  primarySoft: '#F8F4FA',
 
-  accent: '#fb923c',
-  accentSoft: '#fff7ed',
-  success: '#059669',
-  successSoft: '#ecfdf5',
-  warning: '#d97706',
-  warningSoft: '#fffbeb',
-  danger: '#dc2626',
-  dangerSoft: '#fef2f2',
+  accent: '#6F9A74',
+  accentSoft: '#EFF6F0',
+  accentWarm: '#D98EB3',
+  accentWarmSoft: '#F9EFF4',
 
-  text: '#1f172a',
-  textSoft: '#475569',
-  textMuted: '#94a3b8',
-  textInverse: '#ffffff',
+  success: '#6F9A74',
+  successSoft: '#EFF6F0',
+  warning: '#B45309',
+  warningSoft: '#FFFBEB',
+  danger: '#DC2626',
+  dangerSoft: '#FEF2F2',
+  dangerBorder: '#FECACA',
+  warmBorder: '#E8D7EF',
+  successBorder: '#C6E0C9',
 
-  shadow: 'rgba(15, 23, 42, 0.08)',
-  shadowStrong: 'rgba(190, 24, 93, 0.18)',
+  text: '#1E1A24',
+  textSoft: '#5B5566',
+  textMuted: '#9A93A6',
+  textInverse: '#FFFFFF',
+
+  shadow: 'rgba(30, 26, 36, 0.06)',
+  shadowStrong: 'rgba(122, 78, 140, 0.16)',
 };
 
 export const spacing = {
@@ -63,24 +69,68 @@ export const font = {
 
 export const shadows = {
   soft: {
-    shadowColor: colors.shadow,
-    shadowOpacity: 1,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
+    shadowColor: '#1E1A24',
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
     elevation: 2,
   },
   card: {
-    shadowColor: colors.shadow,
-    shadowOpacity: 1,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
+    shadowColor: '#1E1A24',
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
     elevation: 3,
   },
   glow: {
     shadowColor: colors.primary,
-    shadowOpacity: 0.2,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 4,
+    shadowOpacity: 0.16,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 3,
+  },
+};
+
+/** Shared screen chrome — use these so every page feels the same */
+export const layout = {
+  screen: {
+    flex: 1 as const,
+    backgroundColor: colors.bg,
+  },
+  scroll: {
+    padding: spacing.lg,
+    paddingBottom: 40,
+  },
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: 10,
+    paddingBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: '800' as const,
+    color: colors.text,
+    letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    marginTop: 4,
+    color: colors.textSoft,
+    fontSize: 14,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '800' as const,
+    color: colors.textMuted,
+    marginBottom: 10,
+    marginTop: 4,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase' as const,
+  },
+  surfaceCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xxl,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    ...shadows.soft,
   },
 };

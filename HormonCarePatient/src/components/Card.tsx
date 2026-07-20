@@ -44,11 +44,11 @@ const styles = StyleSheet.create({
   },
   warm: {
     backgroundColor: colors.bgSoft,
-    borderColor: '#f9d5e3',
+    borderColor: colors.warmBorder,
   },
   success: {
     backgroundColor: colors.successSoft,
-    borderColor: '#a7f3d0',
+    borderColor: colors.successBorder,
   },
   title: {
     fontSize: 16,

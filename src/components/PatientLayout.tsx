@@ -146,7 +146,7 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
             <Link href="/patient" className="flex items-center gap-2.5">
               <BrandLogo size="sm" />
               <span className="text-base font-semibold tracking-tight text-slate-900">
-                Hormon Care
+                Hormone care
               </span>
             </Link>
 

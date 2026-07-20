@@ -46,6 +46,8 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({
       user: { id: user.id, username: user.username, name: user.name, role: "PATIENT" },
+      // Mobile apps cannot read HttpOnly Set-Cookie from fetch on Android.
+      token,
     });
     return attachSessionCookie(response, token);
   } catch {

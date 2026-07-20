@@ -10,6 +10,7 @@ import LoginScreen from '../screens/LoginScreen';
 import WeekDetailScreen from '../screens/WeekDetailScreen';
 import LifestyleAssessmentScreen from '../screens/LifestyleAssessmentScreen';
 import FollowupScreen from '../screens/FollowupScreen';
+import LegalWebScreen from '../screens/LegalWebScreen';
 import MainTabs, { type MainTabParamList } from './MainTabs';
 import type { PlanProgram } from '../api/client';
 
@@ -19,6 +20,7 @@ export type RootStackParamList = {
   WeekDetail: { weekNumber: number; program?: PlanProgram };
   LifestyleAssessment: undefined;
   Followup: { week?: number } | undefined;
+  LegalWeb: { title: string; kind: 'terms' | 'privacy' };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -88,6 +90,14 @@ export default function RootNavigator() {
             options={{ headerShown: false }}
           />
         )}
+        <Stack.Screen
+          name="LegalWeb"
+          component={LegalWebScreen}
+          options={({ route }) => ({
+            title: route.params.title,
+            presentation: 'modal',
+          })}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

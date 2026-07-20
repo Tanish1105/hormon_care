@@ -445,14 +445,14 @@ const styles = StyleSheet.create({
   },
   notesExcellent: {
     backgroundColor: colors.successSoft,
-    borderColor: '#a7f3d0',
+    borderColor: colors.successBorder,
   },
   notesPoor: {
     backgroundColor: colors.dangerSoft,
-    borderColor: '#fecdd3',
+    borderColor: colors.dangerBorder,
   },
   notesModerate: {
     backgroundColor: colors.warningSoft,
-    borderColor: '#fde68a',
+    borderColor: colors.accent,
   },
 });

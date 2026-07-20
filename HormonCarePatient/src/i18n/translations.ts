@@ -23,6 +23,10 @@ const en: Dict = {
   submitFailed: 'Submit failed',
   dataLoadFailed: 'Data load failed',
   loginFailed: 'Login failed',
+  sessionSetupFailed:
+    'Login could not start a session. Update the live server (redeploy) and try again.',
+  networkError:
+    'Cannot reach the server. Check WiFi/internet and make sure the backend is running on your laptop (npm run dev in hormon_care folder).',
 
   // Tabs
   tabHome: 'Home',
@@ -110,6 +114,7 @@ const en: Dict = {
   weekLocked: 'This week is not unlocked yet.',
   closeFullscreen: 'Close',
   tapToFullscreen: 'Tap to view full screen',
+  pinchToZoom: 'Pinch or double-tap to zoom',
   watchOnYoutube: '▶ Watch on YouTube',
   openVideo: '▶ Open video',
   weekDetailTitle: 'Week Detail',
@@ -237,6 +242,10 @@ const gu: Dict = {
   submitFailed: 'સબમિટ નિષ્ફળ',
   dataLoadFailed: 'ડેટા લોડ નિષ્ફળ',
   loginFailed: 'લોગિન નિષ્ફળ',
+  sessionSetupFailed:
+    'સત્ર શરૂ થઈ શક્યું નથી. live server update/redeploy કરો અને ફરી try કરો.',
+  networkError:
+    'સર્વર સુધી પહોંચ શકાઈ નથી. WiFi/ઇન્ટરનેટ તપાસો અને laptop પર hormon_care folder માં npm run dev ચાલે છે કે નહીં જુઓ.',
 
   tabHome: 'હોમ',
   tabPlan: 'પ્લાન',
@@ -320,6 +329,7 @@ const gu: Dict = {
   weekLocked: 'આ સપ્તાહ હજી unlock થયું નથી.',
   closeFullscreen: 'બંધ કરો',
   tapToFullscreen: 'Full screen માટે tap કરો',
+  pinchToZoom: 'Zoom માટે pinch અથવા double-tap કરો',
   watchOnYoutube: '▶ YouTube પર જુઓ',
   openVideo: '▶ Video ખોલો',
   weekDetailTitle: 'સપ્તાહ વિગત',

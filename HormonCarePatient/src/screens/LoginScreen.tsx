@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -8,21 +9,56 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 import { useLocale } from '../context/LocaleContext';
 import Button from '../components/Button';
 import TextField from '../components/TextField';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-import { colors, radius, shadows } from '../theme';
+import { brandLogo } from '../assets/brand';
+import type { RootStackParamList } from '../navigation/RootNavigator';
+import { colors, layout, radius, shadows } from '../theme';
+
+type LoginNav = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
   const { t } = useLocale();
+  const nav = useNavigation<LoginNav>();
+  const insets = useSafeAreaInsets();
+  const scrollRef = useRef<ScrollView>(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [keyboardPadding, setKeyboardPadding] = useState(0);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, event => {
+      setKeyboardPadding(event.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardPadding(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  function scrollToFocusedField() {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    });
+  }
 
   async function onSubmit() {
     if (!username.trim() || !password.trim()) {
@@ -34,40 +70,52 @@ export default function LoginScreen() {
     try {
       await signIn(username.trim(), password);
     } catch (e: any) {
-      setError(e?.message || t('loginFailed'));
+      setError(
+        e?.message === 'NETWORK_ERROR'
+          ? t('networkError')
+          : e?.message === 'SESSION_SETUP_FAILED'
+            ? t('sessionSetupFailed')
+            : e?.message || t('loginFailed'),
+      );
     } finally {
       setLoading(false);
     }
+  }
+
+  function openLegal(kind: 'terms' | 'privacy') {
+    nav.navigate('LegalWeb', {
+      title: kind === 'terms' ? t('termsConditions') : t('privacyPolicy'),
+      kind,
+    });
   }
 
   return (
     <SafeAreaView style={styles.safe} testID="login-screen">
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}>
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          ref={scrollRef}
+          contentContainerStyle={[
+            styles.scroll,
+            { paddingBottom: 32 + keyboardPadding },
+          ]}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
-          <View style={styles.orbTop} />
-          <View style={styles.orbMid} />
-          <View style={styles.orbBottom} />
-
           <View style={styles.langRow}>
             <LanguageSwitcher compact />
           </View>
 
           <View style={styles.brandBlock}>
-            <View style={styles.logoRing}>
+            <View style={styles.logoCard}>
               <Image
-                source={{
-                  uri: 'https://hormoncare.mediiqr.com/hormon-care-logo.png?v=3',
-                }}
+                source={brandLogo}
                 style={styles.logo}
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.brand}>Hormon Care</Text>
             <Text style={styles.tagline}>{t('loginSubtitle')}</Text>
           </View>
 
@@ -79,6 +127,7 @@ export default function LoginScreen() {
               autoCorrect={false}
               value={username}
               onChangeText={setUsername}
+              onFocus={scrollToFocusedField}
               testID="login-username-input"
             />
             <TextField
@@ -87,6 +136,7 @@ export default function LoginScreen() {
               secureTextEntry
               value={password}
               onChangeText={setPassword}
+              onFocus={scrollToFocusedField}
               testID="login-password-input"
             />
             {error ? (
@@ -106,8 +156,19 @@ export default function LoginScreen() {
 
           <Text style={styles.terms}>
             {t('termsPrefix')}{' '}
-            <Text style={styles.link}>{t('termsConditions')}</Text> {t('termsAnd')}{' '}
-            <Text style={styles.link}>{t('privacyPolicy')}</Text>
+            <Text
+              style={styles.link}
+              onPress={() => openLegal('terms')}
+              testID="terms-link">
+              {t('termsConditions')}
+            </Text>{' '}
+            {t('termsAnd')}{' '}
+            <Text
+              style={styles.link}
+              onPress={() => openLegal('privacy')}
+              testID="privacy-link">
+              {t('privacyPolicy')}
+            </Text>
             {t('termsSuffix')}
           </Text>
         </ScrollView>
@@ -117,82 +178,50 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: layout.screen,
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingBottom: 32,
-    justifyContent: 'center',
+    paddingTop: 16,
   },
   langRow: {
     alignItems: 'flex-end',
     marginBottom: 8,
     marginTop: 8,
   },
-  orbTop: {
-    position: 'absolute',
-    width: 320,
-    height: 320,
-    borderRadius: 320,
-    top: -140,
-    right: -90,
-    backgroundColor: 'rgba(190,24,93,0.12)',
-  },
-  orbMid: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 180,
-    top: 180,
-    left: -70,
-    backgroundColor: 'rgba(251,146,60,0.1)',
-  },
-  orbBottom: {
-    position: 'absolute',
-    width: 280,
-    height: 280,
-    borderRadius: 280,
-    bottom: -120,
-    right: -60,
-    backgroundColor: 'rgba(190,24,93,0.08)',
-  },
   brandBlock: {
     alignItems: 'center',
     marginBottom: 22,
   },
-  logoRing: {
-    width: 112,
-    height: 112,
-    borderRadius: 999,
-    backgroundColor: '#fff',
+  logoCard: {
+    width: 168,
+    height: 168,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 8,
     borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 14,
+    borderColor: colors.borderLight,
+    marginBottom: 12,
     ...shadows.soft,
   },
-  logo: { width: 92, height: 92, borderRadius: 999 },
-  brand: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: colors.primary,
-    letterSpacing: -0.5,
+  logo: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: colors.surface,
   },
   tagline: {
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 4,
     color: colors.textSoft,
     fontSize: 14,
     lineHeight: 20,
     paddingHorizontal: 12,
   },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.96)',
-    borderRadius: radius.xxl,
+    ...layout.surfaceCard,
     padding: 22,
-    borderWidth: 1,
-    borderColor: colors.border,
     ...shadows.card,
   },
   errBanner: {
@@ -203,7 +232,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: '#fecaca',
+    borderColor: colors.dangerBorder,
     overflow: 'hidden',
   },
   terms: {

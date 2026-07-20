@@ -7,8 +7,10 @@
  * and re-send it via the `Cookie` request header on every subsequent call.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from '../config/api';
 
-export const BASE_URL = 'https://hormoncare.mediiqr.com';
+export { BASE_URL };
+
 const COOKIE_KEY = 'hc.sessionCookie';
 const USER_KEY = 'hc.user';
 
@@ -51,6 +53,33 @@ function extractSessionCookie(setCookie: string | null): string | null {
 
 export type ApiError = { status: number; message: string };
 
+function isNetworkError(error: unknown): boolean {
+  if (!(error instanceof TypeError)) return false;
+  const msg = error.message.toLowerCase();
+  return (
+    msg.includes('network request failed') ||
+    msg.includes('failed to fetch') ||
+    msg.includes('network error')
+  );
+}
+
+async function request(
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
+  try {
+    return await fetch(`${BASE_URL}${path}`, init);
+  } catch (error) {
+    if (isNetworkError(error)) {
+      throw {
+        status: 0,
+        message: 'NETWORK_ERROR',
+      } as ApiError;
+    }
+    throw error;
+  }
+}
+
 export async function apiFetch<T = any>(
   path: string,
   init: RequestInit = {},
@@ -65,7 +94,7 @@ export async function apiFetch<T = any>(
   }
   if (cookie) headers.Cookie = cookie;
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...init, headers });
+  const res = await request(path, { ...init, headers });
 
   // capture any refreshed session cookie
   const setCookie =
@@ -106,7 +135,7 @@ export async function login(
   username: string,
   password: string,
 ): Promise<PatientUser> {
-  const res = await fetch(`${BASE_URL}/api/auth/patient/login`, {
+  const res = await request('/api/auth/patient/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ username, password }),
@@ -115,13 +144,25 @@ export async function login(
     // @ts-ignore
     (typeof res.headers.get === 'function' && res.headers.get('set-cookie')) ||
     null;
-  const session = extractSessionCookie(setCookie);
   const text = await res.text();
   const json = text ? JSON.parse(text) : {};
+  const session = extractSessionCookie(setCookie);
   if (!res.ok) {
     throw { status: res.status, message: json?.error || 'Login failed' } as ApiError;
   }
-  if (session) await saveSession(session);
+  if (session) {
+    await saveSession(session);
+  } else if (json?.token) {
+    await saveSession(`session=${json.token}`);
+  } else {
+    throw {
+      status: 0,
+      message: 'SESSION_SETUP_FAILED',
+    } as ApiError;
+  }
+  if (!json?.user) {
+    throw { status: 0, message: 'Login failed' } as ApiError;
+  }
   await saveUser(json.user);
   return json.user as PatientUser;
 }

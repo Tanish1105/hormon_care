@@ -8,7 +8,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Hormon Care - Gynecology Patient Care",
+  title: "Hormone care - Gynecology Patient Care",
   description: "Gynecology doctor patient care management system",
   icons: {
     icon: [

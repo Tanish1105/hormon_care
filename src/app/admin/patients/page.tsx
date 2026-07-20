@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Button, Card, Input, Textarea, Select, Badge } from "@/components/ui";
-import { Plus, Trash2, Key, Copy, Check, Sparkles, SquarePen, Send, FileText, Link2 } from "lucide-react";
+import { Plus, Trash2, Key, Copy, Check, Sparkles, SquarePen, Send, FileText, Link2, ChevronDown } from "lucide-react";
 import { ShareFormLink } from "@/components/ShareFormLink";
 import { APP_PUBLIC_URL, buildAssessmentFormUrl } from "@/lib/assessment-link";
 import { formatDateInputValue, formatDisplayDate } from "@/lib/utils";
@@ -101,6 +101,7 @@ export default function PatientsPage() {
   const [editLoading, setEditLoading] = useState<string | null>(null);
   const [assessmentLoading, setAssessmentLoading] = useState<string | null>(null);
   const [linkCopiedId, setLinkCopiedId] = useState<string | null>(null);
+  const [expandedPatientId, setExpandedPatientId] = useState<string | null>(null);
 
   async function load() {
     setLoadError("");
@@ -178,6 +179,7 @@ export default function PatientsPage() {
   function openCredentialForm(patient: Patient) {
     setCredentialForm({ username: patient.user.username, password: "" });
     setCredentialPatientId(patient.id);
+    setExpandedPatientId(patient.id);
   }
 
   async function saveCredentials(patientId: string) {
@@ -243,6 +245,7 @@ export default function PatientsPage() {
     setCustomForm({ ...emptyCustomForm, title: defaultTitle });
     setCustomPatientId(patient.id);
     setCustomProgram(program);
+    setExpandedPatientId(patient.id);
   }
 
   async function createCustomPlan(patientId: string) {
@@ -505,11 +508,18 @@ export default function PatientsPage() {
             { program: "garbha", label: "Garbh Sanskruti Plan", emptyLabel: "-- No Garbh Sanskruti Plan --" },
             { program: "child", label: "Parenting Sanskruti Plan", emptyLabel: "-- No Parenting Sanskruti --" },
           ];
+          const expanded = expandedPatientId === patient.id;
 
           return (
-          <Card key={patient.id}>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
+          <Card key={patient.id} className="!overflow-hidden !p-0">
+            <button
+              type="button"
+              onClick={() =>
+                setExpandedPatientId((prev) => (prev === patient.id ? null : patient.id))
+              }
+              className="flex w-full items-start gap-3 px-4 py-4 text-left transition hover:bg-slate-50/80 sm:px-6"
+            >
+              <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold text-slate-900">{patient.user.name}</h3>
                   <Badge color="purple">{patient.user.username}</Badge>
@@ -529,27 +539,54 @@ export default function PatientsPage() {
                 )}
                 <p className="mt-1 text-sm text-slate-500">
                   Plan: {patient.plan?.title || "Not assigned"} | Garbh Sanskruti: {patient.garbhaPlan?.title || "Not assigned"} | Parenting Sanskruti: {patient.childGuidancePlan?.title || "Not assigned"}
-                  <br />
-                  Care start: {formatDisplayDate(patient.startDate)} (W{patient.currentWeek})
-                  {" · "}
-                  Garbh Sanskruti start: {formatDisplayDate(patient.garbhaStartDate || patient.startDate)} (W{patient.garbhaCurrentWeek ?? patient.currentWeek})
-                  {" · "}
-                  Parenting Sanskruti start: {formatDisplayDate(patient.childGuidanceStartDate || patient.startDate)} (W{patient.childGuidanceCurrentWeek ?? patient.currentWeek})
                 </p>
               </div>
-              <div className="flex shrink-0 gap-2 self-end sm:self-start">
-                <button
-                  onClick={() => openCredentialForm(patient)}
+              <div className="flex shrink-0 items-center gap-1 pt-0.5">
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openCredentialForm(patient);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openCredentialForm(patient);
+                    }
+                  }}
                   className="rounded-lg p-2 text-purple-600 hover:bg-purple-50"
                   title="Edit ID / Password"
                 >
                   <Key className="h-4 w-4" />
-                </button>
-                <button onClick={() => deletePatient(patient.id)} className="rounded-lg p-2 text-red-500 hover:bg-red-50">
+                </span>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deletePatient(patient.id);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      deletePatient(patient.id);
+                    }
+                  }}
+                  className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </span>
+                <ChevronDown
+                  className={`ml-1 h-5 w-5 shrink-0 text-slate-400 transition ${expanded ? "rotate-180" : ""}`}
+                />
               </div>
-            </div>
+            </button>
+
+            {expanded ? (
+            <div className="space-y-4 border-t border-slate-100 px-4 pb-5 pt-4 sm:px-6">
 
             {credentialPatientId === patient.id && (
               <div className="mt-4 rounded-lg border border-purple-100 bg-purple-50/40 p-4">
@@ -839,6 +876,8 @@ export default function PatientsPage() {
                 </div>
               </div>
             )}
+            </div>
+            ) : null}
           </Card>
           );
         })}
