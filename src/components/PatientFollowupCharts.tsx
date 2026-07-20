@@ -306,14 +306,6 @@ export function PatientFollowupCharts({ followups }: { followups: AdminFollowupR
   }
 
   const weightSeries = buildSeries(sorted, "weight", "Weight (kg)", "#db2777", (r) => r.currentWeight);
-  const measurementSeries = [
-    buildSeries(sorted, "waist", "Waist", "#9333ea", (r) => r.waist),
-    buildSeries(sorted, "chest", "Chest", "#2563eb", (r) => r.chest),
-    buildSeries(sorted, "thigh", "Thigh", "#16a34a", (r) => r.thigh),
-    buildSeries(sorted, "hip", "Hip", "#d97706", (r) => r.hip),
-    buildSeries(sorted, "arm", "Arm", "#0891b2", (r) => r.arm),
-    buildSeries(sorted, "neck", "Neck", "#64748b", (r) => r.neck),
-  ].filter((s): s is ChartSeries => s !== null);
 
   const habitMetrics = [
     { id: "exercise", label: "Exercise", color: "#db2777", getValue: (r: AdminFollowupRow) => r.exerciseDays },
@@ -340,10 +332,7 @@ export function PatientFollowupCharts({ followups }: { followups: AdminFollowupR
             unit="kg"
           />
         )}
-        {measurementSeries.length > 0 && (
-          <FollowupLineChart title="Body measurements (cms)" series={measurementSeries} unit="cms" />
-        )}
-        <div className={measurementSeries.length > 0 && weightSeries ? "lg:col-span-2" : ""}>
+        <div className={weightSeries ? "" : "lg:col-span-2"}>
           <FollowupBarChart title="Weekly habits (days per week)" followups={sorted} metrics={habitMetrics} />
         </div>
       </div>

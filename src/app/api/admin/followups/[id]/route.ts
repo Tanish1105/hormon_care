@@ -37,12 +37,6 @@ export async function PUT(req: Request, { params }: RouteParams) {
       feedbackDislikedNotes: data.feedbackDislikedNotes,
       feedbackBadNotes: data.feedbackBadNotes,
       feedbackGoodNotes: data.feedbackGoodNotes,
-      waist: data.waist,
-      chest: data.chest,
-      thigh: data.thigh,
-      hip: data.hip,
-      arm: data.arm,
-      neck: data.neck,
     },
   });
 

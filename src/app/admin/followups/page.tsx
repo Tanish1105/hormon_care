@@ -188,7 +188,6 @@ export default function AdminFollowupsPage() {
                               <span>Exercise: {latest.exerciseDays}/7</span>
                               <span>Water: {latest.lowWaterDays}/7</span>
                               <span>Sleep: {latest.shortSleepDays}/7</span>
-                              {latest.waist != null && <span>Waist: {latest.waist} cms</span>}
                             </>
                           )}
                         </div>

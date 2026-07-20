@@ -1,7 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -73,6 +76,7 @@ function normalizeFeedback(value: string | null | undefined): string {
 export default function FollowupScreen() {
   const route = useRoute<RParam>();
   const nav = useNavigation();
+  const scrollRef = useRef<ScrollView>(null);
   const { t: appT, locale: appLocale } = useLocale();
   const [formLocale, setFormLocale] = useState<Locale>(appLocale);
   const [form, setForm] = useState<State>(initial);
@@ -80,6 +84,7 @@ export default function FollowupScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [week, setWeek] = useState<number>(route.params?.week || 1);
   const [status, setStatus] = useState<api.GateStatus['followup'] | null>(null);
+  const [keyboardPadding, setKeyboardPadding] = useState(0);
 
   const t = useCallback(
     (key: TranslationKey, vars?: Record<string, string | number>) =>
@@ -125,6 +130,36 @@ export default function FollowupScreen() {
   useEffect(() => {
     nav.setOptions?.({ title: appT('followupNavTitle') } as any);
   }, [nav, appT]);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, event => {
+      setKeyboardPadding(event.endCoordinates.height + 48);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardPadding(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!form.planFeedback) return;
+    scrollToFeedbackFields();
+  }, [form.planFeedback]);
+
+  function scrollToFeedbackFields() {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    });
+  }
 
   const setField = <K extends keyof State>(k: K, v: string) =>
     setForm(prev => ({ ...prev, [k]: v }));
@@ -224,15 +259,24 @@ export default function FollowupScreen() {
   }
 
   const notesStyle = {
-    height: 90,
+    minHeight: 110,
     textAlignVertical: 'top' as const,
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-      keyboardShouldPersistTaps="handled"
-      testID="followup-form">
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={{
+          padding: 16,
+          paddingBottom: 32 + keyboardPadding,
+        }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
+        testID="followup-form">
       <View style={styles.hero}>
         <View style={styles.heroTop}>
           <View style={styles.heroText}>
@@ -298,6 +342,7 @@ export default function FollowupScreen() {
           keyboardType="number-pad"
           value={form.mealsDeviated}
           onChangeText={v => setField('mealsDeviated', v)}
+          onFocus={scrollToFeedbackFields}
         />
       </Card>
 
@@ -318,10 +363,11 @@ export default function FollowupScreen() {
               label={t('feedbackExcellentNotes')}
               required
               multiline
-              numberOfLines={3}
+              numberOfLines={4}
               placeholder={t('feedbackPlaceholderExcellent')}
               value={form.feedbackLikedNotes}
               onChangeText={v => setField('feedbackLikedNotes', v)}
+              onFocus={scrollToFeedbackFields}
               style={notesStyle}
             />
           </View>
@@ -333,10 +379,11 @@ export default function FollowupScreen() {
               label={t('feedbackPoorNotes')}
               required
               multiline
-              numberOfLines={3}
+              numberOfLines={4}
               placeholder={t('feedbackPlaceholderPoor')}
               value={form.feedbackDislikedNotes}
               onChangeText={v => setField('feedbackDislikedNotes', v)}
+              onFocus={scrollToFeedbackFields}
               style={notesStyle}
             />
           </View>
@@ -348,20 +395,22 @@ export default function FollowupScreen() {
               label={t('feedbackBadNotes')}
               required
               multiline
-              numberOfLines={3}
+              numberOfLines={4}
               placeholder={t('feedbackPlaceholderBad')}
               value={form.feedbackBadNotes}
               onChangeText={v => setField('feedbackBadNotes', v)}
+              onFocus={scrollToFeedbackFields}
               style={notesStyle}
             />
             <TextField
               label={t('feedbackGoodNotes')}
               required
               multiline
-              numberOfLines={3}
+              numberOfLines={4}
               placeholder={t('feedbackPlaceholderGood')}
               value={form.feedbackGoodNotes}
               onChangeText={v => setField('feedbackGoodNotes', v)}
+              onFocus={scrollToFeedbackFields}
               style={notesStyle}
             />
           </View>
@@ -375,7 +424,8 @@ export default function FollowupScreen() {
         fullWidth
         testID="followup-submit-button"
       />
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -441,6 +491,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     borderWidth: 1,
     padding: 12,
+    marginTop: 8,
     marginBottom: 4,
   },
   notesExcellent: {

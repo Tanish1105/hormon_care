@@ -26,21 +26,9 @@ export type AdminFollowupRow = {
   feedbackDislikedNotes: string | null;
   feedbackBadNotes: string | null;
   feedbackGoodNotes: string | null;
-  waist: number | null;
-  chest: number | null;
-  thigh: number | null;
-  hip: number | null;
-  arm: number | null;
-  neck: number | null;
   submittedAt: string;
   comparison: {
     weight: ComparisonDelta;
-    waist: ComparisonDelta;
-    chest: ComparisonDelta;
-    thigh: ComparisonDelta;
-    hip: ComparisonDelta;
-    arm: ComparisonDelta;
-    neck: ComparisonDelta;
   };
 };
 
@@ -109,12 +97,6 @@ function followupToForm(f: AdminFollowupRow) {
     feedbackDislikedNotes: f.feedbackDislikedNotes ?? "",
     feedbackBadNotes: f.feedbackBadNotes ?? "",
     feedbackGoodNotes: f.feedbackGoodNotes ?? "",
-    waist: f.waist != null ? String(f.waist) : "",
-    chest: f.chest != null ? String(f.chest) : "",
-    thigh: f.thigh != null ? String(f.thigh) : "",
-    hip: f.hip != null ? String(f.hip) : "",
-    arm: f.arm != null ? String(f.arm) : "",
-    neck: f.neck != null ? String(f.neck) : "",
   };
 }
 
@@ -144,12 +126,6 @@ export function AdminFollowupWeekCard({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        waist: form.waist || null,
-        chest: form.chest || null,
-        thigh: form.thigh || null,
-        hip: form.hip || null,
-        arm: form.arm || null,
-        neck: form.neck || null,
         mealsDeviated: form.mealsDeviated || null,
         planFeedback: form.planFeedback || null,
         feedbackLikedNotes: form.feedbackLikedNotes || null,
@@ -291,17 +267,6 @@ export function AdminFollowupWeekCard({
               ))}
             </Select>
           ))}
-          {(["waist", "chest", "thigh", "hip", "arm", "neck"] as const).map((field) => (
-            <Input
-              key={field}
-              label={`${field.charAt(0).toUpperCase() + field.slice(1)} (cms)`}
-              type="number"
-              step="0.1"
-              min="0"
-              value={form[field]}
-              onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-            />
-          ))}
         </div>
 
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
@@ -363,18 +328,6 @@ export function AdminFollowupWeekCard({
           </div>
         </>
       )}
-
-      <p className="mb-2 mt-4 text-xs font-medium uppercase tracking-wide text-slate-400">
-        Body Measurements (cms)
-      </p>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        <DataCell label="Waist" value={followup.waist} delta={followup.comparison.waist} />
-        <DataCell label="Chest" value={followup.chest} delta={followup.comparison.chest} />
-        <DataCell label="Thigh" value={followup.thigh} delta={followup.comparison.thigh} />
-        <DataCell label="Hip" value={followup.hip} delta={followup.comparison.hip} />
-        <DataCell label="Arm" value={followup.arm} delta={followup.comparison.arm} />
-        <DataCell label="Neck" value={followup.neck} delta={followup.comparison.neck} />
-      </div>
     </div>
   );
 }
