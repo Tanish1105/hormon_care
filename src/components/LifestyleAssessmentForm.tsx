@@ -161,8 +161,8 @@ function RadioRow({
               className={cn(
                 "cursor-pointer rounded border px-2.5 py-1.5 text-xs transition",
                 value === option
-                  ? "border-pink-500 bg-pink-50 text-pink-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-pink-200"
+                  ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-[var(--border)]"
               )}
             >
               <input
@@ -222,8 +222,8 @@ function CheckboxRow({
               className={cn(
                 "cursor-pointer rounded border px-2.5 py-1.5 text-xs transition",
                 values.includes(option)
-                  ? "border-pink-500 bg-pink-50 text-pink-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-pink-200"
+                  ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-[var(--border)]"
               )}
             >
               <input
@@ -301,7 +301,7 @@ function StressScreeningSection({
                             value={option.value}
                             checked={values[key] === String(option.value)}
                             onChange={() => onChange(key, String(option.value))}
-                            className="h-4 w-4 accent-pink-600"
+                            className="h-4 w-4 accent-[var(--primary)]"
                             required
                           />
                           {option[locale]}
@@ -501,7 +501,7 @@ export function LifestyleAssessmentForm({
                         <td className="px-3 py-3 text-sm font-medium text-slate-700">
                           {lifestyleFieldLabel(locale, field.label)}
                         </td>
-                        <td className="px-3 py-3 text-sm font-semibold text-pink-700">
+                        <td className="px-3 py-3 text-sm font-semibold text-[var(--primary)]">
                           {bmi ?? ui.bmiAuto}
                         </td>
                       </tr>
@@ -521,7 +521,7 @@ export function LifestyleAssessmentForm({
                             required
                             value={form[field.key] as string}
                             onChange={(e) => setField(field.key, e.target.value)}
-                            className="w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-pink-400"
+                            className="w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[var(--primary)]"
                           />
                         </td>
                       </tr>

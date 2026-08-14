@@ -59,16 +59,16 @@ export function WeekSelector({
             className={cn(
               "relative flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition",
               locked && "cursor-not-allowed border-slate-100 bg-slate-50 opacity-60",
-              !locked && active && variant === "admin" && "border-pink-500 bg-pink-50",
-              !locked && active && variant === "patient" && "border-purple-500 bg-purple-50",
-              !locked && !active && "border-slate-200 bg-white hover:border-pink-200"
+              !locked && active && variant === "admin" && "border-[var(--primary)] bg-[var(--primary-light)]",
+              !locked && active && variant === "patient" && "border-[var(--secondary)] bg-[var(--gold-soft)]",
+              !locked && !active && "border-slate-200 bg-white hover:border-[var(--border)]"
             )}
           >
             <div
               className={cn(
                 "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-bold",
-                active && variant === "admin" && "bg-pink-600 text-white",
-                active && variant === "patient" && "bg-purple-600 text-white",
+                active && variant === "admin" && "bg-[var(--primary)] text-white",
+                active && variant === "patient" && "bg-[var(--secondary)] text-white",
                 !active && "bg-slate-100 text-slate-700"
               )}
             >
@@ -124,9 +124,9 @@ export function DaySelector({
             className={cn(
               "shrink-0 rounded-xl border-2 px-3 py-2 text-left transition sm:px-4",
               locked && "cursor-not-allowed border-slate-100 bg-slate-50 opacity-60",
-              !locked && active && variant === "admin" && "border-pink-500 bg-pink-50",
-              !locked && active && variant === "patient" && "border-purple-500 bg-purple-50",
-              !locked && !active && "border-slate-200 bg-white hover:border-pink-200"
+              !locked && active && variant === "admin" && "border-[var(--primary)] bg-[var(--primary-light)]",
+              !locked && active && variant === "patient" && "border-[var(--secondary)] bg-[var(--gold-soft)]",
+              !locked && !active && "border-slate-200 bg-white hover:border-[var(--border)]"
             )}
           >
             <p className="text-sm font-semibold text-slate-900">Day {d.dayNumber}</p>
@@ -153,13 +153,13 @@ export function PlanBreadcrumb({
     <div className="flex flex-wrap items-center gap-1 text-sm text-slate-500">
       <span className="font-medium text-slate-700">{planTitle}</span>
       <span>/</span>
-      <span className="rounded bg-pink-100 px-2 py-0.5 font-medium text-pink-700">
+      <span className="rounded bg-[var(--primary-light)] px-2 py-0.5 font-medium text-[var(--primary)]">
         Week {weekNumber}
       </span>
       {dayNumber != null && (
         <>
           <span>/</span>
-          <span className="rounded bg-purple-100 px-2 py-0.5 font-medium text-purple-700">
+          <span className="rounded bg-[var(--gold-soft)] px-2 py-0.5 font-medium text-[var(--secondary)]">
             Day {dayNumber}
           </span>
         </>
@@ -186,14 +186,14 @@ export function PatientWeekPicker({
   if (unlockedWeeks.length <= 1) return null;
 
   return (
-    <div className="rounded-2xl border border-[#eadfd6] bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
+    <div className="rounded-2xl border border-[#d5e2d8] bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
       <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
         સપ્તાહ પસંદ કરો
       </p>
       <div className="relative">
-        <div className="absolute left-5 right-5 top-5 h-0.5 bg-[#eadfd6]" aria-hidden />
+        <div className="absolute left-5 right-5 top-5 h-0.5 bg-[#d5e2d8]" aria-hidden />
         <div
-          className="absolute left-5 top-5 h-0.5 bg-pink-500 transition-all duration-500"
+          className="absolute left-5 top-5 h-0.5 bg-[var(--primary-light)]0 transition-all duration-500"
           style={{
             width:
               unlockedWeeks.length <= 1
@@ -217,8 +217,8 @@ export function PatientWeekPicker({
                   className={cn(
                     "relative z-[1] flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition",
                     active
-                      ? "border-pink-600 bg-pink-600 text-white shadow-md shadow-pink-600/25"
-                      : "border-[#eadfd6] bg-white text-slate-600 group-hover:border-pink-300"
+                      ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-md shadow-[rgba(31,107,69,0.25)]"
+                      : "border-[#d5e2d8] bg-white text-slate-600 group-hover:border-[var(--border)]"
                   )}
                 >
                   {w.weekNumber}
@@ -226,7 +226,7 @@ export function PatientWeekPicker({
                 <span
                   className={cn(
                     "text-center text-xs font-medium",
-                    active ? "text-pink-800" : "text-slate-500"
+                    active ? "text-[var(--primary)]" : "text-slate-500"
                   )}
                 >
                   Week {w.weekNumber}
@@ -269,7 +269,7 @@ export function PatientDayPicker({
   if (unlockedDays.length <= 1) return null;
 
   return (
-    <div className="rounded-2xl border border-[#eadfd6] bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
+    <div className="rounded-2xl border border-[#d5e2d8] bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-5">
       <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
         દિવસ પસંદ કરો
       </p>
@@ -285,17 +285,17 @@ export function PatientDayPicker({
               className={cn(
                 "shrink-0 rounded-2xl border px-4 py-2.5 text-left transition",
                 active
-                  ? "border-pink-500 bg-pink-600 text-white shadow-sm shadow-pink-600/20"
-                  : "border-[#eadfd6] bg-white text-slate-700 hover:border-pink-200"
+                  ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm shadow-[rgba(31,107,69,0.2)]"
+                  : "border-[#d5e2d8] bg-white text-slate-700 hover:border-[var(--border)]"
               )}
             >
               <p className="text-sm font-semibold">Day {d.dayNumber}</p>
               {isCurrent ? (
-                <p className={cn("text-[10px]", active ? "text-pink-100" : "text-emerald-600")}>
+                <p className={cn("text-[10px]", active ? "text-white/90" : "text-emerald-600")}>
                   Today
                 </p>
               ) : (
-                <p className={cn("text-[10px]", active ? "text-pink-100" : "text-slate-400")}>
+                <p className={cn("text-[10px]", active ? "text-white/90" : "text-slate-400")}>
                   Open
                 </p>
               )}

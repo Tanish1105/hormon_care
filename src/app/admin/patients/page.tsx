@@ -556,7 +556,7 @@ export default function PatientsPage() {
                       openCredentialForm(patient);
                     }
                   }}
-                  className="rounded-lg p-2 text-purple-600 hover:bg-purple-50"
+                  className="rounded-lg p-2 text-[var(--secondary)] hover:bg-[var(--gold-soft)]"
                   title="Edit ID / Password"
                 >
                   <Key className="h-4 w-4" />
@@ -589,7 +589,7 @@ export default function PatientsPage() {
             <div className="space-y-4 border-t border-slate-100 px-4 pb-5 pt-4 sm:px-6">
 
             {credentialPatientId === patient.id && (
-              <div className="mt-4 rounded-lg border border-purple-100 bg-purple-50/40 p-4">
+              <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--gold-soft)]/40 p-4">
                 <h4 className="text-sm font-semibold text-slate-800">Edit Login Credentials</h4>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
                   <Input
@@ -692,8 +692,8 @@ export default function PatientsPage() {
                     <label className="block text-sm font-medium text-slate-700">{label}</label>
                     {assigned ? (
                       <>
-                        <div className="flex items-center justify-between gap-2 rounded-lg border border-pink-200 bg-pink-50 px-3 py-2">
-                          <span className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-pink-700">
+                        <div className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--primary-light)] px-3 py-2">
+                          <span className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-[var(--primary)]">
                             {assigned.isCustom && <Sparkles className="h-3.5 w-3.5 shrink-0" />}
                             <span className="truncate">{assigned.title}</span>
                           </span>
@@ -701,7 +701,7 @@ export default function PatientsPage() {
                             type="button"
                             onClick={() => editPatientPlan(patient.id, program)}
                             disabled={editLoading === editKey}
-                            className="flex shrink-0 items-center gap-1 rounded-md bg-pink-600 px-2 py-1 text-xs font-medium text-white hover:bg-pink-700 disabled:opacity-50"
+                            className="flex shrink-0 items-center gap-1 rounded-md bg-[var(--primary)] px-2 py-1 text-xs font-medium text-white hover:bg-[#185738] disabled:opacity-50"
                           >
                             <SquarePen className="h-3 w-3" />
                             {editLoading === editKey ? "..." : "Edit"}
@@ -739,7 +739,7 @@ export default function PatientsPage() {
                         </Select>
                         <button
                           onClick={() => openCustomForm(patient, program)}
-                          className="flex items-center gap-1 text-xs font-medium text-pink-600 hover:underline"
+                          className="flex items-center gap-1 text-xs font-medium text-[var(--primary)] hover:underline"
                         >
                           <Sparkles className="h-3.5 w-3.5" />
                           Create custom plan
@@ -802,9 +802,9 @@ export default function PatientsPage() {
             </div>
 
             {customPatientId === patient.id && (
-              <div className="mt-3 rounded-lg border border-pink-100 bg-pink-50/40 p-4">
+              <div className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--primary-light)]/40 p-4">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-pink-600" />
+                  <Sparkles className="h-4 w-4 text-[var(--primary)]" />
                   <h4 className="text-sm font-semibold text-slate-800">
                     Custom {customProgram === "care" ? "Care" : customProgram === "garbha" ? "Garbh Sanskruti" : "Parenting Sanskruti"} Plan for {patient.user.name}
                   </h4>
@@ -815,7 +815,7 @@ export default function PatientsPage() {
                     onClick={() => setCustomForm({ ...customForm, mode: "new" })}
                     className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
                       customForm.mode === "new"
-                        ? "border-pink-500 bg-pink-100 text-pink-700"
+                        ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
                         : "border-slate-200 bg-white text-slate-600"
                     }`}
                   >
@@ -825,7 +825,7 @@ export default function PatientsPage() {
                     onClick={() => setCustomForm({ ...customForm, mode: "copy" })}
                     className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
                       customForm.mode === "copy"
-                        ? "border-pink-500 bg-pink-100 text-pink-700"
+                        ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
                         : "border-slate-200 bg-white text-slate-600"
                     }`}
                   >

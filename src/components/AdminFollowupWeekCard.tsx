@@ -159,7 +159,7 @@ export function AdminFollowupWeekCard({
 
   if (editing) {
     return (
-      <div className="rounded-xl border border-pink-200 bg-pink-50/30 p-4">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--primary-light)]/30 p-4">
         <div className="mb-4 flex items-center justify-between gap-2">
           <h3 className="font-semibold text-slate-900">Edit Week {followup.weekNumber}</h3>
           <div className="flex gap-2">

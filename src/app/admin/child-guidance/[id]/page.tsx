@@ -170,7 +170,7 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
 
   return (
     <AdminLayout>
-      <Link href="/admin/child-guidance" className="flex items-center gap-1 text-sm text-pink-600 hover:underline">
+      <Link href="/admin/child-guidance" className="flex items-center gap-1 text-sm text-[var(--primary)] hover:underline">
         <ArrowLeft className="h-4 w-4" /> Back to Parenting Sanskruti
       </Link>
 
@@ -194,7 +194,7 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
       </div>
 
       <details className="mt-4">
-        <summary className="cursor-pointer text-sm font-medium text-pink-600">Plan Image/Video Upload</summary>
+        <summary className="cursor-pointer text-sm font-medium text-[var(--primary)]">Plan Image/Video Upload</summary>
         <Card className="mt-2">
           <div className="grid gap-4 md:grid-cols-2">
             <FileUpload label="Plan Image" accept="image" value={plan.imageUrl || ""} onChange={(url) => updatePlanMedia(url, plan.videoUrl || "")} />
@@ -207,7 +207,7 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
         {/* LEFT: Week list */}
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-pink-600" />
+            <Calendar className="h-4 w-4 text-[var(--primary)]" />
             <h2 className="font-semibold text-slate-900">Weeks</h2>
           </div>
           <WeekSelector
@@ -220,7 +220,7 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
           {plan.totalWeeks < 52 && (
             <Button
               variant="ghost"
-              className="mt-3 w-full border border-dashed border-pink-200 text-pink-600 hover:bg-pink-50"
+              className="mt-3 w-full border border-dashed border-[var(--border)] text-[var(--primary)] hover:bg-[var(--primary-light)]"
               onClick={addWeek}
               disabled={addingWeek}
             >
@@ -234,8 +234,8 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
         <div className="space-y-6">
           {week && (
             <>
-              <Card className="border-pink-100 bg-gradient-to-r from-pink-50/50 to-white">
-                <h2 className="text-lg font-bold text-pink-800">
+              <Card className="border-[var(--border)] bg-gradient-to-r from-[var(--primary-light)]/50 to-white">
+                <h2 className="text-lg font-bold text-[var(--primary)]">
                   Week {week.weekNumber} — {week.title}
                 </h2>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -256,8 +256,8 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
               </Card>
 
               {plan.isDayWise && week.days?.length > 0 && (
-                <Card className="border-purple-100">
-                  <h3 className="mb-3 font-semibold text-purple-900">Days in Week {week.weekNumber}</h3>
+                <Card className="border-[var(--border)]">
+                  <h3 className="mb-3 font-semibold text-[var(--secondary)]">Days in Week {week.weekNumber}</h3>
                   <DaySelector
                     days={week.days}
                     activeDay={activeDay}
@@ -284,7 +284,7 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
                 </Card>
               )}
 
-              <Card className="border-2 border-purple-200">
+              <Card className="border-2 border-[var(--border)]">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <h3 className="font-semibold">
                     {plan.isDayWise
@@ -341,7 +341,7 @@ export default function ChildGuidanceDetailPage({ params }: { params: Promise<{ 
                     return (
                       <div key={item.id} className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-start sm:justify-between sm:p-4">
                         <div className="flex min-w-0 gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-pink-600 shadow-sm">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--primary)] shadow-sm">
                             <Icon className="h-5 w-5" />
                           </div>
                           <div className="min-w-0">

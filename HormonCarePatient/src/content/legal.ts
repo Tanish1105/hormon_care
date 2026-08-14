@@ -18,11 +18,11 @@ export const legalDocuments: Record<LegalKind, LegalDocument> = {
     title: 'Terms & Conditions',
     guTitle: 'નિયમો અને શરતો',
     intro:
-      'Welcome to Hormon Care. By accessing or using this patient care platform, you agree to these Terms & Conditions. If you do not agree, please do not use the service.',
+      'Welcome to JEEVANM. By accessing or using this patient care platform, you agree to these Terms & Conditions. If you do not agree, please do not use the service.',
     sections: [
       {
         title: '1. Service purpose',
-        body: 'Hormon Care helps your doctor share care plans, lifestyle assessments, weekly follow-ups, and educational content. It is a support tool and does not replace in-person medical advice, diagnosis, or emergency care.',
+        body: 'JEEVANM helps your doctor share care plans, lifestyle assessments, weekly follow-ups, and educational content. It is a support tool and does not replace in-person medical advice, diagnosis, or emergency care.',
       },
       {
         title: '2. Patient account',
@@ -52,7 +52,7 @@ export const legalDocuments: Record<LegalKind, LegalDocument> = {
     title: 'Privacy Policy',
     guTitle: 'ગોપનીયતા નીતિ',
     intro:
-      'Hormon Care respects your privacy. This policy explains what information we collect, how it is used, and how it is protected when you use the patient platform.',
+      'JEEVANM respects your privacy. This policy explains what information we collect, how it is used, and how it is protected when you use the patient platform.',
     sections: [
       {
         title: '1. Information we collect',

@@ -24,21 +24,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+    // Never leave the splash spinner forever (AsyncStorage / network hangs).
+    const failSafe = setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 4000);
+
     (async () => {
-      const session = await api.loadSession();
-      const stored = await api.loadUser<api.PatientUser>();
-      if (session && stored) {
-        // Verify session is still alive by pinging dashboard.
-        try {
-          await api.getDashboard();
-          setUser(stored);
-        } catch {
-          await api.clearSession();
-          setUser(null);
+      try {
+        const session = await api.loadSession();
+        const stored = await api.loadUser<api.PatientUser>();
+
+        if (session && stored) {
+          // Show home immediately; verify in background so splash never hangs.
+          if (!cancelled) {
+            setUser(stored);
+            setLoading(false);
+          }
+          try {
+            await api.getDashboard();
+          } catch {
+            await api.clearSession();
+            if (!cancelled) setUser(null);
+          }
+          return;
         }
+      } catch {
+        /* fall through to login */
       }
-      setLoading(false);
+      if (!cancelled) {
+        setUser(null);
+        setLoading(false);
+      }
     })();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(failSafe);
+    };
   }, []);
 
   const signIn = useCallback(async (username: string, password: string) => {

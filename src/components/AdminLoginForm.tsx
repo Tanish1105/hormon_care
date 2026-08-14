@@ -1,7 +1,8 @@
 "use client";
+
 import { useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { Button, Input, Card } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 
 export function AdminLoginForm() {
   const [username, setUsername] = useState("");
@@ -33,19 +34,35 @@ export function AdminLoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-white p-4">
-      <Card className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <BrandLogo size="lg" className="mx-auto" priority />
-          <h1 className="mt-4 text-2xl font-bold text-slate-900">Admin Login</h1>
-          <p className="text-sm text-slate-500">Doctor / Admin panel</p>
+    <div className="login-shell relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
+      <div className="login-orb login-orb--green" aria-hidden />
+      <div className="login-orb login-orb--gold" aria-hidden />
+      <div className="login-orb login-orb--soft" aria-hidden />
+
+      <div className="animate-jeevanm-rise relative z-10 w-full max-w-md">
+        <div className="mb-8 text-center">
+          <div className="animate-jeevanm-logo mx-auto inline-flex">
+            <BrandLogo size="lg" priority />
+          </div>
+          <h1 className="font-display mt-5 text-4xl font-semibold tracking-[0.06em] text-[var(--primary)]">
+            JEEVAN<span className="text-[var(--gold)]">M</span>
+          </h1>
+          <div className="login-brand-rule mx-auto mt-3 h-px w-32" aria-hidden />
+          <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--secondary)]">
+            Admin panel
+          </p>
+          <p className="mt-2 text-sm text-[var(--muted)]">Doctor / clinic access</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="animate-jeevanm-rise-delay space-y-4 rounded-[1.75rem] border border-[var(--border)]/90 bg-white/85 p-7 shadow-[0_20px_60px_rgba(20,32,26,0.08)] backdrop-blur-md sm:p-8"
+        >
           <Input
             label="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            autoComplete="username"
             required
           />
           <Input
@@ -53,14 +70,19 @@ export function AdminLoginForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
             required
           />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading}>
+          {error && (
+            <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-100">
+              {error}
+            </p>
+          )}
+          <Button type="submit" className="w-full py-3.5 text-base" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
-      </Card>
+      </div>
     </div>
   );
 }

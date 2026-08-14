@@ -11,13 +11,13 @@ function LegalShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#faf6f3]">
-      <header className="border-b border-[#eadfd6] bg-white/90 backdrop-blur">
+    <div className="min-h-screen bg-[#f2f6f3]">
+      <header className="border-b border-[#d5e2d8] bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
           <Link href="/">
             <BrandMark size="sm" />
           </Link>
-          <Link href="/" className="text-sm font-medium text-pink-700 hover:underline">
+          <Link href="/" className="text-sm font-medium text-[var(--primary)] hover:underline">
             Back to Login
           </Link>
         </div>
@@ -26,7 +26,7 @@ function LegalShell({
         <div className="mb-6 flex justify-center sm:justify-start">
           <BrandLogo size="md" />
         </div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-pink-700/80">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]/80">
           {guTitle}
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{title}</h1>
@@ -40,13 +40,13 @@ export default function TermsPage() {
   return (
     <LegalShell title="Terms & Conditions" guTitle="નિયમો અને શરતો">
       <p>
-        Welcome to Hormon Care. By accessing or using this patient care platform, you agree to
+        Welcome to JEEVANM. By accessing or using this patient care platform, you agree to
         these Terms &amp; Conditions. If you do not agree, please do not use the service.
       </p>
       <section className="space-y-2">
         <h2 className="text-base font-semibold text-slate-900">1. Service purpose</h2>
         <p>
-          Hormon Care helps your doctor share care plans, lifestyle assessments, weekly follow-ups,
+          JEEVANM helps your doctor share care plans, lifestyle assessments, weekly follow-ups,
           and educational content. It is a support tool and does not replace in-person medical
           advice, diagnosis, or emergency care.
         </p>
@@ -88,7 +88,7 @@ export default function TermsPage() {
           the updated terms. For questions, contact your clinic.
         </p>
       </section>
-      <p className="rounded-xl border border-[#eadfd6] bg-white px-4 py-3 text-slate-600">
+      <p className="rounded-xl border border-[#d5e2d8] bg-white px-4 py-3 text-slate-600">
         આ સેવા તમારા ડૉક્ટરની સારવારમાં સહાયરૂપ છે; તાત્કાલિક તબીબી મદદ માટે હંમેશા તમારા ડૉક્ટર અથવા
         ઇમરજન્સી સેવાનો સંપર્ક કરો.
       </p>

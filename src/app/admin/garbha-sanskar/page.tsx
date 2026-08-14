@@ -147,7 +147,7 @@ export default function GarbhaSanskarPage() {
               <button onClick={() => deletePlan(plan.id)} className="rounded-lg p-2 text-red-500 hover:bg-red-50">
                 <Trash2 className="h-4 w-4" />
               </button>
-              <Link href={`/admin/garbha-sanskar/${plan.id}`} className="flex items-center gap-1 rounded-lg bg-purple-50 px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100">
+              <Link href={`/admin/garbha-sanskar/${plan.id}`} className="flex items-center gap-1 rounded-lg bg-[var(--gold-soft)] px-3 py-2 text-sm font-medium text-[var(--secondary)] hover:bg-[var(--gold-soft)]">
                 Manage <ChevronRight className="h-4 w-4" />
               </Link>
             </div>

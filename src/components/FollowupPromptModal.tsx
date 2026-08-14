@@ -70,7 +70,7 @@ export function FollowupPromptModal({
           entered ? "translate-y-0" : "translate-y-8 sm:translate-y-4 sm:scale-[0.98]"
         )}
       >
-        <div className="relative shrink-0 overflow-hidden border-b border-pink-100/80 bg-[linear-gradient(160deg,#fff1f5_0%,#ffffff_55%,#fff7ed_100%)] px-5 pb-4 pt-3">
+        <div className="relative shrink-0 overflow-hidden border-b border-[var(--border)]/80 bg-[linear-gradient(160deg,#e8f3ec_0%,#ffffff_55%,#f8f4e8_100%)] px-5 pb-4 pt-3">
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-300/80 sm:hidden" />
 
           <div className="flex items-start justify-between gap-3">
@@ -129,14 +129,14 @@ export function FollowupPromptModal({
             type="submit"
             form={FORM_ID}
             disabled={submitting}
-            className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide shadow-sm shadow-pink-600/20"
+            className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide shadow-sm shadow-[rgba(31,107,69,0.2)]"
           >
             {submitting ? ui.submitting : ui.submit}
           </Button>
           <button
             type="button"
             onClick={onViewPlan}
-            className="mt-2 w-full py-2.5 text-center text-sm font-medium text-slate-500 transition hover:text-pink-700"
+            className="mt-2 w-full py-2.5 text-center text-sm font-medium text-slate-500 transition hover:text-[var(--primary)]"
           >
             {ui.viewPlanFirst}
           </button>

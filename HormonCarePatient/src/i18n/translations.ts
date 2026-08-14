@@ -60,6 +60,10 @@ const en: Dict = {
   compareHint: 'Each week shows change compared to the previous week.',
   loadingProgress: 'Loading progress...',
   reload: 'Reload',
+  moreWeeks: 'More',
+  viewFullProgress: 'Full progress',
+  closeProgress: 'Close',
+  recentWeeksHint: 'Showing last 2 weeks',
 
   // Login
   loginSubtitle: 'Log in with the ID and password given by your doctor',
@@ -278,6 +282,10 @@ const gu: Dict = {
   compareHint: 'દરેક સપ્તાહ પાછલા સપ્તાહ સાથેની સરખામણી બતાવે છે.',
   loadingProgress: 'પ્રગતિ લોડ થઈ રહી છે...',
   reload: 'ફરી લોડ',
+  moreWeeks: 'વધુ',
+  viewFullProgress: 'પૂરી પ્રગતિ',
+  closeProgress: 'બંધ કરો',
+  recentWeeksHint: 'છેલ્લા 2 સપ્તાહ બતાવ્યા છે',
 
   loginSubtitle: 'Doctor દ્વારા આપેલ ID અને Password થી login કરો',
   patientId: 'Patient ID',

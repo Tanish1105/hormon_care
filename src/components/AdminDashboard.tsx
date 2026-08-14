@@ -59,8 +59,8 @@ export function AdminDashboard() {
   }
 
   const cards = [
-    { label: "Total Patients", value: stats.patients, icon: Users, href: "/admin/patients", color: "pink" },
-    { label: "Active Plans", value: stats.plans, icon: ClipboardList, href: "/admin/plans", color: "purple" },
+    { label: "Total Patients", value: stats.patients, icon: Users, href: "/admin/patients", color: "green" },
+    { label: "Active Plans", value: stats.plans, icon: ClipboardList, href: "/admin/plans", color: "gold" },
     { label: "Garbh Sanskruti", value: stats.garbha, icon: Baby, href: "/admin/garbha-sanskar", color: "green" },
     { label: "Parenting Sanskruti", value: stats.childGuidance, icon: GraduationCap, href: "/admin/child-guidance", color: "slate" },
   ];
@@ -68,18 +68,20 @@ export function AdminDashboard() {
   return (
     <AdminLayout>
       <div>
-        <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Dashboard</h1>
-        <p className="text-sm text-slate-500 sm:text-base">Gynecology care management overview</p>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
+          Dashboard
+        </h1>
+        <p className="text-sm text-[var(--muted)] sm:text-base">JEEVANM care management overview</p>
 
         <div className="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {cards.map((card) => {
             const Icon = card.icon;
             return (
               <Link key={card.href} href={card.href}>
-                <Card className="hover:border-pink-200 transition cursor-pointer">
+                <Card className="hover:border-[var(--border)] transition cursor-pointer">
                   <div className="flex items-center justify-between">
-                    <Icon className="h-8 w-8 text-pink-500" />
-                    <Badge color={card.color as "pink" | "purple" | "green" | "slate"}>{card.value}</Badge>
+                    <Icon className="h-8 w-8 text-[var(--primary)]" />
+                    <Badge color={card.color as "green" | "gold" | "slate" | "pink" | "purple"}>{card.value}</Badge>
                   </div>
                   <p className="mt-4 text-lg font-semibold">{card.label}</p>
                 </Card>
@@ -110,7 +112,7 @@ export function AdminDashboard() {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
               />
             </div>
             <div className="space-y-1">
@@ -121,7 +123,7 @@ export function AdminDashboard() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 minLength={6}
                 required
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
               />
             </div>
             <div className="space-y-1">
@@ -132,7 +134,7 @@ export function AdminDashboard() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 minLength={6}
                 required
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
               />
             </div>
             {passwordError && <p className="text-sm text-red-600">{passwordError}</p>}
@@ -140,7 +142,7 @@ export function AdminDashboard() {
             <button
               type="submit"
               disabled={changingPassword}
-              className="inline-flex items-center justify-center rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-700 disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#185738] disabled:opacity-50"
             >
               {changingPassword ? "Changing..." : "Change Password"}
             </button>

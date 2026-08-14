@@ -11,13 +11,13 @@ function LegalShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#faf6f3]">
-      <header className="border-b border-[#eadfd6] bg-white/90 backdrop-blur">
+    <div className="min-h-screen bg-[#f2f6f3]">
+      <header className="border-b border-[#d5e2d8] bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
           <Link href="/">
             <BrandMark size="sm" />
           </Link>
-          <Link href="/" className="text-sm font-medium text-pink-700 hover:underline">
+          <Link href="/" className="text-sm font-medium text-[var(--primary)] hover:underline">
             Back to Login
           </Link>
         </div>
@@ -26,7 +26,7 @@ function LegalShell({
         <div className="mb-6 flex justify-center sm:justify-start">
           <BrandLogo size="md" />
         </div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-pink-700/80">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]/80">
           {guTitle}
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{title}</h1>
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
   return (
     <LegalShell title="Privacy Policy" guTitle="ગોપનીયતા નીતિ">
       <p>
-        Hormon Care respects your privacy. This policy explains what information we collect, how
+        JEEVANM respects your privacy. This policy explains what information we collect, how
         it is used, and how it is protected when you use the patient platform.
       </p>
       <section className="space-y-2">
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
           this page.
         </p>
       </section>
-      <p className="rounded-xl border border-[#eadfd6] bg-white px-4 py-3 text-slate-600">
+      <p className="rounded-xl border border-[#d5e2d8] bg-white px-4 py-3 text-slate-600">
         તમારી તબીબી માહિતી ફક્ત સારવાર અને પ્લાન સપોર્ટ માટે વપરાય છે. વધુ માહિતી માટે તમારી ક્લિનિકનો
         સંપર્ક કરો.
       </p>

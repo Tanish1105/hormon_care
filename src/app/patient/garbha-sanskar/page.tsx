@@ -64,7 +64,7 @@ function ContentItem({ item }: { item: Content }) {
   return (
     <div className="rounded-xl border bg-slate-50 p-4">
       <div className="flex gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-purple-600 shadow-sm">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--secondary)] shadow-sm">
           <Icon className="h-5 w-5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -138,7 +138,7 @@ export default function PatientGarbhaSanskarPage() {
   return (
     <PatientLayout>
       <div className="flex items-center gap-3">
-        <Baby className="h-8 w-8 text-purple-600" />
+        <Baby className="h-8 w-8 text-[var(--secondary)]" />
         <div>
           <h1 className="text-2xl font-bold">{plan?.title ?? "Plan"}</h1>
           <p className="text-slate-500">તમારા માટે assign કરેલો ગર્ભ સંસ્કૃતિ plan</p>
@@ -205,22 +205,22 @@ export default function PatientGarbhaSanskarPage() {
 
           <div className="mt-4 space-y-4">
             {week && weekUnlocked && dayUnlocked ? (
-              <Card className="border-2 border-purple-200">
-                <div className="border-b border-purple-100 bg-purple-50/50 -mx-4 -mt-4 mb-4 rounded-t-xl px-4 py-4 sm:-mx-6 sm:-mt-6 sm:mb-6 sm:px-6">
+              <Card className="border-2 border-[var(--border)]">
+                <div className="border-b border-[var(--border)] bg-[var(--gold-soft)]/50 -mx-4 -mt-4 mb-4 rounded-t-xl px-4 py-4 sm:-mx-6 sm:-mt-6 sm:mb-6 sm:px-6">
                   <PlanBreadcrumb
                     planTitle={plan.title}
                     weekNumber={week.weekNumber}
                     dayNumber={plan.isDayWise ? selectedDay : undefined}
                   />
-                  <h2 className="mt-2 text-lg font-bold text-purple-900 sm:text-xl">
+                  <h2 className="mt-2 text-lg font-bold text-[var(--secondary)] sm:text-xl">
                     {plan.isDayWise
                       ? `Week ${week.weekNumber} · Day ${selectedDay}: ${day?.title ?? ""}`
                       : `Week ${week.weekNumber}: ${week.title}`}
                   </h2>
                   {plan.isDayWise ? (
-                    day?.description && <p className="mt-1 text-sm text-purple-700">{day.description}</p>
+                    day?.description && <p className="mt-1 text-sm text-[var(--secondary)]">{day.description}</p>
                   ) : (
-                    week.description && <p className="mt-1 text-sm text-purple-700">{week.description}</p>
+                    week.description && <p className="mt-1 text-sm text-[var(--secondary)]">{week.description}</p>
                   )}
                 </div>
 

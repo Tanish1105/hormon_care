@@ -1,5 +1,5 @@
 /**
- * HTTP client for the Hormon Care patient backend.
+ * HTTP client for the JEEVANM patient backend.
  *
  * The upstream Next.js backend at https://hormoncare.mediiqr.com issues an HttpOnly
  * session cookie on login. React Native's fetch does NOT automatically persist
@@ -13,6 +13,7 @@ export { BASE_URL };
 
 const COOKIE_KEY = 'hc.sessionCookie';
 const USER_KEY = 'hc.user';
+const REQUEST_TIMEOUT_MS = 12_000;
 
 let cachedCookie: string | null = null;
 
@@ -67,16 +68,26 @@ async function request(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    return await fetch(`${BASE_URL}${path}`, init);
+    return await fetch(`${BASE_URL}${path}`, {
+      ...init,
+      signal: controller.signal,
+    });
   } catch (error) {
-    if (isNetworkError(error)) {
+    if (
+      (error instanceof Error && error.name === 'AbortError') ||
+      isNetworkError(error)
+    ) {
       throw {
         status: 0,
         message: 'NETWORK_ERROR',
       } as ApiError;
     }
     throw error;
+  } finally {
+    clearTimeout(timer);
   }
 }
 

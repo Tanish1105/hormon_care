@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Fraunces, Outfit } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Hormone care - Gynecology Patient Care",
-  description: "Gynecology doctor patient care management system",
+  title: "JEEVANM - Gynecology Patient Care",
+  description: "JEEVANM gynecology doctor patient care management system",
   icons: {
     icon: [
-      { url: "/favicon.png", sizes: "48x48", type: "image/png" },
-      { url: "/hormon-care-logo.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico?v=2", sizes: "32x32" },
+      { url: "/favicon.png?v=2", sizes: "48x48", type: "image/png" },
+      { url: "/jeevanm.png?v=2", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/hormon-care-logo.png", sizes: "180x180", type: "image/png" }],
-    shortcut: "/favicon.png",
+    apple: [{ url: "/apple-icon.png?v=2", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.ico?v=2",
   },
 };
 
@@ -31,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="gu" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full">{children}</body>
+    <html lang="gu" className={`${outfit.variable} ${fraunces.variable} h-full antialiased`}>
+      <body className="min-h-full font-sans">{children}</body>
     </html>
   );
 }

@@ -41,13 +41,13 @@ export default function PublicAssessmentPage() {
   }, [load]);
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-pink-50 to-white">
-      <header className="border-b border-pink-100 bg-white/90 px-4 py-4 backdrop-blur">
+    <div className="min-h-full bg-gradient-to-b from-[var(--primary-light)] to-white">
+      <header className="border-b border-[var(--border)] bg-white/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <BrandLogo size="sm" />
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900">Hormone care</p>
+              <p className="text-sm font-semibold text-slate-900">JEEVANM</p>
               <h1 className="truncate text-base font-bold text-slate-700">{ui.title}</h1>
             </div>
           </div>

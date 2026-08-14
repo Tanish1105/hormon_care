@@ -69,7 +69,7 @@ export function FileUpload({ label, accept, value, onChange, className }: FileUp
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-200 px-4 py-6 text-sm text-slate-500 transition hover:border-pink-300 hover:bg-pink-50/50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-200 px-4 py-6 text-sm text-slate-500 transition hover:border-[var(--border)] hover:bg-[var(--primary-light)]/50"
         >
           {uploading ? (
             <><Loader2 className="h-5 w-5 animate-spin" /> Uploading...</>

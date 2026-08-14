@@ -114,7 +114,7 @@ export default function AdminLifestyleAssessmentsPage() {
             onClick={() => setFilter(f.key)}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
               filter === f.key
-                ? "bg-pink-600 text-white"
+                ? "bg-[var(--primary)] text-white"
                 : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
             }`}
           >

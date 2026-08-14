@@ -135,18 +135,13 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <ContentProtection>
-      <div className="relative min-h-screen overflow-x-hidden bg-[#faf6f3] text-slate-900">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_at_top,_rgba(190,24,93,0.12),_transparent_55%),radial-gradient(ellipse_at_80%_0%,_rgba(251,146,60,0.1),_transparent_45%)]"
-        />
-
-        <header className="sticky top-0 z-10 border-b border-[#eadfd6]/80 bg-[#faf6f3]/85 backdrop-blur-md">
+      <div className="jeevanm-atmosphere relative min-h-screen overflow-x-hidden text-[var(--foreground)]">
+        <header className="sticky top-0 z-10 border-b border-[var(--border)]/80 bg-[rgba(242,246,243,0.88)] backdrop-blur-md">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3.5">
             <Link href="/patient" className="flex items-center gap-2.5">
               <BrandLogo size="sm" />
-              <span className="text-base font-semibold tracking-tight text-slate-900">
-                Hormone care
+              <span className="font-display text-lg font-semibold tracking-tight text-[var(--foreground)]">
+                JEEVANM
               </span>
             </Link>
 
@@ -210,8 +205,8 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
                     className={cn(
                       "flex max-w-[9rem] items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition sm:max-w-[12rem]",
                       active
-                        ? "bg-pink-600 text-white shadow-sm shadow-pink-600/20"
-                        : "text-slate-600 hover:bg-white/70"
+                        ? "bg-[var(--primary)] text-white shadow-sm shadow-[rgba(31,107,69,0.25)]"
+                        : "text-[var(--muted)] hover:bg-white/70"
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />

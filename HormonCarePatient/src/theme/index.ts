@@ -1,42 +1,41 @@
 /**
- * Shared design tokens — keep every screen on the same white / soft-brand system.
- * Palette aligned with Hormon Care logo (lavender, sage, soft rose) on white.
+ * Shared design tokens — JEEVANM green / gold premium system.
  */
 export const colors = {
-  bg: '#FFFFFF',
-  bgSoft: '#F7F3FA',
-  bgAlt: '#F4F7F5',
+  bg: '#F4F8F5',
+  bgSoft: '#EAF2EC',
+  bgAlt: '#F7F9F6',
   surface: '#FFFFFF',
-  border: '#E8E4EE',
-  borderLight: '#F0ECF4',
+  border: '#D5E2D8',
+  borderLight: '#E6EEE8',
 
-  primary: '#7A4E8C',
-  primaryHover: '#5F3A6E',
-  primaryTint: '#EFE6F4',
-  primarySoft: '#F8F4FA',
+  primary: '#1F6B45',
+  primaryHover: '#185738',
+  primaryTint: '#E6F2EA',
+  primarySoft: '#F1F7F3',
 
-  accent: '#6F9A74',
-  accentSoft: '#EFF6F0',
-  accentWarm: '#D98EB3',
-  accentWarmSoft: '#F9EFF4',
+  accent: '#B8892D',
+  accentSoft: '#F7F0DE',
+  accentWarm: '#C9A227',
+  accentWarmSoft: '#FBF6E8',
 
-  success: '#6F9A74',
-  successSoft: '#EFF6F0',
+  success: '#1F6B45',
+  successSoft: '#E6F2EA',
   warning: '#B45309',
   warningSoft: '#FFFBEB',
   danger: '#DC2626',
   dangerSoft: '#FEF2F2',
   dangerBorder: '#FECACA',
-  warmBorder: '#E8D7EF',
-  successBorder: '#C6E0C9',
+  warmBorder: '#E8D9A8',
+  successBorder: '#B9D6C3',
 
-  text: '#1E1A24',
-  textSoft: '#5B5566',
-  textMuted: '#9A93A6',
+  text: '#14201A',
+  textSoft: '#45554C',
+  textMuted: '#6F7F75',
   textInverse: '#FFFFFF',
 
-  shadow: 'rgba(30, 26, 36, 0.06)',
-  shadowStrong: 'rgba(122, 78, 140, 0.16)',
+  shadow: 'rgba(20, 32, 26, 0.06)',
+  shadowStrong: 'rgba(31, 107, 69, 0.18)',
 };
 
 export const spacing = {
@@ -58,34 +57,34 @@ export const radius = {
 };
 
 export const font = {
-  h1: { fontSize: 28, fontWeight: '800' as const, letterSpacing: -0.6 },
-  h2: { fontSize: 22, fontWeight: '800' as const, letterSpacing: -0.4 },
-  h3: { fontSize: 17, fontWeight: '700' as const, letterSpacing: -0.2 },
+  h1: { fontSize: 28, fontWeight: '700' as const, letterSpacing: -0.5 },
+  h2: { fontSize: 22, fontWeight: '700' as const, letterSpacing: -0.35 },
+  h3: { fontSize: 17, fontWeight: '600' as const, letterSpacing: -0.2 },
   body: { fontSize: 15, fontWeight: '400' as const },
   bodyStrong: { fontSize: 15, fontWeight: '600' as const },
   caption: { fontSize: 13, fontWeight: '400' as const },
-  micro: { fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.4 },
+  micro: { fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.5 },
 };
 
 export const shadows = {
   soft: {
-    shadowColor: '#1E1A24',
+    shadowColor: '#14201A',
     shadowOpacity: 0.05,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 6 },
     elevation: 2,
   },
   card: {
-    shadowColor: '#1E1A24',
-    shadowOpacity: 0.06,
+    shadowColor: '#14201A',
+    shadowOpacity: 0.07,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
     elevation: 3,
   },
   glow: {
     shadowColor: colors.primary,
-    shadowOpacity: 0.16,
-    shadowRadius: 16,
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
     elevation: 3,
   },
@@ -108,9 +107,9 @@ export const layout = {
   },
   headerTitle: {
     fontSize: 26,
-    fontWeight: '800' as const,
+    fontWeight: '700' as const,
     color: colors.text,
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
   },
   headerSubtitle: {
     marginTop: 4,
@@ -119,11 +118,11 @@ export const layout = {
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: '800' as const,
+    fontWeight: '700' as const,
     color: colors.textMuted,
     marginBottom: 10,
     marginTop: 4,
-    letterSpacing: 0.8,
+    letterSpacing: 0.9,
     textTransform: 'uppercase' as const,
   },
   surfaceCard: {

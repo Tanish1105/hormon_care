@@ -1,5 +1,5 @@
 /**
- * Hormon Care - Patient Mobile App
+ * JEEVANM - Patient Mobile App
  * React Native CLI
  */
 import React from 'react';

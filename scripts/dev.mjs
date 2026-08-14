@@ -18,7 +18,7 @@ execSync("npx prisma generate", { stdio: "inherit" });
 
 const ips = getLocalNetworkIPs();
 console.log("\n----------------------------------------");
-console.log("  Hormon Care — Network URLs");
+console.log("  JEEVANM — Network URLs");
 console.log("  Laptop:  http://localhost:3001");
 for (const ip of ips) {
   console.log(`  Phone:   http://${ip}:3001`);

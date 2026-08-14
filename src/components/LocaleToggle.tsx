@@ -31,8 +31,8 @@ export function LocaleToggle({
           "rounded-md px-3 py-1.5 font-medium transition",
           locale === "en"
             ? onDark
-              ? "bg-white text-pink-700"
-              : "bg-pink-600 text-white"
+              ? "bg-white text-[var(--primary)]"
+              : "bg-[var(--primary)] text-white"
             : onDark
               ? "text-white/85 hover:bg-white/10"
               : "text-slate-600 hover:bg-slate-50"
@@ -47,8 +47,8 @@ export function LocaleToggle({
           "rounded-md px-3 py-1.5 font-medium transition",
           locale === "gu"
             ? onDark
-              ? "bg-white text-pink-700"
-              : "bg-pink-600 text-white"
+              ? "bg-white text-[var(--primary)]"
+              : "bg-[var(--primary)] text-white"
             : onDark
               ? "text-white/85 hover:bg-white/10"
               : "text-slate-600 hover:bg-slate-50"

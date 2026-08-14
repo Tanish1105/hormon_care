@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --primary: #be185d;
-  --primary-light: #fce7f3;
-  --secondary: #7c3aed;
+  --background: #f2f6f3;
+  --foreground: #14201a;
+  --primary: #1f6b45;
+  --primary-light: #e6f2ea;
+  --secondary: #b8892d;
+  --gold: #c9a227;
+  --gold-soft: #f7f0de;
   --card: #ffffff;
-  --border: #e2e8f0;
-  --muted: #64748b;
+  --border: #d5e2d8;
+  --muted: #5c6b62;
+  --surface-mist: #eef4f0;
 }
 
 @theme inline {
@@ -17,10 +20,13 @@
   --color-primary: var(--primary);
   --color-primary-light: var(--primary-light);
   --color-secondary: var(--secondary);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
   --color-card: var(--card);
   --color-border: var(--border);
   --color-muted: var(--muted);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-outfit);
+  --font-display: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -30,8 +36,147 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-input, textarea, select {
+h1,
+h2,
+.font-display {
+  font-family: var(--font-display), var(--font-sans), Georgia, serif;
+}
+
+input,
+textarea,
+select {
   font-family: inherit;
+}
+
+@keyframes jeevanm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes jeevanm-soft-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes jeevanm-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-jeevanm-rise {
+  animation: jeevanm-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-jeevanm-rise-delay {
+  animation: jeevanm-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.animate-jeevanm-logo {
+  animation: jeevanm-soft-pulse 4.5s ease-in-out infinite;
+}
+
+.jeevanm-atmosphere {
+  background:
+    radial-gradient(ellipse 80% 55% at 12% -10%, rgba(31, 107, 69, 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 92% 8%, rgba(201, 162, 39, 0.14), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 70% 100%, rgba(31, 107, 69, 0.08), transparent 55%),
+    linear-gradient(165deg, #eef4f0 0%, #f7faf7 42%, #f3f1e8 100%);
+}
+
+.login-shell {
+  background:
+    radial-gradient(ellipse 90% 60% at 8% 12%, rgba(31, 107, 69, 0.2), transparent 58%),
+    radial-gradient(ellipse 70% 55% at 96% 6%, rgba(201, 162, 39, 0.18), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 78% 88%, rgba(31, 107, 69, 0.1), transparent 55%),
+    linear-gradient(160deg, #e8f1eb 0%, #f5f8f5 38%, #f6f3e9 100%);
+}
+
+.login-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.login-orb--green {
+  top: -8%;
+  left: -6%;
+  width: min(42vw, 420px);
+  height: min(42vw, 420px);
+  background: radial-gradient(circle, rgba(31, 107, 69, 0.22), transparent 68%);
+  animation: login-drift 14s ease-in-out infinite;
+}
+
+.login-orb--gold {
+  top: 8%;
+  right: -8%;
+  width: min(36vw, 360px);
+  height: min(36vw, 360px);
+  background: radial-gradient(circle, rgba(201, 162, 39, 0.2), transparent 70%);
+  animation: login-drift 18s ease-in-out infinite reverse;
+}
+
+.login-orb--soft {
+  bottom: -12%;
+  left: 35%;
+  width: min(48vw, 480px);
+  height: min(48vw, 480px);
+  background: radial-gradient(circle, rgba(31, 107, 69, 0.1), transparent 70%);
+  animation: login-drift 20s ease-in-out infinite;
+}
+
+@keyframes login-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(18px, -14px) scale(1.04);
+  }
+}
+
+@keyframes login-leaf-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
+.animate-login-leaf {
+  animation: login-leaf-float 7s ease-in-out infinite;
+}
+
+.animate-login-leaf-delay {
+  animation: login-leaf-float 9s ease-in-out 1.2s infinite;
+}
+
+.login-brand-rule {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(31, 107, 69, 0.55) 18%,
+    rgba(201, 162, 39, 0.85) 50%,
+    rgba(31, 107, 69, 0.55) 82%,
+    transparent
+  );
 }
 
 .patient-protected {
@@ -49,5 +194,18 @@ input, textarea, select {
 @media print {
   .patient-protected {
     display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-jeevanm-rise,
+  .animate-jeevanm-rise-delay,
+  .animate-jeevanm-logo,
+  .animate-login-leaf,
+  .animate-login-leaf-delay,
+  .login-orb--green,
+  .login-orb--gold,
+  .login-orb--soft {
+    animation: none;
   }
 }

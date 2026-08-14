@@ -39,9 +39,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="relative hidden w-64 flex-col border-r border-slate-200 bg-white md:flex">
-        <div className="border-b border-slate-200 px-5 py-4">
+    <div className="flex min-h-screen flex-col bg-[var(--background)] md:flex-row">
+      <aside className="relative hidden w-64 flex-col border-r border-[var(--border)] bg-white md:flex">
+        <div className="border-b border-[var(--border)] px-5 py-4">
           <BrandMark subtitle="Admin Panel" size="md" />
         </div>
         <nav className="flex-1 space-y-1 p-4">
@@ -53,10 +53,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
                   active
-                    ? "bg-pink-50 text-pink-700"
-                    : "text-slate-600 hover:bg-slate-50"
+                    ? "bg-[var(--primary-light)] text-[var(--primary)]"
+                    : "text-[var(--muted)] hover:bg-[var(--surface-mist)] hover:text-[var(--foreground)]"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -65,10 +65,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className="border-t border-slate-200 p-4">
+        <div className="border-t border-[var(--border)] p-4">
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--muted)] hover:bg-[var(--surface-mist)]"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -76,22 +76,20 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--border)] bg-white/95 px-4 py-3 backdrop-blur md:hidden">
         <BrandMark subtitle="Admin Panel" size="sm" />
         <button
           onClick={logout}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+          className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm text-[var(--muted)] hover:bg-[var(--surface-mist)]"
           aria-label="Logout"
         >
           <LogOut className="h-4 w-4" />
         </button>
       </header>
 
-      <main className="flex-1 overflow-auto bg-slate-50 p-4 pb-24 md:p-8 md:pb-8">
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto p-4 pb-24 md:p-8 md:pb-8">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 bg-white px-1 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-[var(--border)] bg-white/95 px-1 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
         <div className="grid grid-cols-7 gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -102,10 +100,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={cn(
                   "flex flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-[10px] font-medium transition",
-                  active ? "text-pink-700" : "text-slate-500"
+                  active ? "text-[var(--primary)]" : "text-[var(--muted)]"
                 )}
               >
-                <Icon className={cn("h-5 w-5", active && "text-pink-600")} />
+                <Icon className={cn("h-5 w-5", active && "text-[var(--primary)]")} />
                 <span className="truncate">{item.shortLabel}</span>
               </Link>
             );

@@ -104,7 +104,7 @@ export default function AdminFollowupsPage() {
             onClick={toggleCompulsory}
             className={cn(
               "relative h-7 w-12 rounded-full transition",
-              compulsory ? "bg-pink-600" : "bg-slate-300"
+              compulsory ? "bg-[var(--primary)]" : "bg-slate-300"
             )}
           >
             <span

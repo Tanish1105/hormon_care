@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   return NextResponse.json({
     ok: true,
-    service: "hormon-care",
+    service: "jeevanm",
     time: new Date().toISOString(),
   });
 }

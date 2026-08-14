@@ -93,13 +93,13 @@ export default function PublicFollowupPage() {
   const ui = followupUi(locale);
 
   return (
-    <div className="min-h-full bg-[linear-gradient(180deg,#fff1f5_0%,#f8fafc_42%,#ffffff_100%)]">
-      <header className="border-b border-pink-100/80 bg-white/90 px-4 py-4 backdrop-blur">
+    <div className="min-h-full bg-[linear-gradient(180deg,#e8f3ec_0%,#f8fafc_42%,#ffffff_100%)]">
+      <header className="border-b border-[var(--border)]/80 bg-white/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <BrandLogo size="sm" />
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900">Hormone care</p>
+              <p className="text-sm font-semibold text-slate-900">JEEVANM</p>
               <h1 className="truncate text-base font-bold text-slate-700">{ui.title}</h1>
             </div>
           </div>

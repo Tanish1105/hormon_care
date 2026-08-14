@@ -87,9 +87,9 @@ function ContentItem({ item }: { item: Content }) {
     (item.type === "VIDEO" && Boolean(item.url));
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-[#eadfd6] bg-white shadow-sm transition hover:border-pink-200/80">
-      <div className="flex items-start gap-3 border-b border-[#f0e8e1] px-4 py-3.5">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-pink-50 text-pink-700">
+    <article className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm transition hover:border-[var(--primary)]/25">
+      <div className="flex items-start gap-3 border-b border-[var(--border)]/70 px-4 py-3.5">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-light)] text-[var(--primary)]">
           <Icon className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
@@ -107,7 +107,7 @@ function ContentItem({ item }: { item: Content }) {
 
       <div className={cn("space-y-3 p-4", hasMedia && "pt-3")}>
         {item.content && (
-          <div className="rounded-xl bg-[#faf6f3] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-slate-700">
+          <div className="rounded-xl bg-[#f2f6f3] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-slate-700">
             {item.content}
           </div>
         )}
@@ -214,13 +214,13 @@ export default function PatientDashboard() {
   if (!data) {
     return (
       <PatientLayout>
-        <div className="rounded-2xl border border-[#eadfd6] bg-white p-8 text-center shadow-sm">
+        <div className="rounded-2xl border border-[#d5e2d8] bg-white p-8 text-center shadow-sm">
           <p className="font-medium text-slate-800">Plan load થઈ શક્યો નહીં</p>
           <p className="mt-2 text-sm text-slate-500">{loadError}</p>
           <button
             type="button"
             onClick={loadDashboard}
-            className="mt-4 rounded-xl bg-pink-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-pink-700"
+            className="mt-4 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#185738]"
           >
             ફરી પ્રયાસ કરો
           </button>
@@ -249,53 +249,62 @@ export default function PatientDashboard() {
 
   return (
     <PatientLayout>
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-[#eadfd6] bg-[linear-gradient(145deg,#fff8f5_0%,#ffffff_48%,#fff4ec_100%)] px-5 py-6 shadow-sm sm:px-7 sm:py-7">
+      <section className="animate-jeevanm-rise relative mb-2 overflow-hidden pb-4 pt-1">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-pink-200/30 blur-3xl"
+          className="pointer-events-none absolute -left-24 -top-28 h-72 w-72 rounded-full bg-[rgba(31,107,69,0.08)]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-orange-200/25 blur-3xl"
+          className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-[rgba(201,162,39,0.10)]"
         />
 
-          <div className="relative">
-          <div className="mb-3">
-            <BrandLogo size="md" />
+        <div className="relative">
+          <div className="flex items-center gap-3">
+            <BrandLogo size="sm" />
+            <div className="min-w-0">
+              <p className="font-display text-base font-semibold tracking-wide text-[var(--primary)]">
+                JEEVANM
+              </p>
+              <p className="mt-0.5 text-[9px] font-semibold tracking-wide text-[var(--primary)] sm:text-[10px]">
+                Transforming Habits Into Health
+              </p>
+            </div>
           </div>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            નમસ્તે, {profile.user.name}
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">Patient ID · {profile.user.username}</p>
 
-          {plan && unlockedWeek > 0 && (
-            <div className="mt-6 max-w-md">
-              <div className="mb-2 flex items-center justify-between text-xs font-medium text-slate-600">
-                <span className="inline-flex items-center gap-1.5">
-                  <CalendarDays className="h-3.5 w-3.5 text-pink-600" />
-                  {plan.title}
-                </span>
-                <span>
-                  Week {unlockedWeek}/{plan.totalWeeks}
+          {plan && unlockedWeek > 0 ? (
+            <div className="mt-5 w-full max-w-md rounded-2xl border border-[var(--border)] bg-white/85 p-5 shadow-[0_12px_40px_rgba(20,32,26,0.05)] backdrop-blur-sm">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
+                    Progress
+                  </p>
+                  <p className="mt-1 truncate text-sm font-semibold text-[var(--foreground)]">
+                    {plan.title}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-lg bg-[var(--gold-soft)] px-2.5 py-1.5 text-sm font-bold text-[var(--secondary)]">
+                  {progressPct}%
                 </span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-[#eadfd6]/80">
+              <div className="h-2 overflow-hidden rounded-md bg-[var(--primary-light)]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-pink-500 to-rose-400 transition-all duration-700"
+                  className="h-full rounded-md bg-[linear-gradient(90deg,var(--primary),#2f8a58_70%,var(--secondary))] transition-all duration-700"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
-              <p className="mt-2 text-sm text-slate-600">
-                હાલ unlock:{" "}
-                <span className="font-semibold text-emerald-700">Week {unlockedWeek}</span>
-                {plan.isDayWise ? (
-                  <>
-                    {" · "}
-                    <span className="font-semibold text-emerald-700">Day {unlockedDay}</span>
-                  </>
-                ) : null}
+              <p className="mt-3 flex items-center gap-1.5 text-sm text-[var(--muted)]">
+                <CalendarDays className="h-3.5 w-3.5 text-[var(--primary)]" />
+                Week {unlockedWeek}/{plan.totalWeeks}
+                {plan.isDayWise ? ` · Day ${unlockedDay}` : null}
               </p>
             </div>
+          ) : (
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--muted)]">
+              {plan
+                ? "તમારો care plan નીચે જુઓ."
+                : "હજુ plan assign નથી. Doctor સાથે contact કરો."}
+            </p>
           )}
         </div>
       </section>
@@ -308,7 +317,7 @@ export default function PatientDashboard() {
       )}
 
       {!plan ? (
-        <div className="mt-6 rounded-2xl border border-[#eadfd6] bg-white p-8 text-center shadow-sm">
+        <div className="mt-6 rounded-2xl border border-[#d5e2d8] bg-white p-8 text-center shadow-sm">
           <p className="text-slate-500">હજુ plan assign નથી. Doctor સાથે contact કરો.</p>
         </div>
       ) : unlockedWeek === 0 ? (
@@ -322,7 +331,7 @@ export default function PatientDashboard() {
       ) : (
         <div className="mt-6 space-y-5">
           {(plan.imageUrl || plan.description || plan.videoUrl) && (
-            <div className="overflow-hidden rounded-2xl border border-[#eadfd6] bg-white shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-[#d5e2d8] bg-white shadow-sm">
               {plan.imageUrl && (
                 <FullscreenImage
                   src={plan.imageUrl}
@@ -368,20 +377,20 @@ export default function PatientDashboard() {
           )}
 
           {week && weekUnlocked && dayUnlocked ? (
-            <section className="overflow-hidden rounded-[1.5rem] border border-[#eadfd6] bg-white shadow-sm">
-              <div className="border-b border-[#f0e8e1] bg-[linear-gradient(120deg,#fff1f5,#ffffff_55%)] px-5 py-5 sm:px-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-700/70">
+            <section className="overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-white shadow-sm">
+              <div className="border-b border-[var(--border)] bg-[linear-gradient(120deg,#e8f3ec,#ffffff_55%)] px-5 py-5 sm:px-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--primary)]/70">
                   {plan.title}
-                  <span className="mx-1.5 text-pink-300">/</span>
+                  <span className="mx-1.5 text-[var(--secondary)]">/</span>
                   Week {week.weekNumber}
                   {plan.isDayWise ? (
                     <>
-                      <span className="mx-1.5 text-pink-300">/</span>
+                      <span className="mx-1.5 text-[var(--secondary)]">/</span>
                       Day {selectedDay}
                     </>
                   ) : null}
                 </p>
-                <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+                <h2 className="font-display mt-2 text-2xl font-semibold tracking-tight text-[var(--foreground)]">
                   {plan.isDayWise
                     ? `Day ${selectedDay}: ${day?.title ?? ""}`
                     : `Week ${week.weekNumber}: ${week.title}`}
@@ -408,11 +417,11 @@ export default function PatientDashboard() {
               </div>
             </section>
           ) : week && weekUnlocked && plan.isDayWise ? (
-            <div className="rounded-2xl border border-[#eadfd6] bg-white p-8 text-center text-slate-500 shadow-sm">
+            <div className="rounded-2xl border border-[#d5e2d8] bg-white p-8 text-center text-slate-500 shadow-sm">
               આ day માટે plan ઉપલબ્ધ નથી.
             </div>
           ) : (
-            <div className="rounded-2xl border border-[#eadfd6] bg-white p-8 text-center text-slate-500 shadow-sm">
+            <div className="rounded-2xl border border-[#d5e2d8] bg-white p-8 text-center text-slate-500 shadow-sm">
               આ week માટે plan ઉપલબ્ધ નથી.
             </div>
           )}

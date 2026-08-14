@@ -1,6 +1,6 @@
-# Hormon Care - Patient App (React Native CLI)
+# JEEVANM - Patient App (React Native CLI)
 
-A native Android/iOS mobile app for **Hormon Care - Gynecology Patient Care**.
+A native Android/iOS mobile app for **JEEVANM - Gynecology Patient Care**.
 The app connects directly to the live production backend at
 `https://hormoncare.mediiqr.com` (the same database that powers the web
 patient portal). All patient data, plans, weekly followups and lifestyle
@@ -141,4 +141,4 @@ For a signed release you'll need to configure a keystore in
 
 ## License
 
-Private / Internal use for Hormon Care.
+Private / Internal use for JEEVANM.

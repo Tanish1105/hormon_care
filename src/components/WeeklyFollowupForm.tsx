@@ -49,7 +49,7 @@ const FEEDBACK_OPTIONS = [
 ] as const;
 
 function RequiredMark() {
-  return <span className="text-pink-600">*</span>;
+  return <span className="text-[var(--primary)]">*</span>;
 }
 
 function FormSection({
@@ -67,12 +67,12 @@ function FormSection({
     return (
       <section className="space-y-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-pink-50 text-pink-700">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-light)] text-[var(--primary)]">
             <Icon className="h-4 w-4" />
           </span>
           <div className="min-w-0">
             <h3 className="text-[15px] font-semibold text-slate-900">{title}</h3>
-            <div className="mt-1 h-0.5 w-8 rounded-full bg-pink-400/80" />
+            <div className="mt-1 h-0.5 w-8 rounded-full bg-[var(--secondary)]/80" />
           </div>
         </div>
         <div className="space-y-5">{children}</div>
@@ -82,8 +82,8 @@ function FormSection({
 
   return (
     <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-      <div className="flex items-center gap-3 border-b border-slate-100 bg-gradient-to-r from-pink-50/80 to-white px-5 py-4">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-pink-700 shadow-sm ring-1 ring-pink-100">
+      <div className="flex items-center gap-3 border-b border-slate-100 bg-gradient-to-r from-[var(--primary-light)]/80 to-white px-5 py-4">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[var(--primary)] shadow-sm ring-1 ring-[var(--primary-light)]">
           <Icon className="h-5 w-5" />
         </span>
         <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
@@ -128,7 +128,7 @@ function DayScaleField({
               className={cn(
                 "flex cursor-pointer items-center justify-center rounded-lg py-2.5 text-center text-[11px] font-semibold transition sm:text-xs",
                 selected
-                  ? "bg-pink-600 text-white shadow-sm"
+                  ? "bg-[var(--primary)] text-white shadow-sm"
                   : "text-slate-600 hover:bg-white hover:text-slate-900"
               )}
             >
@@ -447,7 +447,7 @@ export function WeeklyFollowupForm({
     >
       {!compact && (
         <Card className="!overflow-hidden !p-0">
-          <div className="bg-[linear-gradient(160deg,#fff1f5_0%,#ffffff_60%,#fff7ed_100%)] px-5 py-5">
+          <div className="bg-[linear-gradient(160deg,#e8f3ec_0%,#ffffff_60%,#f8f4e8_100%)] px-5 py-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <BrandLogo size="md" className="mb-3" />
@@ -486,7 +486,7 @@ export function WeeklyFollowupForm({
           <Button
             type="submit"
             disabled={loading}
-            className="min-w-44 rounded-xl px-8 py-3.5 text-sm font-semibold tracking-wide shadow-sm shadow-pink-600/20"
+            className="min-w-44 rounded-xl px-8 py-3.5 text-sm font-semibold tracking-wide shadow-sm shadow-[rgba(31,107,69,0.2)]"
           >
             {loading ? ui.submitting : ui.submit}
           </Button>

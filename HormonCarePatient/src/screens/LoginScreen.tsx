@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -17,6 +18,7 @@ import { useLocale } from '../context/LocaleContext';
 import Button from '../components/Button';
 import TextField from '../components/TextField';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import BrandTitle from '../components/BrandTitle';
 import { brandLogo } from '../assets/brand';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { colors, layout, radius, shadows } from '../theme';
@@ -34,6 +36,15 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [keyboardPadding, setKeyboardPadding] = useState(0);
+  const rise = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(rise, {
+      toValue: 1,
+      duration: 700,
+      useNativeDriver: true,
+    }).start();
+  }, [rise]);
 
   useEffect(() => {
     const showEvent =
@@ -89,8 +100,15 @@ export default function LoginScreen() {
     });
   }
 
+  const brandTranslate = rise.interpolate({
+    inputRange: [0, 1],
+    outputRange: [16, 0],
+  });
+
   return (
     <SafeAreaView style={styles.safe} testID="login-screen">
+      <View style={styles.glowTop} pointerEvents="none" />
+      <View style={styles.glowGold} pointerEvents="none" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -108,7 +126,11 @@ export default function LoginScreen() {
             <LanguageSwitcher compact />
           </View>
 
-          <View style={styles.brandBlock}>
+          <Animated.View
+            style={[
+              styles.brandBlock,
+              { opacity: rise, transform: [{ translateY: brandTranslate }] },
+            ]}>
             <View style={styles.logoCard}>
               <Image
                 source={brandLogo}
@@ -116,8 +138,11 @@ export default function LoginScreen() {
                 resizeMode="contain"
               />
             </View>
+            <View style={styles.brandTitleWrap}>
+              <BrandTitle size="full" showTagline />
+            </View>
             <Text style={styles.tagline}>{t('loginSubtitle')}</Text>
-          </View>
+          </Animated.View>
 
           <View style={styles.card}>
             <TextField
@@ -134,6 +159,7 @@ export default function LoginScreen() {
               label={t('password')}
               placeholder="••••••"
               secureTextEntry
+              showSecureToggle
               value={password}
               onChangeText={setPassword}
               onFocus={scrollToFocusedField}
@@ -179,10 +205,29 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   safe: layout.screen,
+  glowTop: {
+    position: 'absolute',
+    top: -80,
+    left: -40,
+    width: 260,
+    height: 260,
+    borderRadius: 200,
+    backgroundColor: 'rgba(31,107,69,0.12)',
+  },
+  glowGold: {
+    position: 'absolute',
+    top: 40,
+    right: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 200,
+    backgroundColor: 'rgba(201,162,39,0.12)',
+  },
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 16,
+    justifyContent: 'center',
   },
   langRow: {
     alignItems: 'flex-end',
@@ -191,29 +236,34 @@ const styles = StyleSheet.create({
   },
   brandBlock: {
     alignItems: 'center',
-    marginBottom: 22,
+    marginBottom: 28,
   },
   logoCard: {
     width: 168,
     height: 168,
     backgroundColor: colors.surface,
-    borderRadius: radius.xl,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 8,
+    padding: 10,
     borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: 12,
-    ...shadows.soft,
+    borderColor: colors.border,
+    marginBottom: 16,
+    ...shadows.glow,
   },
   logo: {
     width: '100%',
     height: '100%',
     backgroundColor: colors.surface,
+    borderRadius: 999,
+  },
+  brandTitleWrap: {
+    alignItems: 'center',
+    width: '100%',
   },
   tagline: {
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 12,
     color: colors.textSoft,
     fontSize: 14,
     lineHeight: 20,

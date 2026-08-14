@@ -63,7 +63,7 @@ export function AdminLifestyleAssessmentCard({
   item: AssessmentItem;
   onUpdated: () => void;
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [editingRec, setEditingRec] = useState(false);
   const [rec, setRec] = useState(item.doctorRecommendation ?? "");
   const [saving, setSaving] = useState(false);
