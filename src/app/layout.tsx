@@ -17,12 +17,13 @@ export const metadata: Metadata = {
   description: "JEEVANM gynecology doctor patient care management system",
   icons: {
     icon: [
-      { url: "/favicon.ico?v=2", sizes: "32x32" },
-      { url: "/favicon.png?v=2", sizes: "48x48", type: "image/png" },
-      { url: "/jeevanm.png?v=2", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico?v=3", sizes: "32x32" },
+      { url: "/favicon.png?v=3", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png?v=3", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png?v=3", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/apple-icon.png?v=2", sizes: "180x180", type: "image/png" }],
-    shortcut: "/favicon.ico?v=2",
+    apple: [{ url: "/apple-icon.png?v=3", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.ico?v=3",
   },
 };
 
