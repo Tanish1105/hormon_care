@@ -40,22 +40,36 @@ export function PatientLoginForm() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/patient/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 20_000);
+      const res = await fetch("/api/auth/patient/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username, password }),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
 
-    const data = await res.json();
-    setLoading(false);
+      const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
-      setError(data.error || "Login failed");
-      return;
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        return;
+      }
+
+      window.location.href = "/patient";
+    } catch (err) {
+      const aborted = err instanceof Error && err.name === "AbortError";
+      setError(
+        aborted
+          ? "Server response slow / DB connection fail. Hostinger DB settings check karo."
+          : "Network error — server reach nathi thatu. Thodi vaar pachhi try karo."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    window.location.href = "/patient";
   }
 
   return (
