@@ -7,13 +7,14 @@
  * and re-send it via the `Cookie` request header on every subsequent call.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_URL } from '../config/api';
+import CookieManager from '@react-native-cookies/cookies';
+import { BASE_URL, resolveApiBaseUrl } from '../config/api';
 
-export { BASE_URL };
+export { BASE_URL, resolveApiBaseUrl };
 
 const COOKIE_KEY = 'hc.sessionCookie';
 const USER_KEY = 'hc.user';
-const REQUEST_TIMEOUT_MS = 12_000;
+const REQUEST_TIMEOUT_MS = 20_000;
 
 let cachedCookie: string | null = null;
 
@@ -23,14 +24,49 @@ export async function loadSession(): Promise<string | null> {
   return cachedCookie;
 }
 
+function tokenFromSession(cookie: string | null): string | null {
+  if (!cookie) return null;
+  const match = cookie.match(/session=([^;]+)/i);
+  return match ? match[1] : cookie;
+}
+
+async function syncNativeCookie(cookie: string | null) {
+  const base = resolveApiBaseUrl();
+  try {
+    if (!cookie) {
+      await CookieManager.clearAll(false);
+      return;
+    }
+    const token = tokenFromSession(cookie);
+    if (!token) return;
+    const url = new URL(base);
+    await CookieManager.set(
+      base,
+      {
+        name: 'session',
+        value: token,
+        path: '/',
+        domain: url.hostname,
+        secure: url.protocol === 'https:',
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      false,
+    );
+  } catch {
+    /* iOS still has Authorization + Cookie headers as fallback */
+  }
+}
+
 export async function saveSession(cookie: string): Promise<void> {
   cachedCookie = cookie;
   await AsyncStorage.setItem(COOKIE_KEY, cookie);
+  await syncNativeCookie(cookie);
 }
 
 export async function clearSession(): Promise<void> {
   cachedCookie = null;
   await AsyncStorage.multiRemove([COOKIE_KEY, USER_KEY]);
+  await syncNativeCookie(null);
 }
 
 export async function saveUser(user: unknown): Promise<void> {
@@ -64,18 +100,57 @@ function isNetworkError(error: unknown): boolean {
   );
 }
 
-async function request(
+function request(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    return await fetch(`${BASE_URL}${path}`, {
-      ...init,
-      signal: controller.signal,
+  const url = `${resolveApiBaseUrl()}${path}`;
+  const method = (init.method || 'GET').toUpperCase();
+  const headers = (init.headers || {}) as Record<string, string>;
+  const body =
+    typeof init.body === 'string' || init.body == null
+      ? (init.body as string | null)
+      : String(init.body);
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url, true);
+    xhr.withCredentials = true;
+    xhr.timeout = REQUEST_TIMEOUT_MS;
+    Object.entries(headers).forEach(([key, value]) => {
+      try {
+        xhr.setRequestHeader(key, value);
+      } catch {
+        /* iOS may block Cookie; Authorization still goes through */
+      }
     });
-  } catch (error) {
+    xhr.onload = () => {
+      const raw = xhr.getAllResponseHeaders();
+      const mapped = new Headers();
+      raw
+        .trim()
+        .split(/[\r\n]+/)
+        .forEach(line => {
+          const idx = line.indexOf(':');
+          if (idx > 0) {
+            mapped.append(line.slice(0, idx).trim(), line.slice(idx + 1).trim());
+          }
+        });
+      resolve(
+        new Response(xhr.responseText, {
+          status: xhr.status,
+          headers: mapped,
+        }),
+      );
+    };
+    xhr.onerror = () => reject(new TypeError('Network request failed'));
+    xhr.ontimeout = () => {
+      const err = new Error('Aborted');
+      err.name = 'AbortError';
+      reject(err);
+    };
+    xhr.send(body);
+  }).catch(error => {
     if (
       (error instanceof Error && error.name === 'AbortError') ||
       isNetworkError(error)
@@ -86,9 +161,7 @@ async function request(
       } as ApiError;
     }
     throw error;
-  } finally {
-    clearTimeout(timer);
-  }
+  });
 }
 
 export async function apiFetch<T = any>(
@@ -103,7 +176,11 @@ export async function apiFetch<T = any>(
   if (init.body && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
-  if (cookie) headers.Cookie = cookie;
+  if (cookie) {
+    headers.Cookie = cookie;
+    const token = tokenFromSession(cookie);
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
 
   const res = await request(path, { ...init, headers });
 

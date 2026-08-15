@@ -21,6 +21,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 import BrandTitle from '../components/BrandTitle';
 import { brandLogo } from '../assets/brand';
 import type { RootStackParamList } from '../navigation/RootNavigator';
+import { resolveApiBaseUrl } from '../config/api';
 import { colors, layout, radius, shadows } from '../theme';
 
 type LoginNav = NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -168,6 +169,7 @@ export default function LoginScreen() {
             {error ? (
               <Text style={styles.errBanner} testID="login-error">
                 {error}
+                {__DEV__ ? `\n${resolveApiBaseUrl()}` : ''}
               </Text>
             ) : null}
             <Button

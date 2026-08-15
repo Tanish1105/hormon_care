@@ -23,7 +23,6 @@ export function usePatientDashboard() {
       setGate(g);
     } catch (e: any) {
       setError(e?.message || t('dataLoadFailed'));
-      if (e?.status === 401) signOut();
     }
   }, [signOut, t]);
 

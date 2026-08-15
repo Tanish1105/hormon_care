@@ -44,8 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           try {
             await api.getDashboard();
           } catch {
-            await api.clearSession();
-            if (!cancelled) setUser(null);
+            /* Keep the saved session; home can retry. */
           }
           return;
         }
