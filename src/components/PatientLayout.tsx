@@ -135,7 +135,7 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <ContentProtection>
-      <div className="jeevanm-atmosphere relative min-h-screen overflow-x-hidden text-[var(--foreground)]">
+      <div className="jeevanm-atmosphere relative min-h-dvh text-[var(--foreground)]">
         <header className="sticky top-0 z-10 border-b border-[var(--border)]/80 bg-[rgba(242,246,243,0.88)] backdrop-blur-md">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3.5">
             <Link href="/patient" className="flex items-center gap-2.5">

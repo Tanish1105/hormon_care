@@ -83,6 +83,12 @@ export function PatientLoginForm() {
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col lg:flex-row">
         <section className="animate-jeevanm-rise flex flex-1 flex-col items-center justify-center px-6 pb-4 pt-14 text-center lg:items-start lg:px-14 lg:pb-16 lg:pt-16 lg:text-left">
+          <Link
+            href="/"
+            className="mb-6 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--primary)] lg:mb-8"
+          >
+            ← JEEVANM home
+          </Link>
           <div className="animate-jeevanm-logo inline-flex">
             <BrandLogo size="xl" priority />
           </div>

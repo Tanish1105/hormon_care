@@ -80,8 +80,8 @@ export default function PlansPage() {
     <AdminLayout>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Plans</h1>
-          <p className="text-sm text-slate-500 sm:text-base">Manage week-wise care plans</p>
+          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Arogya Sanskruti</h1>
+          <p className="text-sm text-slate-500 sm:text-base">Manage week-wise Arogya Sanskruti plans</p>
         </div>
         <Button className="w-full sm:w-auto" onClick={() => setShowForm(!showForm)}>
           <Plus className="mr-1 h-4 w-4" /> New Plan

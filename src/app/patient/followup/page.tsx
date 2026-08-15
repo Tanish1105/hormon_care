@@ -35,7 +35,7 @@ function FollowupPageContent() {
   if (!status.hasCarePlan) {
     return (
       <Card className="text-center">
-        <p className="text-slate-500">Weekly followup is only available with an active Care Plan.</p>
+        <p className="text-slate-500">Weekly followup is only available with an active Arogya Sanskruti plan.</p>
       </Card>
     );
   }

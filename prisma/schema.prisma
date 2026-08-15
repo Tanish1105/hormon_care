@@ -386,3 +386,18 @@ model MediaFile {
   data      Bytes    @db.LongBlob
   createdAt DateTime @default(now())
 }
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  interest  String?
+  message   String   @db.Text
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}

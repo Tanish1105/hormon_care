@@ -13,8 +13,12 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "JEEVANM - Gynecology Patient Care",
-  description: "JEEVANM gynecology doctor patient care management system",
+  title: {
+    default: "JEEVANM — Transforming Habits Into Health",
+    template: "%s | JEEVANM",
+  },
+  description:
+    "JEEVANM — transforming habits into health for everyone. Personal plans, Garbh Sanskruti, parenting guidance, and lifestyle support.",
   icons: {
     icon: [
       { url: "/favicon.ico?v=3", sizes: "32x32" },
@@ -38,8 +42,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="gu" className={`${outfit.variable} ${fraunces.variable} h-full antialiased`}>
-      <body className="min-h-full font-sans">{children}</body>
+    <html lang="en" className={`${outfit.variable} ${fraunces.variable} antialiased`}>
+      <body className="min-h-dvh font-sans">{children}</body>
     </html>
   );
 }

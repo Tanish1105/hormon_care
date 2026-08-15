@@ -436,7 +436,7 @@ export default function PatientsPage() {
             </div>
             <Textarea label="Requirements / Notes" value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} rows={3} placeholder="Patient's special requirements..." />
             <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 md:grid-cols-2">
-              <Select label="Care Plan" value={form.planId} onChange={(e) => setForm({ ...form, planId: e.target.value })}>
+              <Select label="Arogya Sanskruti" value={form.planId} onChange={(e) => setForm({ ...form, planId: e.target.value })}>
                 <option value="">-- Select Plan --</option>
                 {plans.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
               </Select>
@@ -504,7 +504,7 @@ export default function PatientsPage() {
       <div className="mt-6 space-y-4">
         {patients.map((patient) => {
           const programMeta: { program: PatientProgram; label: string; emptyLabel: string }[] = [
-            { program: "care", label: "Care Plan", emptyLabel: "-- No Plan --" },
+            { program: "care", label: "Arogya Sanskruti", emptyLabel: "-- No Plan --" },
             { program: "garbha", label: "Garbh Sanskruti Plan", emptyLabel: "-- No Garbh Sanskruti Plan --" },
             { program: "child", label: "Parenting Sanskruti Plan", emptyLabel: "-- No Parenting Sanskruti --" },
           ];

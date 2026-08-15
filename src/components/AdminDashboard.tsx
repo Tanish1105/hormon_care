@@ -4,10 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Card, Badge } from "@/components/ui";
-import { Users, ClipboardList, Baby, GraduationCap } from "lucide-react";
+import { Users, ClipboardList, Baby, GraduationCap, MessageSquare } from "lucide-react";
 
 export function AdminDashboard() {
-  const [stats, setStats] = useState({ patients: 0, plans: 0, garbha: 0, childGuidance: 0 });
+  const [stats, setStats] = useState({
+    patients: 0,
+    plans: 0,
+    garbha: 0,
+    childGuidance: 0,
+    inquiries: 0,
+  });
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,12 +27,14 @@ export function AdminDashboard() {
       fetch("/api/admin/plans").then((r) => r.json()),
       fetch("/api/admin/garbha-plans").then((r) => r.json()),
       fetch("/api/admin/child-guidance-plans").then((r) => r.json()),
-    ]).then(([patients, plans, garbha, childGuidance]) => {
+      fetch("/api/admin/inquiries").then((r) => r.json()),
+    ]).then(([patients, plans, garbha, childGuidance, inquiries]) => {
       setStats({
         patients: patients.length || 0,
         plans: plans.length || 0,
         garbha: garbha.length || 0,
         childGuidance: childGuidance.length || 0,
+        inquiries: inquiries.aggregate?.newCount || 0,
       });
     });
   }, []);
@@ -63,6 +71,7 @@ export function AdminDashboard() {
     { label: "Active Plans", value: stats.plans, icon: ClipboardList, href: "/admin/plans", color: "gold" },
     { label: "Garbh Sanskruti", value: stats.garbha, icon: Baby, href: "/admin/garbha-sanskar", color: "green" },
     { label: "Parenting Sanskruti", value: stats.childGuidance, icon: GraduationCap, href: "/admin/child-guidance", color: "slate" },
+    { label: "New Inquiries", value: stats.inquiries, icon: MessageSquare, href: "/admin/inquiries", color: "gold" },
   ];
 
   return (

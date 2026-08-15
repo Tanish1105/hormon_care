@@ -29,7 +29,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname === "/patient/login") {
-    return NextResponse.redirect(new URL("/", request.url));
+    if (user?.role === "PATIENT") {
+      return NextResponse.redirect(new URL("/patient", request.url));
+    }
+    return NextResponse.next();
   }
 
   if (pathname === "/admin/login") {
@@ -44,7 +47,7 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/patient") && pathname !== "/patient/login") {
     if (!user || user.role !== "PATIENT") {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/patient/login", request.url));
     }
   }
 

@@ -18,7 +18,7 @@ function LegalShell({
             <BrandMark size="sm" />
           </Link>
           <Link href="/" className="text-sm font-medium text-[var(--primary)] hover:underline">
-            Back to Login
+            Home
           </Link>
         </div>
       </header>

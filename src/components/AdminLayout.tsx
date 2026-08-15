@@ -11,16 +11,18 @@ import {
   GraduationCap,
   BarChart3,
   FileText,
+  MessageSquare,
 } from "lucide-react";
 import { BrandMark } from "@/components/BrandLogo";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", shortLabel: "Home", icon: LayoutDashboard },
-  { href: "/admin/plans", label: "Plans", shortLabel: "Plans", icon: ClipboardList },
+  { href: "/admin/plans", label: "Arogya Sanskruti", shortLabel: "Arogya", icon: ClipboardList },
   { href: "/admin/patients", label: "Patients", shortLabel: "Patients", icon: Users },
   { href: "/admin/lifestyle-assessments", label: "Lifestyle", shortLabel: "Lifestyle", icon: FileText },
   { href: "/admin/followups", label: "Followups", shortLabel: "Followup", icon: BarChart3 },
+  { href: "/admin/inquiries", label: "Inquiries", shortLabel: "Inquiry", icon: MessageSquare },
   { href: "/admin/garbha-sanskar", label: "Garbh Sanskruti", shortLabel: "Garbh", icon: Baby },
   { href: "/admin/child-guidance", label: "Parenting Sanskruti", shortLabel: "Parenting", icon: GraduationCap },
 ];
@@ -87,10 +89,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </button>
       </header>
 
-      <main className="flex-1 overflow-auto p-4 pb-24 md:p-8 md:pb-8">{children}</main>
+      <main className="flex-1 overflow-auto p-4 pb-36 md:p-8 md:pb-8">{children}</main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-[var(--border)] bg-white/95 px-1 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-4 gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(pathname, item.href);

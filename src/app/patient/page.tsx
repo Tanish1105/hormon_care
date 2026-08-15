@@ -302,7 +302,7 @@ export default function PatientDashboard() {
           ) : (
             <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--muted)]">
               {plan
-                ? "તમારો care plan નીચે જુઓ."
+                ? "તમારી આરોગ્ય સંસ્કૃતિ નીચે જુઓ."
                 : "હજુ plan assign નથી. Doctor સાથે contact કરો."}
             </p>
           )}
