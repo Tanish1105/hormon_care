@@ -278,18 +278,19 @@ export function PublicHome({ patientLoggedIn }: { patientLoggedIn: boolean }) {
         </section>
 
         <section id="inquiry" className="relative mx-auto max-w-6xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-3xl text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--secondary)]">
               {copy.inquiryKicker}
             </p>
             <h2 className="font-display mt-2 text-3xl font-semibold text-[var(--primary)] sm:text-4xl">
               {copy.inquiryTitle}
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--muted)] sm:text-base">
+            <div className="login-brand-rule mx-auto mt-4 h-px w-40" aria-hidden />
+            <p className="mt-4 text-sm leading-relaxed text-[var(--muted)] sm:text-base">
               {copy.inquiryBody}
             </p>
           </div>
-          <div className="mx-auto mt-8 max-w-2xl">
+          <div className="mx-auto mt-10 max-w-3xl">
             <InquiryForm
               copy={{
                 name: copy.inquiryName,
