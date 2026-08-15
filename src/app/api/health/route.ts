@@ -5,6 +5,7 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     service: "jeevanm",
+    mobileAuth: "header",
     time: new Date().toISOString(),
   });
 }

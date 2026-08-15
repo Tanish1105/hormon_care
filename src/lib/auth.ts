@@ -46,22 +46,30 @@ export async function verifyToken(token: string): Promise<SessionUser | null> {
   }
 }
 
+function tokenFromAuthorization(value: string | null): string | null {
+  if (!value) return null;
+  return value.toLowerCase().startsWith("bearer ")
+    ? value.slice(7).trim()
+    : null;
+}
+
 export async function getSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
-  let token = cookieStore.get("session")?.value ?? null;
+  const headerStore = await headers();
+  const candidates = [
+    cookieStore.get("session")?.value,
+    tokenFromAuthorization(headerStore.get("authorization")),
+    headerStore.get("x-session-token"),
+  ];
 
-  // React Native iOS cannot set the Cookie header on fetch, so the
-  // mobile app sends the JWT as Authorization: Bearer <token>.
-  if (!token) {
-    const headerStore = await headers();
-    const auth = headerStore.get("authorization");
-    if (auth?.toLowerCase().startsWith("bearer ")) {
-      token = auth.slice(7).trim();
-    }
+  for (const raw of candidates) {
+    const token = raw?.trim();
+    if (!token) continue;
+    const user = await verifyToken(token);
+    if (user) return user;
   }
 
-  if (!token) return null;
-  return verifyToken(token);
+  return null;
 }
 
 export function attachSessionCookie(response: NextResponse, token: string) {

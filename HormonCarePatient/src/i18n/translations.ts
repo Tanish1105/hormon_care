@@ -26,7 +26,7 @@ const en: Dict = {
   sessionSetupFailed:
     'Login could not start a session. Update the live server (redeploy) and try again.',
   networkError:
-    'Cannot reach the server. Check WiFi/internet and make sure the backend is running on your laptop (npm run dev in hormon_care folder).',
+    'Cannot reach the server. Check that the iPhone has internet (WiFi or mobile data).',
 
   // Tabs
   tabHome: 'Home',
@@ -249,7 +249,7 @@ const gu: Dict = {
   sessionSetupFailed:
     'સત્ર શરૂ થઈ શક્યું નથી. live server update/redeploy કરો અને ફરી try કરો.',
   networkError:
-    'સર્વર સુધી પહોંચ શકાઈ નથી. WiFi/ઇન્ટરનેટ તપાસો અને laptop પર hormon_care folder માં npm run dev ચાલે છે કે નહીં જુઓ.',
+    'સર્વર સુધી પહોંચ શકાઈ નથી. iPhone પર ઇન્ટરનેટ (WiFi અથવા મોબાઇલ ડેટા) ચાલુ છે કે નહીં તપાસો.',
 
   tabHome: 'હોમ',
   tabPlan: 'પ્લાન',

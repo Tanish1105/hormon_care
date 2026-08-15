@@ -26,8 +26,14 @@ const server = http.createServer(async (req, res) => {
     }
 
     const auth = typeof headers.authorization === 'string' ? headers.authorization : '';
+    const headerToken =
+      typeof headers['x-session-token'] === 'string'
+        ? headers['x-session-token'].trim()
+        : '';
     if (auth.toLowerCase().startsWith('bearer ')) {
       headers.cookie = `session=${auth.slice(7).trim()}`;
+    } else if (headerToken) {
+      headers.cookie = `session=${headerToken}`;
     }
 
     const upstream = await fetch(`${TARGET}${req.url}`, {

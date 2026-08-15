@@ -6,6 +6,7 @@
  * cookies between app launches, so we manage the raw `Set-Cookie` header ourselves
  * and re-send it via the `Cookie` request header on every subsequent call.
  */
+import { NativeModules, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CookieManager from '@react-native-cookies/cookies';
 import { BASE_URL, resolveApiBaseUrl } from '../config/api';
@@ -100,6 +101,12 @@ function isNetworkError(error: unknown): boolean {
   );
 }
 
+type NativeHttpResult = {
+  status: number;
+  headers: Record<string, string>;
+  body: string;
+};
+
 function request(
   path: string,
   init: RequestInit = {},
@@ -111,6 +118,31 @@ function request(
     typeof init.body === 'string' || init.body == null
       ? (init.body as string | null)
       : String(init.body);
+
+  const native = NativeModules.JeevanmHttp as
+    | { request: (u: string, m: string, h: Record<string, string>, b: string) => Promise<NativeHttpResult> }
+    | undefined;
+
+  if (Platform.OS === 'ios' && native?.request) {
+    return native
+      .request(url, method, headers, body ?? '')
+      .then(result => {
+        const mapped = new Headers();
+        Object.entries(result.headers || {}).forEach(([key, value]) => {
+          mapped.append(key, value);
+        });
+        return new Response(result.body, {
+          status: result.status,
+          headers: mapped,
+        });
+      })
+      .catch(() => {
+        throw {
+          status: 0,
+          message: 'NETWORK_ERROR',
+        } as ApiError;
+      });
+  }
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -179,7 +211,10 @@ export async function apiFetch<T = any>(
   if (cookie) {
     headers.Cookie = cookie;
     const token = tokenFromSession(cookie);
-    if (token) headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+      headers['X-Session-Token'] = token;
+    }
   }
 
   const res = await request(path, { ...init, headers });
@@ -425,7 +460,7 @@ export function resolveMediaUrl(url?: string | null): string | null {
     path = `/api/media/${uploadMatch[1]}`;
   }
 
-  const absolute = `${BASE_URL}${path}`;
+  const absolute = `${resolveApiBaseUrl()}${path}`;
   try {
     return encodeURI(decodeURI(absolute));
   } catch {
@@ -438,14 +473,14 @@ export function youtubeEmbedPageUrl(
   contentId: string,
   source: 'plan' | 'garbha' | 'child-guidance' = 'plan',
 ): string {
-  return `${BASE_URL}/api/patient/youtube-embed/${contentId}?source=${source}`;
+  return `${resolveApiBaseUrl()}/api/patient/youtube-embed/${contentId}?source=${source}`;
 }
 
 export function youtubeThumbUrl(
   contentId: string,
   source: 'plan' | 'garbha' | 'child-guidance' = 'plan',
 ): string {
-  return `${BASE_URL}/api/patient/youtube-thumb/${contentId}?source=${source}`;
+  return `${resolveApiBaseUrl()}/api/patient/youtube-thumb/${contentId}?source=${source}`;
 }
 
 /** Count contents for week-wise or day-wise plans. */

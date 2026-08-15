@@ -1,6 +1,6 @@
 const PRODUCTION_API = 'https://hormoncare.mediiqr.com';
 
-/** Always the live site on iPhone — LAN/localhost URLs fail off the laptop WiFi. */
+/** Always the live site. Laptop/Metro proxy URLs fail on a physical iPhone. */
 export function resolveApiBaseUrl(): string {
   return PRODUCTION_API;
 }
