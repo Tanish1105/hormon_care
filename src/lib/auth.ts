@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
@@ -48,7 +48,18 @@ export async function verifyToken(token: string): Promise<SessionUser | null> {
 
 export async function getSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
+  let token = cookieStore.get("session")?.value ?? null;
+
+  // React Native iOS cannot set the Cookie header on fetch, so the
+  // mobile app sends the JWT as Authorization: Bearer <token>.
+  if (!token) {
+    const headerStore = await headers();
+    const auth = headerStore.get("authorization");
+    if (auth?.toLowerCase().startsWith("bearer ")) {
+      token = auth.slice(7).trim();
+    }
+  }
+
   if (!token) return null;
   return verifyToken(token);
 }
