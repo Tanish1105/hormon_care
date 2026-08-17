@@ -134,7 +134,8 @@ export default function AdminSupplementsPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Supplements</h1>
           <p className="text-sm text-slate-500 sm:text-base">
-            Patient પસંદ કરીને personal list assign કરો. દરેક નવી assign પર title બદલાય, જૂની list historyમાં રહે.
+            Patient par click kari ne list 1, 2, 3... assign karo. Catalog ma common names
+            rakhso to tap kari add thai jase.
           </p>
         </div>
         <Button className="w-full sm:w-auto" onClick={startCreate}>
@@ -216,13 +217,18 @@ export default function AdminSupplementsPage() {
             </Card>
           )}
 
-          {catalog.map((item) => (
+          {catalog.map((item, index) => (
             <Card key={item.id} className="flex items-start justify-between gap-3 !py-3">
-              <div className="min-w-0">
-                <h3 className="font-semibold text-slate-900">{item.name}</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  {item.defaultTime || "Time not set"} · {item.defaultQuantity || "Quantity not set"}
-                </p>
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--primary-light)] text-xs font-bold text-[var(--primary)]">
+                  {index + 1}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-slate-900">{item.name}</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {item.defaultTime || "Time not set"} · {item.defaultQuantity || "Quantity not set"}
+                  </p>
+                </div>
               </div>
               <div className="flex shrink-0 gap-1">
                 <button
@@ -248,7 +254,7 @@ export default function AdminSupplementsPage() {
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Patients</h2>
-          <p className="text-sm text-slate-500">Click a patient to assign or change their list.</p>
+          <p className="text-sm text-slate-500">Patient par click — list 1, 2, 3 assign karo.</p>
         </div>
         <div className="w-full sm:max-w-xs">
           <Input

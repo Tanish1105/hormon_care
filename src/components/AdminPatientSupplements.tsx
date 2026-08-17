@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Input, Select, Textarea } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 import { SUPPLEMENT_TIME_OPTIONS } from "@/lib/supplements";
-import { Pill, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Pill, Plus, Trash2 } from "lucide-react";
 
 type CatalogItem = {
   id: string;
@@ -40,9 +40,16 @@ type DraftItem = {
   notes: string;
 };
 
+const fieldClass =
+  "w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]";
+
+function newKey() {
+  return `row-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
 function blankItem(): DraftItem {
   return {
-    key: `new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    key: newKey(),
     supplementId: "",
     name: "",
     time: "Morning",
@@ -63,6 +70,16 @@ function toDraft(items: PlanItem[]): DraftItem[] {
   }));
 }
 
+function timeOptions(current: string) {
+  if (
+    current &&
+    !(SUPPLEMENT_TIME_OPTIONS as readonly string[]).includes(current)
+  ) {
+    return [current, ...SUPPLEMENT_TIME_OPTIONS];
+  }
+  return [...SUPPLEMENT_TIME_OPTIONS];
+}
+
 export function AdminPatientSupplements({
   patientId,
   patientName,
@@ -74,7 +91,7 @@ export function AdminPatientSupplements({
 }) {
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [title, setTitle] = useState("For 2 months");
+  const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<DraftItem[]>([blankItem()]);
   const [loading, setLoading] = useState(true);
@@ -89,6 +106,7 @@ export function AdminPatientSupplements({
     () => plans.filter((plan) => !plan.isActive),
     [plans]
   );
+  const filledCount = items.filter((item) => item.name.trim()).length;
 
   async function load() {
     setLoading(true);
@@ -104,8 +122,8 @@ export function AdminPatientSupplements({
     const current = nextPlans.find((plan) => plan.isActive) ?? null;
     setCatalog(data.catalog || []);
     setPlans(nextPlans);
-    setTitle("For 2 months");
-    setNotes("");
+    setTitle(current?.title || "");
+    setNotes(current?.notes || "");
     setItems(toDraft(current?.items || []));
     setLoading(false);
   }
@@ -115,25 +133,36 @@ export function AdminPatientSupplements({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId]);
 
-  function applyCatalog(index: number, supplementId: string) {
-    const picked = catalog.find((item) => item.id === supplementId);
+  function updateItem(index: number, patch: Partial<DraftItem>) {
+    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+  }
+
+  function addRow(partial?: Partial<DraftItem>) {
+    setItems((prev) => {
+      const next = blankItem();
+      const filled = { ...next, ...partial, key: newKey() };
+      const emptyIndex = prev.findIndex((item) => !item.name.trim());
+      if (emptyIndex >= 0 && partial?.name) {
+        return prev.map((item, i) => (i === emptyIndex ? { ...item, ...filled } : item));
+      }
+      return [...prev, filled];
+    });
+  }
+
+  function removeRow(index: number) {
     setItems((prev) =>
-      prev.map((item, i) =>
-        i === index
-          ? {
-              ...item,
-              supplementId,
-              name: picked?.name || item.name,
-              time: picked?.defaultTime || item.time,
-              quantity: picked?.defaultQuantity || item.quantity,
-            }
-          : item
-      )
+      prev.length === 1 ? [blankItem()] : prev.filter((_, i) => i !== index)
     );
   }
 
-  function updateItem(index: number, patch: Partial<DraftItem>) {
-    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+  function moveRow(index: number, dir: -1 | 1) {
+    setItems((prev) => {
+      const next = [...prev];
+      const target = index + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
   }
 
   function payloadItems() {
@@ -142,33 +171,38 @@ export function AdminPatientSupplements({
       .map((item) => ({
         supplementId: item.supplementId || null,
         name: item.name.trim(),
-        time: item.time.trim(),
-        quantity: item.quantity.trim(),
+        time: item.time.trim() || "Morning",
+        quantity: item.quantity.trim() || "1",
         notes: item.notes.trim() || null,
       }));
   }
 
-  async function assignNewPeriod() {
+  async function save(mode: "update" | "new") {
     const nextItems = payloadItems();
-    if (!title.trim()) {
-      setError("Title is required, e.g. For 2 months");
-      return;
-    }
+    const nextTitle = title.trim() || "Supplement list";
     if (!nextItems.length) {
-      setError("Add at least one supplement");
+      setError("List ma at least 1 supplement add karo");
       return;
     }
     setSaving(true);
     setError("");
-    const res = await fetch(`/api/admin/patients/${patientId}/supplements`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, notes, items: nextItems }),
-    });
+
+    const body = { title: nextTitle, notes, items: nextItems };
+    const updating = mode === "update" && activePlan;
+    const res = await fetch(
+      updating
+        ? `/api/admin/patients/${patientId}/supplements/${activePlan.id}`
+        : `/api/admin/patients/${patientId}/supplements`,
+      {
+        method: updating ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
     const data = await res.json();
     setSaving(false);
     if (!res.ok) {
-      setError(data.error || "Could not assign supplements");
+      setError(data.error || "Could not save supplements");
       return;
     }
     await load();
@@ -190,7 +224,7 @@ export function AdminPatientSupplements({
   }
 
   async function removePlan(planId: string) {
-    if (!confirm("Delete this supplement list?")) return;
+    if (!confirm("Delete this old list?")) return;
     await fetch(`/api/admin/patients/${patientId}/supplements/${planId}`, {
       method: "DELETE",
     });
@@ -203,178 +237,271 @@ export function AdminPatientSupplements({
   }
 
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-      <div className="flex items-center gap-2">
-        <Pill className="h-4 w-4 text-[var(--primary)]" />
-        <h4 className="text-sm font-semibold text-slate-800">
-          Assign supplements · {patientName}
-        </h4>
-      </div>
-      <p className="mt-1 text-xs text-slate-500">
-        દરેક વખત નવી list assign કરો ત્યારે નવું title આપો (જેમ કે For 2 months). જૂની list historyમાં રહેશે, patientને નવી current list દેખાશે.
-      </p>
-
-      {activePlan && (
-        <div className="mt-3 rounded-lg border border-[var(--primary)]/20 bg-white px-3 py-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--primary)]">
-            Current list
-          </p>
-          <p className="text-sm font-semibold text-slate-900">{activePlan.title}</p>
-          <p className="text-xs text-slate-500">
-            {activePlan.items.length} supplements ·{" "}
-            {new Date(activePlan.createdAt).toLocaleDateString()}
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-light)] text-[var(--primary)]">
+          <Pill className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <h4 className="text-base font-semibold text-slate-900">
+            Supplement list · {patientName}
+          </h4>
+          <p className="mt-0.5 text-sm text-slate-500">
+            Patient app ma aa list <span className="font-semibold">1, 2, 3</span> number
+            sathe dekhase. Catalog mathi tap kari add karo, ke name type karo.
           </p>
         </div>
-      )}
+      </div>
 
       {error && (
-        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
+      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_12rem]">
         <Input
-          label="New period title"
+          label="List title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="For 2 months"
+          placeholder="e.g. For 2 months"
         />
-        <Textarea
-          label="Doctor notes (optional)"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={1}
-        />
+        <div className="flex items-end">
+          <p className="w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 text-sm text-slate-600">
+            {filledCount} supplement{filledCount === 1 ? "" : "s"} in list
+          </p>
+        </div>
       </div>
 
-      <div className="mt-3 space-y-3">
-        {items.map((item, index) => (
-          <div key={item.key} className="rounded-lg border border-slate-200 bg-white p-3">
-            <div className="grid gap-3 md:grid-cols-2">
-              <Select
-                label="From catalog"
-                value={item.supplementId}
-                onChange={(e) => applyCatalog(index, e.target.value)}
-              >
-                <option value="">Custom / pick supplement</option>
-                {catalog.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </Select>
-              <Input
-                label="Name"
-                value={item.name}
-                onChange={(e) => updateItem(index, { name: e.target.value, supplementId: "" })}
-                placeholder="Supplement name"
-              />
-              <Select
-                label="Time"
-                value={
-                  SUPPLEMENT_TIME_OPTIONS.includes(
-                    item.time as (typeof SUPPLEMENT_TIME_OPTIONS)[number]
-                  )
-                    ? item.time
-                    : "__custom"
-                }
-                onChange={(e) =>
-                  updateItem(index, {
-                    time: e.target.value === "__custom" ? "" : e.target.value,
-                  })
-                }
-              >
-                {SUPPLEMENT_TIME_OPTIONS.map((time) => (
-                  <option key={time} value={time}>
-                    {time}
-                  </option>
-                ))}
-                <option value="__custom">Custom time</option>
-              </Select>
-              <Input
-                label="Quantity"
-                value={item.quantity}
-                onChange={(e) => updateItem(index, { quantity: e.target.value })}
-                placeholder="1 tablet"
-              />
-            </div>
-            {!SUPPLEMENT_TIME_OPTIONS.includes(
-              item.time as (typeof SUPPLEMENT_TIME_OPTIONS)[number]
-            ) && (
-              <div className="mt-3">
-                <Input
-                  label="Custom time"
-                  value={item.time}
-                  onChange={(e) => updateItem(index, { time: e.target.value })}
-                  placeholder="e.g. 9:00 PM"
-                />
-              </div>
-            )}
-            <div className="mt-3 flex items-end gap-2">
-              <div className="flex-1">
-                <Input
-                  label="Item notes (optional)"
-                  value={item.notes}
-                  onChange={(e) => updateItem(index, { notes: e.target.value })}
-                />
-              </div>
+      {catalog.length > 0 && (
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Tap to add
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {catalog.map((option) => (
               <button
+                key={option.id}
                 type="button"
                 onClick={() =>
-                  setItems((prev) =>
-                    prev.length === 1 ? [blankItem()] : prev.filter((_, i) => i !== index)
-                  )
+                  addRow({
+                    supplementId: option.id,
+                    name: option.name,
+                    time: option.defaultTime || "Morning",
+                    quantity: option.defaultQuantity || "1 tablet",
+                    notes: option.description || "",
+                  })
                 }
-                className="mb-0.5 rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-[var(--primary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
               >
-                <Trash2 className="h-4 w-4" />
+                + {option.name}
               </button>
-            </div>
+            ))}
           </div>
-        ))}
+        </div>
+      )}
+
+      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+        <div className="hidden grid-cols-[2.5rem_minmax(0,1.4fr)_9rem_8rem_minmax(0,1fr)_5.5rem] gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 md:grid">
+          <span>#</span>
+          <span>Supplement</span>
+          <span>Time</span>
+          <span>Quantity</span>
+          <span>Notes</span>
+          <span className="text-right">Move</span>
+        </div>
+
+        <div className="divide-y divide-slate-100">
+          {items.map((item, index) => (
+            <div
+              key={item.key}
+              className="grid gap-3 px-3 py-3 md:grid-cols-[2.5rem_minmax(0,1.4fr)_9rem_8rem_minmax(0,1fr)_5.5rem] md:items-center md:gap-2"
+            >
+              <div className="flex items-center justify-between md:block">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary-light)] text-sm font-bold text-[var(--primary)]">
+                  {index + 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeRow(index)}
+                  className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 md:hidden"
+                  aria-label={`Remove ${index + 1}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+
+              <label className="block md:contents">
+                <span className="mb-1 block text-xs font-medium text-slate-500 md:hidden">
+                  Supplement
+                </span>
+                <input
+                  className={fieldClass}
+                  value={item.name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    const picked = catalog.find((option) => option.name === name);
+                    if (picked) {
+                      updateItem(index, {
+                        name,
+                        supplementId: picked.id,
+                        time: picked.defaultTime || item.time,
+                        quantity: picked.defaultQuantity || item.quantity,
+                      });
+                    } else {
+                      updateItem(index, { name, supplementId: "" });
+                    }
+                  }}
+                  placeholder={`Supplement ${index + 1} name`}
+                  list={`catalog-${patientId}`}
+                />
+              </label>
+
+              <label className="block md:contents">
+                <span className="mb-1 block text-xs font-medium text-slate-500 md:hidden">
+                  Time
+                </span>
+                <select
+                  className={fieldClass}
+                  value={item.time}
+                  onChange={(e) => updateItem(index, { time: e.target.value })}
+                >
+                  {timeOptions(item.time).map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block md:contents">
+                <span className="mb-1 block text-xs font-medium text-slate-500 md:hidden">
+                  Quantity
+                </span>
+                <input
+                  className={fieldClass}
+                  value={item.quantity}
+                  onChange={(e) => updateItem(index, { quantity: e.target.value })}
+                  placeholder="1 tablet"
+                />
+              </label>
+
+              <label className="block md:contents">
+                <span className="mb-1 block text-xs font-medium text-slate-500 md:hidden">
+                  Notes
+                </span>
+                <input
+                  className={fieldClass}
+                  value={item.notes}
+                  onChange={(e) => updateItem(index, { notes: e.target.value })}
+                  placeholder="Optional"
+                />
+              </label>
+
+              <div className="hidden justify-end gap-1 md:flex">
+                <button
+                  type="button"
+                  onClick={() => moveRow(index, -1)}
+                  disabled={index === 0}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30"
+                  aria-label="Move up"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveRow(index, 1)}
+                  disabled={index === items.length - 1}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30"
+                  aria-label="Move down"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeRow(index)}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                  aria-label="Remove"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <datalist id={`catalog-${patientId}`}>
+        {catalog.map((option) => (
+          <option key={option.id} value={option.name} />
+        ))}
+      </datalist>
 
       <button
         type="button"
-        onClick={() => setItems((prev) => [...prev, blankItem()])}
-        className="mt-3 flex items-center gap-1 text-sm font-medium text-[var(--primary)] hover:underline"
+        onClick={() => addRow()}
+        className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[var(--primary)] hover:underline"
       >
-        <Plus className="h-4 w-4" /> Add supplement
+        <Plus className="h-4 w-4" /> Add {items.length + 1}
       </button>
 
-      <div className="mt-3">
-        <Button onClick={assignNewPeriod} disabled={saving}>
+      <div className="mt-4">
+        <Input
+          label="Doctor notes for this list (optional)"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="e.g. After food, 2 months"
+        />
+      </div>
+
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Button onClick={() => save(activePlan ? "update" : "new")} disabled={saving}>
           {saving
             ? "Saving..."
             : activePlan
-              ? "Assign new list"
-              : "Assign to patient"}
+              ? "Save list"
+              : "Assign list to patient"}
         </Button>
+        {activePlan ? (
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={saving}
+            onClick={() => save("new")}
+          >
+            Save as new list
+          </Button>
+        ) : null}
       </div>
+      <p className="mt-2 text-xs text-slate-500">
+        {activePlan
+          ? "Save list = same list update. Save as new list = juni list history ma rahe, patient ne navi current list dekhase."
+          : "Assign thata patient app ma 1, 2, 3 list immediately dekhase."}
+      </p>
 
       {history.length > 0 && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-5 space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Previous lists
+            Old lists
           </p>
           {history.map((plan) => (
             <div
               key={plan.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
             >
               <div>
                 <p className="text-sm font-medium text-slate-800">{plan.title}</p>
                 <p className="text-xs text-slate-500">
-                  {plan.items.length} supplements ·{" "}
-                  {new Date(plan.createdAt).toLocaleDateString()}
+                  {plan.items.map((item) => item.name).join(", ") ||
+                    `${plan.items.length} supplements`}{" "}
+                  · {new Date(plan.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => reactivate(plan.id)}
-                  className="text-xs font-medium text-[var(--primary)] hover:underline"
+                  className="text-xs font-semibold text-[var(--primary)] hover:underline"
                 >
                   Make current
                 </button>

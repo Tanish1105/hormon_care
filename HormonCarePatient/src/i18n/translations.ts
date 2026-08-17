@@ -227,17 +227,28 @@ const en: Dict = {
   // Supplements
   tabSupplements: 'Supplements',
   supplementsTitle: 'Your supplements',
-  supplementsSubtitle: 'Take as advised by your doctor',
+  supplementsSubtitle: 'Take each one at the time and quantity your doctor advised',
   supplementsEmptyTitle: 'No supplements assigned',
   supplementsEmptyBody:
     'Your personal supplement list will appear here once your doctor assigns it.',
   supplementsCurrent: 'Current',
+  supplementsPrevious: 'Previous',
   supplementsPast: 'Previous lists',
   supplementTime: 'Time',
   supplementQuantity: 'Quantity',
   supplementNotes: 'Notes',
   supplementsCount: '{count} supplements',
-  viewSupplements: 'View supplements',
+  supplementsTimesADay: '{count} times a day',
+  viewSupplements: 'View list',
+  timeEmptyStomach: 'Empty stomach',
+  timeMorning: 'Morning',
+  timeAfterBreakfast: 'After breakfast',
+  timeAfternoon: 'Afternoon',
+  timeAfterLunch: 'After lunch',
+  timeEvening: 'Evening',
+  timeAfterDinner: 'After dinner',
+  timeNight: 'Night',
+  timeBeforeSleep: 'Before sleep',
 };
 
 const gu: Dict = {
@@ -457,17 +468,28 @@ const gu: Dict = {
 
   tabSupplements: 'સપ્લિમેન્ટ',
   supplementsTitle: 'તમારા સપ્લિમેન્ટ',
-  supplementsSubtitle: 'ડૉક્ટરની સલાહ મુજબ લો',
+  supplementsSubtitle: 'ડૉક્ટરે કહેલા સમય અને માત્રા મુજબ લો',
   supplementsEmptyTitle: 'સપ્લિમેન્ટ એસાઈન નથી',
   supplementsEmptyBody:
     'તમારા ડૉક્ટર personal list એસાઈન કરે ત્યારે અહીં દેખાશે.',
   supplementsCurrent: 'હાલની યાદી',
+  supplementsPrevious: 'પહેલાંની',
   supplementsPast: 'પહેલાની યાદીઓ',
   supplementTime: 'સમય',
   supplementQuantity: 'માત્રા',
   supplementNotes: 'નોંધ',
   supplementsCount: '{count} સપ્લિમેન્ટ',
-  viewSupplements: 'સપ્લિમેન્ટ જુઓ',
+  supplementsTimesADay: '{count} વખત',
+  viewSupplements: 'યાદી જુઓ',
+  timeEmptyStomach: 'ખાલી પેટ',
+  timeMorning: 'સવાર',
+  timeAfterBreakfast: 'નાસ્તા પછી',
+  timeAfternoon: 'બપોર',
+  timeAfterLunch: 'જમ્યા પછી',
+  timeEvening: 'સાંજ',
+  timeAfterDinner: 'રાત્રિભોજન પછી',
+  timeNight: 'રાત',
+  timeBeforeSleep: 'સૂતા પહેલાં',
 };
 
 const catalogs: Record<Locale, Dict> = { en, gu };

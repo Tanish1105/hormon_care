@@ -662,15 +662,18 @@ function supplementsFromDashboard(
 }
 
 export async function getSupplements(): Promise<SupplementsResponse> {
-  try {
-    return await apiFetch<SupplementsResponse>('/api/patient/supplements');
-  } catch (error) {
-    const status = (error as ApiError)?.status;
-    if (status === 404) {
-      return supplementsFromDashboard(await getDashboard());
-    }
-    throw error;
+  const [dedicated, dashboard] = await Promise.allSettled([
+    apiFetch<SupplementsResponse>('/api/patient/supplements'),
+    getDashboard(),
+  ]);
+
+  if (dedicated.status === 'fulfilled') {
+    return dedicated.value;
   }
+  if (dashboard.status === 'fulfilled') {
+    return supplementsFromDashboard(dashboard.value);
+  }
+  throw dedicated.reason;
 }
 
 export function getActiveSupplementPlan(

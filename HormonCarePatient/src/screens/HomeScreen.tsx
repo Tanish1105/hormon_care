@@ -27,7 +27,9 @@ import type { MainTabParamList } from '../navigation/MainTabs';
 import Button from '../components/Button';
 import FullscreenImage from '../components/FullscreenImage';
 import BrandTitle from '../components/BrandTitle';
+import PillMark from '../components/PillMark';
 import { brandLogo } from '../assets/brand';
+import { supplementTimeLabel } from '../lib/supplements';
 import { colors, layout, radius, shadows, spacing } from '../theme';
 
 type Nav = CompositeNavigationProp<
@@ -211,15 +213,33 @@ export default function HomeScreen() {
                 styles.suppCard,
                 pressed && { transform: [{ scale: 0.985 }], opacity: 0.94 },
               ]}>
-              <Text style={styles.suppEyebrow}>{t('tabSupplements')}</Text>
-              <Text style={styles.suppTitle} numberOfLines={1}>
-                {activeSupplements.title}
-              </Text>
-              <Text style={styles.suppMeta}>
-                {t('supplementsCount', {
-                  count: activeSupplements.items?.length || 0,
-                })}
-              </Text>
+              <View style={styles.suppTop}>
+                <PillMark size={42} iconSize={20} />
+                <View style={styles.suppTopText}>
+                  <Text style={styles.suppEyebrow}>{t('tabSupplements')}</Text>
+                  <Text style={styles.suppTitle} numberOfLines={1}>
+                    {activeSupplements.title}
+                  </Text>
+                  <Text style={styles.suppMeta}>
+                    {t('supplementsCount', {
+                      count: activeSupplements.items?.length || 0,
+                    })}
+                  </Text>
+                </View>
+              </View>
+              {(activeSupplements.items || []).slice(0, 3).map(item => (
+                <View key={item.id} style={styles.suppPreview}>
+                  <Text style={styles.suppPreviewTime} numberOfLines={1}>
+                    {supplementTimeLabel(item.time, t)}
+                  </Text>
+                  <Text style={styles.suppPreviewName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.suppPreviewQty} numberOfLines={1}>
+                    {item.quantity}
+                  </Text>
+                </View>
+              ))}
               <Text style={styles.suppCta}>{t('viewSupplements')} →</Text>
             </Pressable>
           ) : null}
@@ -738,19 +758,26 @@ const styles = StyleSheet.create({
   },
   suppCard: {
     marginBottom: 14,
-    padding: 18,
+    padding: 16,
     borderRadius: radius.xl,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.successBorder,
   },
+  suppTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 4,
+  },
+  suppTopText: { flex: 1, minWidth: 0 },
   suppEyebrow: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.9,
     textTransform: 'uppercase',
     color: colors.primary,
-    marginBottom: 6,
+    marginBottom: 2,
   },
   suppTitle: {
     fontSize: 18,
@@ -758,12 +785,38 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   suppMeta: {
-    marginTop: 4,
+    marginTop: 2,
     fontSize: 13,
     color: colors.textSoft,
   },
-  suppCta: {
+  suppPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderLight,
+  },
+  suppPreviewTime: {
+    width: 92,
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  suppPreviewName: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  suppPreviewQty: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.accent,
+  },
+  suppCta: {
+    marginTop: 12,
     fontSize: 13,
     fontWeight: '700',
     color: colors.primary,

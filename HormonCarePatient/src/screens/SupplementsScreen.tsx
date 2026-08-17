@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -8,11 +8,16 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLocale } from '../context/LocaleContext';
 import type { TranslationKey } from '../i18n/translations';
 import * as api from '../api/client';
-import Card from '../components/Card';
-import { colors, layout, radius, spacing } from '../theme';
+import PillMark from '../components/PillMark';
+import {
+  groupSupplementItems,
+  supplementTimeLabel,
+} from '../lib/supplements';
+import { colors, layout, radius, shadows, spacing } from '../theme';
 
 function PlanBlock({
   plan,
@@ -23,41 +28,59 @@ function PlanBlock({
   current?: boolean;
   t: (key: TranslationKey, vars?: Record<string, string | number>) => string;
 }) {
+  const groups = groupSupplementItems(plan.items || []);
+
   return (
-    <Card
-      accent={current ? 'success' : 'default'}
-      title={plan.title}
-      subtitle={
-        current
-          ? t('supplementsCurrent')
-          : t('supplementsCount', { count: plan.items.length })
-      }>
-      {plan.notes ? <Text style={styles.planNotes}>{plan.notes}</Text> : null}
-      {plan.items.map((item, index) => (
-        <View
-          key={item.id}
-          style={[styles.item, index === 0 && styles.itemFirst]}>
-          <Text style={styles.itemName}>{item.name}</Text>
-          <View style={styles.metaRow}>
-            <View style={styles.chip}>
-              <Text style={styles.chipLabel}>{t('supplementTime')}</Text>
-              <Text style={styles.chipValue}>{item.time}</Text>
+    <View style={[styles.planCard, current && styles.planCardCurrent]}>
+      <View style={[styles.planHead, current && styles.planHeadCurrent]}>
+        <View style={styles.planBadge}>
+          <Text style={styles.planBadgeText}>
+            {current ? t('supplementsCurrent') : t('supplementsPrevious')}
+          </Text>
+        </View>
+        <Text style={styles.planTitle}>{plan.title}</Text>
+        {plan.notes ? <Text style={styles.planNotes}>{plan.notes}</Text> : null}
+        <Text style={styles.planMeta}>
+          {t('supplementsCount', { count: plan.items?.length || 0 })}
+          {groups.length > 1
+            ? ` · ${t('supplementsTimesADay', { count: groups.length })}`
+            : ''}
+        </Text>
+      </View>
+
+      {groups.map(group => (
+        <View key={group.time} style={styles.group}>
+          <Text style={styles.groupLabel}>
+            {supplementTimeLabel(group.time, t)}
+          </Text>
+          {group.items.map((item, index) => (
+            <View
+              key={item.id}
+              style={[styles.item, index === 0 && styles.itemFirst]}>
+              <PillMark size={38} iconSize={18} />
+              <View style={styles.itemBody}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <View style={styles.metaRow}>
+                  <View style={styles.chip}>
+                    <Text style={styles.chipText}>
+                      {supplementTimeLabel(item.time, t)}
+                    </Text>
+                  </View>
+                  <View style={[styles.chip, styles.chipGold]}>
+                    <Text style={[styles.chipText, styles.chipTextGold]}>
+                      {item.quantity}
+                    </Text>
+                  </View>
+                </View>
+                {item.notes ? (
+                  <Text style={styles.itemNotes}>{item.notes}</Text>
+                ) : null}
+              </View>
             </View>
-            <View style={[styles.chip, styles.chipGold]}>
-              <Text style={[styles.chipLabel, styles.chipLabelGold]}>
-                {t('supplementQuantity')}
-              </Text>
-              <Text style={[styles.chipValue, styles.chipValueGold]}>
-                {item.quantity}
-              </Text>
-            </View>
-          </View>
-          {item.notes ? (
-            <Text style={styles.itemNotes}>{item.notes}</Text>
-          ) : null}
+          ))}
         </View>
       ))}
-    </Card>
+    </View>
   );
 }
 
@@ -73,20 +96,29 @@ export default function SupplementsScreen() {
     setError(null);
     try {
       const data = await api.getSupplements();
-      setActivePlan(data.activePlan);
-      setHistory((data.plans || []).filter(plan => !plan.isActive));
+      const plans = data.plans || [];
+      const active =
+        data.activePlan ?? plans.find(plan => plan.isActive) ?? plans[0] ?? null;
+      setActivePlan(active);
+      setHistory(plans.filter(plan => plan.id !== active?.id && !plan.isActive));
     } catch (e: any) {
       setError(e?.message || t('dataLoadFailed'));
     }
   }, [t]);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await load();
-      setLoading(false);
-    })();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      let alive = true;
+      (async () => {
+        setLoading(true);
+        await load();
+        if (alive) setLoading(false);
+      })();
+      return () => {
+        alive = false;
+      };
+    }, [load]),
+  );
 
   async function onRefresh() {
     setRefreshing(true);
@@ -94,7 +126,7 @@ export default function SupplementsScreen() {
     setRefreshing(false);
   }
 
-  if (loading) {
+  if (loading && !activePlan && history.length === 0) {
     return (
       <SafeAreaView style={[styles.safe, styles.center]} edges={['top']}>
         <ActivityIndicator size="small" color={colors.primary} />
@@ -126,14 +158,13 @@ export default function SupplementsScreen() {
 
         {!error && !activePlan && history.length === 0 ? (
           <View style={styles.empty}>
+            <PillMark size={56} iconSize={28} />
             <Text style={styles.emptyTitle}>{t('supplementsEmptyTitle')}</Text>
             <Text style={styles.emptyBody}>{t('supplementsEmptyBody')}</Text>
           </View>
         ) : null}
 
-        {activePlan ? (
-          <PlanBlock plan={activePlan} current t={t} />
-        ) : null}
+        {activePlan ? <PlanBlock plan={activePlan} current t={t} /> : null}
 
         {history.length > 0 ? (
           <>
@@ -185,14 +216,17 @@ const styles = StyleSheet.create({
   },
   errorText: { color: colors.danger, fontWeight: '600', fontSize: 13 },
   empty: {
-    padding: 22,
-    borderRadius: radius.xl,
+    paddingVertical: 36,
+    paddingHorizontal: 22,
+    borderRadius: radius.xxl,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.borderLight,
     alignItems: 'center',
+    ...shadows.soft,
   },
   emptyTitle: {
+    marginTop: 14,
     fontSize: 17,
     fontWeight: '700',
     color: colors.text,
@@ -213,23 +247,89 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.textMuted,
   },
+  planCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xxl,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    overflow: 'hidden',
+    marginBottom: 16,
+    ...shadows.card,
+  },
+  planCardCurrent: {
+    borderColor: colors.successBorder,
+  },
+  planHead: {
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 14,
+    backgroundColor: colors.bgSoft,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+  },
+  planHeadCurrent: {
+    backgroundColor: colors.primaryTint,
+  },
+  planBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.surface,
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  planBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+    color: colors.primary,
+  },
+  planTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: -0.35,
+    color: colors.text,
+  },
   planNotes: {
+    marginTop: 6,
     fontSize: 13,
     lineHeight: 19,
     color: colors.textSoft,
+  },
+  planMeta: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  group: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 6,
+  },
+  groupLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: colors.textMuted,
     marginBottom: 8,
+    marginLeft: 2,
   },
   item: {
-    marginTop: 14,
-    paddingTop: 14,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: colors.borderLight,
   },
   itemFirst: {
-    marginTop: 4,
-    paddingTop: 0,
     borderTopWidth: 0,
+    paddingTop: 4,
   },
+  itemBody: { flex: 1, minWidth: 0 },
   itemName: {
     fontSize: 16,
     fontWeight: '700',
@@ -245,26 +345,19 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.primarySoft,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   chipGold: {
     backgroundColor: colors.accentSoft,
   },
-  chipLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    color: colors.primary,
-    marginBottom: 2,
-  },
-  chipLabelGold: { color: colors.accent },
-  chipValue: {
+  chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.primary,
   },
-  chipValueGold: { color: colors.text },
+  chipTextGold: {
+    color: colors.accent,
+  },
   itemNotes: {
     marginTop: 8,
     fontSize: 13,
