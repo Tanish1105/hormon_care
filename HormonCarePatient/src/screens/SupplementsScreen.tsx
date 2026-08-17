@@ -124,7 +124,7 @@ export default function SupplementsScreen() {
           </View>
         ) : null}
 
-        {!activePlan && history.length === 0 ? (
+        {!error && !activePlan && history.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>{t('supplementsEmptyTitle')}</Text>
             <Text style={styles.emptyBody}>{t('supplementsEmptyBody')}</Text>

@@ -8,7 +8,7 @@
  */
 import { NativeModules, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CookieManager from '@react-native-cookies/cookies';
+import CookieManager from '@preeternal/react-native-cookie-manager';
 import { BASE_URL, resolveApiBaseUrl } from '../config/api';
 
 export { BASE_URL, resolveApiBaseUrl };
@@ -651,14 +651,30 @@ export type SupplementsResponse = {
   activePlan: SupplementPlan | null;
 };
 
-export function getSupplements() {
-  return apiFetch<SupplementsResponse>('/api/patient/supplements');
+function supplementsFromDashboard(
+  dashboard: DashboardResponse | null | undefined,
+): SupplementsResponse {
+  const plans = dashboard?.profile?.supplementPlans ?? [];
+  return {
+    plans,
+    activePlan: plans.find(plan => plan.isActive) ?? plans[0] ?? null,
+  };
+}
+
+export async function getSupplements(): Promise<SupplementsResponse> {
+  try {
+    return await apiFetch<SupplementsResponse>('/api/patient/supplements');
+  } catch (error) {
+    const status = (error as ApiError)?.status;
+    if (status === 404) {
+      return supplementsFromDashboard(await getDashboard());
+    }
+    throw error;
+  }
 }
 
 export function getActiveSupplementPlan(
   dashboard: DashboardResponse | null | undefined,
 ): SupplementPlan | null {
-  const plans = dashboard?.profile?.supplementPlans;
-  if (!plans?.length) return null;
-  return plans.find(plan => plan.isActive) ?? plans[0] ?? null;
+  return supplementsFromDashboard(dashboard).activePlan;
 }

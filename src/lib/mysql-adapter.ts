@@ -82,7 +82,6 @@ export function createMysqlAdapter() {
     allowPublicKeyRetrieval: true,
     connectTimeout: 8_000,
     acquireTimeout: 8_000,
-    family: 4,
   });
 }
 
@@ -99,7 +98,6 @@ export async function testMysqlConnection() {
       database: config.database,
       allowPublicKeyRetrieval: true,
       connectTimeout: 10_000,
-      family: 4,
     });
     await conn.query("SELECT 1");
     return { ok: true as const, host: config.host, database: config.database };
