@@ -5,6 +5,7 @@ import {
   createToken,
   attachSessionCookie,
 } from "@/lib/auth";
+import { jsonFromDatabaseError } from "@/lib/db-error";
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,7 +51,9 @@ export async function POST(request: NextRequest) {
       token,
     });
     return attachSessionCookie(response, token);
-  } catch {
-    return NextResponse.json({ error: "Login failed" }, { status: 500 });
+  } catch (error) {
+    console.error("patient login error:", error);
+    const { status, error: message } = jsonFromDatabaseError(error);
+    return NextResponse.json({ error: message }, { status });
   }
 }

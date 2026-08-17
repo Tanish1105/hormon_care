@@ -25,6 +25,15 @@ const patientListInclude = {
       accessToken: true,
     },
   },
+  supplementPlans: {
+    where: { isActive: true },
+    select: {
+      id: true,
+      title: true,
+      _count: { select: { items: true } },
+    },
+    take: 1,
+  },
 } as const;
 
 function withShareLinks<

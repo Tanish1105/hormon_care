@@ -69,8 +69,10 @@ export default function HomeScreen() {
     onRefresh,
     gate,
     error,
+    dashboard,
     assignedPrograms,
   } = usePatientDashboard();
+  const activeSupplements = api.getActiveSupplementPlan(dashboard);
   const heroAnim = useRise(!loading, 0);
   const bodyAnim = useRise(!loading, 90);
 
@@ -200,6 +202,26 @@ export default function HomeScreen() {
                 testID="followup-cta-button"
               />
             </View>
+          ) : null}
+
+          {activeSupplements && !pendingLifestyle ? (
+            <Pressable
+              onPress={() => nav.navigate('Supplements')}
+              style={({ pressed }) => [
+                styles.suppCard,
+                pressed && { transform: [{ scale: 0.985 }], opacity: 0.94 },
+              ]}>
+              <Text style={styles.suppEyebrow}>{t('tabSupplements')}</Text>
+              <Text style={styles.suppTitle} numberOfLines={1}>
+                {activeSupplements.title}
+              </Text>
+              <Text style={styles.suppMeta}>
+                {t('supplementsCount', {
+                  count: activeSupplements.items?.length || 0,
+                })}
+              </Text>
+              <Text style={styles.suppCta}>{t('viewSupplements')} →</Text>
+            </Pressable>
           ) : null}
 
           <View style={styles.sectionHead}>
@@ -713,5 +735,37 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.primary,
     fontWeight: '600',
+  },
+  suppCard: {
+    marginBottom: 14,
+    padding: 18,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.successBorder,
+  },
+  suppEyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    color: colors.primary,
+    marginBottom: 6,
+  },
+  suppTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  suppMeta: {
+    marginTop: 4,
+    fontSize: 13,
+    color: colors.textSoft,
+  },
+  suppCta: {
+    marginTop: 10,
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.primary,
   },
 });

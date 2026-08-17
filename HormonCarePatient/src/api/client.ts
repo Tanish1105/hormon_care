@@ -344,6 +344,24 @@ export type Plan = {
   weeks: PlanWeek[];
 };
 
+export type SupplementItem = {
+  id: string;
+  name: string;
+  time: string;
+  quantity: string;
+  notes: string | null;
+  sortOrder?: number;
+};
+
+export type SupplementPlan = {
+  id: string;
+  title: string;
+  notes: string | null;
+  isActive: boolean;
+  createdAt: string;
+  items: SupplementItem[];
+};
+
 export type DashboardResponse = {
   profile: {
     id: string;
@@ -362,6 +380,7 @@ export type DashboardResponse = {
     plan: Plan | null;
     garbhaPlan?: Plan | null;
     childGuidancePlan?: Plan | null;
+    supplementPlans?: SupplementPlan[];
   };
   unlockedWeek: number;
   garbhaUnlockedWeek?: number;
@@ -625,4 +644,21 @@ export type FollowupHistory = {
 
 export function getFollowupHistory() {
   return apiFetch<FollowupHistory>('/api/patient/followup/history');
+}
+
+export type SupplementsResponse = {
+  plans: SupplementPlan[];
+  activePlan: SupplementPlan | null;
+};
+
+export function getSupplements() {
+  return apiFetch<SupplementsResponse>('/api/patient/supplements');
+}
+
+export function getActiveSupplementPlan(
+  dashboard: DashboardResponse | null | undefined,
+): SupplementPlan | null {
+  const plans = dashboard?.profile?.supplementPlans;
+  if (!plans?.length) return null;
+  return plans.find(plan => plan.isActive) ?? plans[0] ?? null;
 }

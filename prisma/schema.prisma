@@ -43,6 +43,7 @@ model PatientProfile {
 
   weeklyFollowups WeeklyFollowup[]
   lifestyleAssessment LifestyleAssessment?
+  supplementPlans PatientSupplementPlan[]
 }
 
 model LifestyleAssessment {
@@ -385,6 +386,53 @@ model MediaFile {
   size      Int
   data      Bytes    @db.LongBlob
   createdAt DateTime @default(now())
+}
+
+/// Master list of supplements the admin can assign to patients
+model Supplement {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?  @db.Text
+  defaultTime     String?
+  defaultQuantity String?
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  items PatientSupplementItem[]
+}
+
+/// A titled period of supplements for one patient, e.g. "For 2 months"
+model PatientSupplementPlan {
+  id               String   @id @default(cuid())
+  patientProfileId String
+  patientProfile   PatientProfile @relation(fields: [patientProfileId], references: [id], onDelete: Cascade)
+  title            String
+  notes            String?  @db.Text
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  items PatientSupplementItem[]
+
+  @@index([patientProfileId, isActive])
+}
+
+model PatientSupplementItem {
+  id           String   @id @default(cuid())
+  planId       String
+  plan         PatientSupplementPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  supplementId String?
+  supplement   Supplement? @relation(fields: [supplementId], references: [id], onDelete: SetNull)
+  name         String
+  time         String
+  quantity     String
+  notes        String?  @db.Text
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([planId])
 }
 
 model Inquiry {

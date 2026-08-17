@@ -223,6 +223,21 @@ const en: Dict = {
   feedbackRequired: "Please select how you felt about this week's plan",
   notesRequired: 'Please fill the feedback notes',
   fieldRequired: '{field} is required',
+
+  // Supplements
+  tabSupplements: 'Supplements',
+  supplementsTitle: 'Your supplements',
+  supplementsSubtitle: 'Take as advised by your doctor',
+  supplementsEmptyTitle: 'No supplements assigned',
+  supplementsEmptyBody:
+    'Your personal supplement list will appear here once your doctor assigns it.',
+  supplementsCurrent: 'Current',
+  supplementsPast: 'Previous lists',
+  supplementTime: 'Time',
+  supplementQuantity: 'Quantity',
+  supplementNotes: 'Notes',
+  supplementsCount: '{count} supplements',
+  viewSupplements: 'View supplements',
 };
 
 const gu: Dict = {
@@ -439,6 +454,20 @@ const gu: Dict = {
   feedbackRequired: 'કૃપા કરીને આ સપ્તાહના પ્લાન વિશે તમારું અનુભૂતિ પસંદ કરો',
   notesRequired: 'કૃપા કરીને ફીડબેક નોંધ ભરો',
   fieldRequired: '{field} જરૂરી છે',
+
+  tabSupplements: 'સપ્લિમેન્ટ',
+  supplementsTitle: 'તમારા સપ્લિમેન્ટ',
+  supplementsSubtitle: 'ડૉક્ટરની સલાહ મુજબ લો',
+  supplementsEmptyTitle: 'સપ્લિમેન્ટ એસાઈન નથી',
+  supplementsEmptyBody:
+    'તમારા ડૉક્ટર personal list એસાઈન કરે ત્યારે અહીં દેખાશે.',
+  supplementsCurrent: 'હાલની યાદી',
+  supplementsPast: 'પહેલાની યાદીઓ',
+  supplementTime: 'સમય',
+  supplementQuantity: 'માત્રા',
+  supplementNotes: 'નોંધ',
+  supplementsCount: '{count} સપ્લિમેન્ટ',
+  viewSupplements: 'સપ્લિમેન્ટ જુઓ',
 };
 
 const catalogs: Record<Locale, Dict> = { en, gu };

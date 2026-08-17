@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PatientLayout } from "@/components/PatientLayout";
 import { PatientWeekPicker, PatientDayPicker } from "@/components/PlanWeekDay";
 import { isWeekUnlocked, isDayUnlocked, formatDisplayDate } from "@/lib/utils";
@@ -11,7 +12,7 @@ import { FullscreenImage } from "@/components/FullscreenImage";
 import { FullscreenVideo } from "@/components/FullscreenVideo";
 import { FullscreenYoutube } from "@/components/FullscreenYoutube";
 import { cn } from "@/lib/utils";
-import { CalendarDays, Dumbbell, ExternalLink, ImageIcon, Sparkles, Video } from "lucide-react";
+import { CalendarDays, Dumbbell, ExternalLink, ImageIcon, Sparkles, Video, Pill } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 
 type Content = {
@@ -56,6 +57,13 @@ type DashboardData = {
       isDayWise: boolean;
       weeks: Week[];
     } | null;
+    supplementPlans?: {
+      id: string;
+      title: string;
+      notes: string | null;
+      isActive: boolean;
+      items: { id: string; name: string; time: string; quantity: string }[];
+    }[];
   };
   unlockedWeek: number;
   unlockedDay: number;
@@ -231,6 +239,8 @@ export default function PatientDashboard() {
 
   const { profile, unlockedWeek, unlockedDay } = data;
   const plan = profile.plan;
+  const activeSupplements =
+    profile.supplementPlans?.find((p) => p.isActive) ?? profile.supplementPlans?.[0] ?? null;
   const week = plan?.weeks.find((w) => w.weekNumber === selectedWeek);
   const day = week?.days?.find((d) => d.dayNumber === selectedDay);
   const weekUnlocked = week && isWeekUnlocked(week.weekNumber, unlockedWeek);
@@ -314,6 +324,28 @@ export default function PatientDashboard() {
           <h2 className="text-sm font-semibold text-amber-950">તમારી Requirements</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-amber-900/90">{profile.requirements}</p>
         </div>
+      )}
+
+      {activeSupplements && (
+        <Link
+          href="/patient/supplements"
+          className="mt-5 block overflow-hidden rounded-2xl border border-[var(--primary)]/20 bg-white px-5 py-4 shadow-sm transition hover:border-[var(--primary)]/40"
+        >
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-light)] text-[var(--primary)]">
+              <Pill className="h-4 w-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
+                Supplements
+              </p>
+              <h2 className="mt-1 font-semibold text-slate-900">{activeSupplements.title}</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                {activeSupplements.items.length} supplements · time અને quantity સાથે જુઓ
+              </p>
+            </div>
+          </div>
+        </Link>
       )}
 
       {!plan ? (

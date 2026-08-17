@@ -8,11 +8,13 @@ import type { PlanProgram } from '../api/client';
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
 import PlanScreen from '../screens/PlanScreen';
+import SupplementsScreen from '../screens/SupplementsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 export type MainTabParamList = {
   Home: undefined;
   Plan: { program?: PlanProgram } | undefined;
+  Supplements: undefined;
   Profile: undefined;
 };
 
@@ -55,6 +57,16 @@ export default function MainTabs() {
         options={{
           title: t('tabPlan'),
           tabBarIcon: ({ color }) => <TabBarIcon name="plan" color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Supplements"
+        component={SupplementsScreen}
+        options={{
+          title: t('tabSupplements'),
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="supplements" color={color} />
+          ),
         }}
       />
       <Tab.Screen

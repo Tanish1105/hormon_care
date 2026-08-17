@@ -1,4 +1,8 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import dns from "node:dns";
+
+// Node 17+ prefers IPv6; Hostinger Remote MySQL allowlists are usually IPv4.
+dns.setDefaultResultOrder("ipv4first");
 
 function env(name: string): string | undefined {
   const raw = process.env[name];
@@ -59,15 +63,27 @@ export function buildMysqlConnectionUrl() {
   const params = new URLSearchParams({
     allowPublicKeyRetrieval: "true",
     connectionLimit: String(config.connectionLimit),
-    connectTimeout: "60000",
-    acquireTimeout: "60000",
+    connectTimeout: "10000",
+    acquireTimeout: "10000",
   });
   return `mariadb://${auth}@${config.host}:${config.port}/${config.database}?${params.toString()}`;
 }
 
 export function createMysqlAdapter() {
-  // PrismaMariaDb works reliably with a connection URL; object config can pool-timeout on Hostinger.
-  return new PrismaMariaDb(buildMysqlConnectionUrl());
+  const config = getMysqlConfig();
+  // Object config keeps special characters in the password (e.g. @) intact.
+  return new PrismaMariaDb({
+    host: config.host,
+    port: config.port,
+    user: config.user,
+    password: config.password,
+    database: config.database,
+    connectionLimit: config.connectionLimit,
+    allowPublicKeyRetrieval: true,
+    connectTimeout: 8_000,
+    acquireTimeout: 8_000,
+    family: 4,
+  });
 }
 
 export async function testMysqlConnection() {
@@ -83,6 +99,7 @@ export async function testMysqlConnection() {
       database: config.database,
       allowPublicKeyRetrieval: true,
       connectTimeout: 10_000,
+      family: 4,
     });
     await conn.query("SELECT 1");
     return { ok: true as const, host: config.host, database: config.database };

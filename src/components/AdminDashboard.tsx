@@ -107,6 +107,7 @@ export function AdminDashboard() {
             <li>Add <strong>Patients</strong> — the system automatically generates an ID/password</li>
             <li>Assign a plan to each patient based on their requirements</li>
             <li>Create a week-wise plan in <strong>Garbh Sanskruti</strong> or <strong>Parenting Sanskruti</strong> and assign it to patients</li>
+            <li>In <strong>Supplements</strong>, open a patient and assign a personal list with a title like &quot;For 2 months&quot;. Next time, assign again with a new title — old list stays in history.</li>
           </ol>
         </Card>
 

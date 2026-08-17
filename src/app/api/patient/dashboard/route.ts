@@ -43,6 +43,10 @@ export async function GET() {
       childGuidancePlan: { include: childGuidancePlanInclude },
       weeklyFollowups: { select: { weekNumber: true }, orderBy: { weekNumber: "asc" } },
       lifestyleAssessment: { select: { requestedAt: true, submittedAt: true } },
+      supplementPlans: {
+        include: { items: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
 

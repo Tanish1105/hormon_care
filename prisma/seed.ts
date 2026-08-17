@@ -95,6 +95,21 @@ async function main() {
     });
     console.log("Garbh Sanskruti plan created:", garbha.title);
   }
+
+  const supplementCount = await prisma.supplement.count();
+  if (supplementCount === 0) {
+    await prisma.supplement.createMany({
+      data: [
+        { name: "Folic Acid", defaultTime: "Morning", defaultQuantity: "1 tablet", sortOrder: 1 },
+        { name: "Vitamin D", defaultTime: "After lunch", defaultQuantity: "1 capsule", sortOrder: 2 },
+        { name: "Iron", defaultTime: "After dinner", defaultQuantity: "1 tablet", sortOrder: 3 },
+        { name: "Calcium", defaultTime: "Night", defaultQuantity: "1 tablet", sortOrder: 4 },
+        { name: "Vitamin B12", defaultTime: "Morning", defaultQuantity: "1 tablet", sortOrder: 5 },
+        { name: "Omega-3", defaultTime: "After breakfast", defaultQuantity: "1 capsule", sortOrder: 6 },
+      ],
+    });
+    console.log("Default supplement catalog created");
+  }
 }
 
 main()

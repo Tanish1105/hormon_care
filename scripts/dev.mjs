@@ -1,5 +1,8 @@
 import { execSync, spawn } from "node:child_process";
+import dns from "node:dns";
 import os from "node:os";
+
+dns.setDefaultResultOrder("ipv4first");
 
 function getLocalNetworkIPs() {
   const ips = [];

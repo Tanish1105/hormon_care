@@ -7,6 +7,17 @@ export async function GET() {
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Connection failed";
-    return NextResponse.json({ ok: false, error: message }, { status: 503 });
+    const clientHost = message.match(/@'([^']+)'/)?.[1] ?? null;
+    return NextResponse.json(
+      {
+        ok: false,
+        error: message,
+        clientHost,
+        hint: clientHost
+          ? `Add ${clientHost} (or %) in hPanel → Databases → Remote MySQL`
+          : "Add your public IP (or %) in hPanel → Databases → Remote MySQL",
+      },
+      { status: 503 }
+    );
   }
 }

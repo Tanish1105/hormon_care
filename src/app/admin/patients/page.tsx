@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/AdminLayout";
 import { Button, Card, Input, Textarea, Select, Badge } from "@/components/ui";
 import { Plus, Trash2, Key, Copy, Check, Sparkles, SquarePen, Send, FileText, Link2, ChevronDown } from "lucide-react";
 import { ShareFormLink } from "@/components/ShareFormLink";
+import { AdminPatientSupplements } from "@/components/AdminPatientSupplements";
 import { APP_PUBLIC_URL, buildAssessmentFormUrl } from "@/lib/assessment-link";
 import { formatDateInputValue, formatDisplayDate } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ type Patient = {
   } | null;
   assessmentFormLink?: string | null;
   followupFormLink?: string | null;
+  supplementPlans?: { id: string; title: string; _count: { items: number } }[];
 };
 
 type Plan = { id: string; title: string };
@@ -539,6 +541,9 @@ export default function PatientsPage() {
                 )}
                 <p className="mt-1 text-sm text-slate-500">
                   Plan: {patient.plan?.title || "Not assigned"} | Garbh Sanskruti: {patient.garbhaPlan?.title || "Not assigned"} | Parenting Sanskruti: {patient.childGuidancePlan?.title || "Not assigned"}
+                  {patient.supplementPlans?.[0]
+                    ? ` | Supplements: ${patient.supplementPlans[0].title} (${patient.supplementPlans[0]._count.items})`
+                    : ""}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-1 pt-0.5">
@@ -749,6 +754,10 @@ export default function PatientsPage() {
                   </div>
                 );
               })}
+            </div>
+
+            <div className="mt-4">
+              <AdminPatientSupplements patientId={patient.id} patientName={patient.user.name} />
             </div>
 
             <div className="mt-4 space-y-3">

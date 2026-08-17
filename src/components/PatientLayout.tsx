@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Home, Baby, GraduationCap, ClipboardCheck, FileText } from "lucide-react";
+import { LogOut, Home, Baby, GraduationCap, ClipboardCheck, FileText, Pill } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ContentProtection } from "@/components/ContentProtection";
@@ -179,6 +179,29 @@ export function PatientLayout({ children }: { children: React.ReactNode }) {
                 >
                   <ClipboardCheck className="h-4 w-4" />
                   <span className="hidden sm:inline">Followup</span>
+                </Link>
+              )}
+
+              {lifestyleBlocked ? (
+                <span
+                  className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-slate-300"
+                  title="Complete lifestyle assessment first"
+                >
+                  <Pill className="h-4 w-4" />
+                  <span className="hidden sm:inline">Supplements</span>
+                </span>
+              ) : (
+                <Link
+                  href="/patient/supplements"
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition",
+                    pathname === "/patient/supplements"
+                      ? "bg-[var(--primary)] text-white shadow-sm shadow-[rgba(31,107,69,0.25)]"
+                      : "text-[var(--muted)] hover:bg-white/70"
+                  )}
+                >
+                  <Pill className="h-4 w-4" />
+                  <span className="hidden sm:inline">Supplements</span>
                 </Link>
               )}
 

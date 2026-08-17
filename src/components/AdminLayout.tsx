@@ -12,6 +12,7 @@ import {
   BarChart3,
   FileText,
   MessageSquare,
+  Pill,
 } from "lucide-react";
 import { BrandMark } from "@/components/BrandLogo";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/admin/lifestyle-assessments", label: "Lifestyle", shortLabel: "Lifestyle", icon: FileText },
   { href: "/admin/followups", label: "Followups", shortLabel: "Followup", icon: BarChart3 },
   { href: "/admin/inquiries", label: "Inquiries", shortLabel: "Inquiry", icon: MessageSquare },
+  { href: "/admin/supplements", label: "Supplements", shortLabel: "Supp", icon: Pill },
   { href: "/admin/garbha-sanskar", label: "Garbh Sanskruti", shortLabel: "Garbh", icon: Baby },
   { href: "/admin/child-guidance", label: "Parenting Sanskruti", shortLabel: "Parenting", icon: GraduationCap },
 ];
