@@ -303,7 +303,7 @@ export default function PatientsPage() {
       data = {};
     }
     setEditLoading(null);
-    if (!res.ok) {
+    if (!res.ok || !data.editPath) {
       alert(data.error || "Could not open plan editor");
       return;
     }
