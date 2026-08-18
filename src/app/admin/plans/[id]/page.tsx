@@ -23,11 +23,12 @@ import {
   FileText,
 } from "lucide-react";
 import { useStaffPortal } from "@/components/StaffPortalContext";
+import { PlanSectionTabs } from "@/components/PlanSectionTabs";
 import {
-  PLAN_CONTENT_SECTIONS,
   PLAN_SECTION_LABELS,
   contentSection,
   isSafeHttpUrl,
+  sectionCounts,
   type PlanContentSection,
 } from "@/lib/plan-sections";
 
@@ -103,6 +104,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
   const [plan, setPlan] = useState<Plan | null>(null);
   const [activeWeek, setActiveWeek] = useState(1);
   const [activeDay, setActiveDay] = useState(1);
+  const [activeSection, setActiveSection] = useState<PlanContentSection>("RECIPE");
   const [addingSection, setAddingSection] = useState<PlanContentSection | null>(null);
   const [contentForm, setContentForm] = useState(emptyContentForm);
   const [savingContent, setSavingContent] = useState(false);
@@ -118,6 +120,10 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
   const week = plan?.weeks.find((w) => w.weekNumber === activeWeek);
   const day = week?.days?.find((d) => d.dayNumber === activeDay);
   const activeContents = plan?.isDayWise ? (day?.contents ?? []) : (week?.contents ?? []);
+  const contentCounts = sectionCounts(activeContents);
+  const SectionIcon = sectionIcons[activeSection];
+  const sectionItems = activeContents.filter((item) => contentSection(item) === activeSection);
+  const isAdding = addingSection === activeSection;
 
   function selectWeek(weekNumber: number) {
     setActiveWeek(weekNumber);
@@ -233,6 +239,21 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
         )}
       </div>
 
+      <div className="mt-5">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Content sections
+        </p>
+        <PlanSectionTabs
+          value={activeSection}
+          counts={contentCounts}
+          onChange={(section) => {
+            setActiveSection(section);
+            setAddingSection(null);
+            setContentForm(emptyContentForm);
+          }}
+        />
+      </div>
+
       <details className="mt-4">
         <summary className="cursor-pointer text-sm font-medium text-[var(--primary)]">Plan Image/Video Upload</summary>
         <Card className="mt-2">
@@ -329,19 +350,14 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
               )}
 
               <div className="space-y-4">
-                {PLAN_CONTENT_SECTIONS.map((section) => {
-                  const SectionIcon = sectionIcons[section];
-                  const sectionItems = activeContents.filter((item) => contentSection(item) === section);
-                  const isAdding = addingSection === section;
-                  return (
-                    <Card key={section} className="border-2 border-[var(--border)]">
+                    <Card className="border-2 border-[var(--border)]">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-2">
                           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--primary-light)] text-[var(--primary)]">
                             <SectionIcon className="h-4 w-4" />
                           </span>
                           <div>
-                            <h3 className="font-semibold">{PLAN_SECTION_LABELS[section]}</h3>
+                            <h3 className="font-semibold">{PLAN_SECTION_LABELS[activeSection]}</h3>
                             <p className="text-xs text-slate-500">
                               {sectionItems.length} item{sectionItems.length === 1 ? "" : "s"} · description, image, video, or link
                             </p>
@@ -350,7 +366,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
                         <Button
                           className="w-full sm:w-auto"
                           onClick={() => {
-                            setAddingSection(isAdding ? null : section);
+                            setAddingSection(isAdding ? null : activeSection);
                             setContentForm(emptyContentForm);
                           }}
                         >
@@ -430,8 +446,8 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
                                 {savingContent
                                   ? "Adding..."
                                   : plan.isDayWise
-                                    ? `Add to ${PLAN_SECTION_LABELS[section]} · Day ${activeDay}`
-                                    : `Add to ${PLAN_SECTION_LABELS[section]}`}
+                                    ? `Add to ${PLAN_SECTION_LABELS[activeSection]} · Day ${activeDay}`
+                                    : `Add to ${PLAN_SECTION_LABELS[activeSection]}`}
                               </Button>
                               <Button
                                 type="button"
@@ -513,13 +529,11 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
                         })}
                         {sectionItems.length === 0 && !isAdding && (
                           <p className="rounded-lg border border-dashed border-slate-200 py-6 text-center text-sm text-slate-500">
-                            No {PLAN_SECTION_LABELS[section].toLowerCase()} yet — click Add to write a description or upload image, video, or link
+                            No {PLAN_SECTION_LABELS[activeSection].toLowerCase()} yet — click Add to write a description or upload image, video, or link
                           </p>
                         )}
                       </div>
                     </Card>
-                  );
-                })}
 
                 {plan.isDayWise && activeDay < 7 && (
                   <div className="flex justify-stretch sm:justify-end">

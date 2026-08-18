@@ -128,7 +128,7 @@ export default function AdminFollowupsPage() {
         <>
           <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Card>
-              <p className="text-sm text-slate-500">Patients on Arogya Sanskruti</p>
+              <p className="text-sm text-slate-500">Patients on Personalized Plan</p>
               <p className="mt-1 text-2xl font-bold">{data.aggregate.totalPatients}</p>
             </Card>
             <Card>
@@ -143,7 +143,7 @@ export default function AdminFollowupsPage() {
 
           <div className="space-y-4">
             {data.patients.length === 0 ? (
-              <Card className="text-center text-slate-500">No patients with Arogya Sanskruti yet.</Card>
+              <Card className="text-center text-slate-500">No patients with Personalized Plan yet.</Card>
             ) : (
               data.patients.map((patient) => {
                 const expanded = expandedPatient === patient.id;

@@ -17,7 +17,7 @@ type Inquiry = {
 };
 
 const INTEREST_LABEL: Record<string, string> = {
-  arogya: "Arogya Sanskruti",
+  arogya: "Personalized Plan",
   garbha: "Garbh Sanskruti",
   parenting: "Parenting Sanskruti",
   other: "Other",

@@ -45,6 +45,25 @@ export function groupContentsBySection<T extends { section?: string | null; type
   return grouped;
 }
 
+export function sectionCounts<T extends { section?: string | null; type?: string | null }>(
+  contents: T[]
+): Record<PlanContentSection, number> {
+  const grouped = groupContentsBySection(contents);
+  return {
+    RECIPE: grouped.RECIPE.length,
+    EXERCISE: grouped.EXERCISE.length,
+    MEDITATION: grouped.MEDITATION.length,
+  };
+}
+
+export function firstFilledSection<T extends { section?: string | null; type?: string | null }>(
+  contents: T[],
+  fallback: PlanContentSection = "RECIPE"
+): PlanContentSection {
+  const grouped = groupContentsBySection(contents);
+  return PLAN_CONTENT_SECTIONS.find((section) => grouped[section].length > 0) ?? fallback;
+}
+
 export function isSafeHttpUrl(url: string): boolean {
   try {
     const parsed = new URL(url);

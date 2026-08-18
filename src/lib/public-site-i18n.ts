@@ -65,13 +65,13 @@ export function publicSiteCopy(locale: PatientLocale) {
     servicesKicker: t("Services", "સેવાઓ"),
     servicesTitle: t("What you get", "અહીં શું મળે છે"),
     servicesIntro: t(
-      "Habit building for every person and every family — Arogya Sanskruti, Garbh Sanskruti, and Parenting Sanskruti.",
-      "દરેક વ્યક્તિ અને દરેક પરિવાર માટે આદત નિર્માણ — આરોગ્ય સંસ્કૃતિ, ગર્ભ સંસ્કૃતિ અને પેરેન્ટિંગ સંસ્કૃતિ."
+      "Habit building for every person and every family — Personalized Plan, Garbh Sanskruti, and Parenting Sanskruti.",
+      "દરેક વ્યક્તિ અને દરેક પરિવાર માટે આદત નિર્માણ — પર્સનલાઇઝ્ડ પ્લાન, ગર્ભ સંસ્કૃતિ અને પેરેન્ટિંગ સંસ્કૃતિ."
     ),
     services: [
       {
-        title: t("Arogya Sanskruti", "આરોગ્ય સંસ્કૃતિ"),
-        subtitle: t("આરોગ્ય સંસ્કૃતિ", "Arogya Sanskruti"),
+        title: t("Personalized Plan", "પર્સનલાઇઝ્ડ પ્લાન"),
+        subtitle: t("પર્સનલાઇઝ્ડ પ્લાન", "Personalized Plan"),
         body: t(
           "This is not a weight-loss program. It is for improving daily habits and building better ones — food, sleep, movement, water, and routine — with week-by-week guidance.",
           "આ વેઇટ લોસ પ્રોગ્રામ નથી. રોજિંદી આદતો સુધારવા અને સારી આદતો બનાવવા માટે છે — આહાર, ઊંઘ, હલનચલન, પાણી અને રૂટિન — અઠવાડિયા મુજબની માર્ગદર્શિકા સાથે."
@@ -126,7 +126,7 @@ export function publicSiteCopy(locale: PatientLocale) {
     ),
     programs: [
       {
-        title: t("Arogya Sanskruti", "આરોગ્ય સંસ્કૃતિ"),
+        title: t("Personalized Plan", "પર્સનલાઇઝ્ડ પ્લાન"),
         lead: t(
           "For anyone who wants to improve daily habits and build new ones. This is not a weight-loss course.",
           "રોજિંદી આદતો સુધારવા અને નવી આદતો બનાવવા માટે. આ વેઇટ લોસ કોર્સ નથી."
@@ -264,7 +264,7 @@ export function publicSiteCopy(locale: PatientLocale) {
     inquiryAnother: t("Send another", "બીજી મોકલો"),
     inquiryInterests: [
       { value: "", label: t("General inquiry", "સામાન્ય પૂછપરછ") },
-      { value: "arogya", label: t("Arogya Sanskruti", "આરોગ્ય સંસ્કૃતિ") },
+      { value: "arogya", label: t("Personalized Plan", "પર્સનલાઇઝ્ડ પ્લાન") },
       { value: "garbha", label: t("Garbh Sanskruti", "ગર્ભ સંસ્કૃતિ") },
       { value: "parenting", label: t("Parenting Sanskruti", "પેરેન્ટિંગ સંસ્કૃતિ") },
       { value: "other", label: t("Other", "અન્ય") },

@@ -32,7 +32,7 @@ function navItems(caps: StaffCapabilities) {
   }
   if (caps.canWritePlans) {
     items.push(
-      { href: `${b}/plans`, label: "Arogya Sanskruti", shortLabel: "Arogya", icon: ClipboardList },
+      { href: `${b}/plans`, label: "Personalized Plan", shortLabel: "Plan", icon: ClipboardList },
       { href: `${b}/garbha-sanskar`, label: "Garbh Sanskruti", shortLabel: "Garbh", icon: Baby },
       {
         href: `${b}/child-guidance`,

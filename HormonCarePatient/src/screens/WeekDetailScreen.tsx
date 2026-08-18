@@ -19,8 +19,10 @@ import { colors, radius } from '../theme';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import {
   PLAN_CONTENT_SECTIONS,
+  firstFilledSection,
   groupContentsBySection,
   isSafeHttpUrl,
+  sectionCounts,
   type PlanContentSection,
 } from '../lib/plan-sections';
 
@@ -154,6 +156,8 @@ export default function WeekDetailScreen() {
   const [unlockedWeek, setUnlockedWeek] = useState(0);
   const [unlockedDay, setUnlockedDay] = useState(7);
   const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedSection, setSelectedSection] =
+    useState<PlanContentSection>('RECIPE');
   const [locked, setLocked] = useState(false);
   const [cookie, setCookie] = useState<string | null>(null);
   const [youtubeSource, setYoutubeSource] = useState<
@@ -223,7 +227,21 @@ export default function WeekDetailScreen() {
     () => groupContentsBySection(activeContents),
     [activeContents],
   );
+  const contentCounts = useMemo(
+    () => sectionCounts(activeContents),
+    [activeContents],
+  );
   const showSections = program === 'care';
+  const visibleSections = showSections
+    ? PLAN_CONTENT_SECTIONS.filter(section => contentCounts[section] > 0)
+    : [];
+
+  useEffect(() => {
+    if (!showSections || activeContents.length === 0) return;
+    if (contentCounts[selectedSection] === 0) {
+      setSelectedSection(firstFilledSection(activeContents));
+    }
+  }, [showSections, activeContents, contentCounts, selectedSection]);
 
   const sectionTitle = (section: PlanContentSection) => {
     if (section === 'RECIPE') return t('sectionRecipes');
@@ -308,6 +326,41 @@ export default function WeekDetailScreen() {
         </View>
       ) : null}
 
+      {showSections && visibleSections.length > 0 ? (
+        <View style={styles.sectionTabs}>
+          {visibleSections.map(section => {
+            const active = section === selectedSection;
+            return (
+              <Pressable
+                key={section}
+                onPress={() => setSelectedSection(section)}
+                style={[styles.sectionTab, active && styles.sectionTabActive]}>
+                <Text
+                  style={[
+                    styles.sectionTabText,
+                    active && styles.sectionTabTextActive,
+                  ]}>
+                  {sectionTitle(section)}
+                </Text>
+                <View
+                  style={[
+                    styles.sectionTabCount,
+                    active && styles.sectionTabCountActive,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.sectionTabCountText,
+                      active && styles.sectionTabCountTextActive,
+                    ]}>
+                    {contentCounts[section]}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
+
       {activeContents.length === 0 ? (
         <Card>
           <Text style={{ color: colors.textSoft }}>
@@ -315,23 +368,9 @@ export default function WeekDetailScreen() {
           </Text>
         </Card>
       ) : showSections ? (
-        PLAN_CONTENT_SECTIONS.map(section => {
-          const items = groupedContents[section];
-          if (items.length === 0) return null;
-          return (
-            <View key={section} style={styles.sectionBlock}>
-              <View style={styles.sectionHeader}>
-                <View style={styles.sectionMark}>
-                  <Text style={styles.sectionMarkText}>
-                    {section === 'RECIPE' ? '1' : section === 'EXERCISE' ? '2' : '3'}
-                  </Text>
-                </View>
-                <Text style={styles.sectionHeading}>{sectionTitle(section)}</Text>
-              </View>
-              {renderContentCards(items)}
-            </View>
-          );
-        })
+        <View style={styles.sectionBlock}>
+          {renderContentCards(groupedContents[selectedSection])}
+        </View>
       ) : (
         renderContentCards(activeContents)
       )}
@@ -406,6 +445,49 @@ const styles = StyleSheet.create({
   },
   dayChipText: { fontWeight: '700', color: colors.textSoft },
   dayChipTextActive: { color: '#fff' },
+  sectionTabs: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  sectionTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  sectionTabActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary,
+  },
+  sectionTabText: {
+    fontWeight: '700',
+    color: colors.textSoft,
+    fontSize: 13,
+  },
+  sectionTabTextActive: { color: '#fff' },
+  sectionTabCount: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.bgSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  sectionTabCountActive: { backgroundColor: 'rgba(255,255,255,0.22)' },
+  sectionTabCountText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.textMuted,
+  },
+  sectionTabCountTextActive: { color: '#fff' },
   sectionBlock: { marginBottom: 18 },
   sectionHeader: {
     flexDirection: 'row',

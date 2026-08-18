@@ -502,7 +502,7 @@ export default function PatientsPage() {
             {capabilities.canAssignPlans ? (
             <>
             <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 md:grid-cols-2">
-              <Select label="Arogya Sanskruti" value={form.planId} onChange={(e) => setForm({ ...form, planId: e.target.value })}>
+              <Select label="Personalized Plan" value={form.planId} onChange={(e) => setForm({ ...form, planId: e.target.value })}>
                 <option value="">-- Select Plan --</option>
                 {plans.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
               </Select>
@@ -572,7 +572,7 @@ export default function PatientsPage() {
       <div className="mt-6 space-y-4">
         {patients.map((patient) => {
           const programMeta: { program: PatientProgram; label: string; emptyLabel: string }[] = [
-            { program: "care", label: "Arogya Sanskruti", emptyLabel: "-- No Plan --" },
+            { program: "care", label: "Personalized Plan", emptyLabel: "-- No Plan --" },
             { program: "garbha", label: "Garbh Sanskruti Plan", emptyLabel: "-- No Garbh Sanskruti Plan --" },
             { program: "child", label: "Parenting Sanskruti Plan", emptyLabel: "-- No Parenting Sanskruti --" },
           ];
@@ -608,7 +608,7 @@ export default function PatientsPage() {
                   <p className="mt-2 text-sm text-slate-600"><strong>Requirements:</strong> {patient.requirements}</p>
                 )}
                 <p className="mt-1 text-sm text-slate-500">
-                  Plan: {patient.plan?.title || "Not assigned"} | Garbh Sanskruti: {patient.garbhaPlan?.title || "Not assigned"} | Parenting Sanskruti: {patient.childGuidancePlan?.title || "Not assigned"}
+                  Personalized Plan: {patient.plan?.title || "Not assigned"} | Garbh Sanskruti: {patient.garbhaPlan?.title || "Not assigned"} | Parenting Sanskruti: {patient.childGuidancePlan?.title || "Not assigned"}
                   {patient.supplementPlans?.[0]
                     ? ` | Supplements: ${patient.supplementPlans[0].title} (${patient.supplementPlans[0]._count.items})`
                     : ""}

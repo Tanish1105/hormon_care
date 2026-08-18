@@ -14,12 +14,15 @@ import { FullscreenYoutube } from "@/components/FullscreenYoutube";
 import { cn } from "@/lib/utils";
 import { CalendarDays, Dumbbell, ExternalLink, ImageIcon, Sparkles, Video, Pill, ChefHat, Flower2, FileText } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { PlanSectionTabs } from "@/components/PlanSectionTabs";
 import {
-  PLAN_CONTENT_SECTIONS,
   PLAN_SECTION_LABELS,
   PLAN_SECTION_LABELS_GU,
+  firstFilledSection,
   groupContentsBySection,
   isSafeHttpUrl,
+  sectionCounts,
+  type PlanContentSection,
 } from "@/lib/plan-sections";
 
 type Content = {
@@ -199,6 +202,7 @@ export default function PatientDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedSection, setSelectedSection] = useState<PlanContentSection>("RECIPE");
 
   const loadDashboard = useCallback(() => {
     setLoading(true);
@@ -244,6 +248,18 @@ export default function PatientDashboard() {
 
   useMidnightRefresh(loadDashboard);
 
+  useEffect(() => {
+    const plan = data?.profile.plan;
+    if (!plan) return;
+    const week = plan.weeks.find((w) => w.weekNumber === selectedWeek);
+    const day = week?.days?.find((d) => d.dayNumber === selectedDay);
+    const contents = plan.isDayWise ? (day?.contents ?? []) : (week?.contents ?? []);
+    const counts = sectionCounts(contents);
+    if (counts[selectedSection] === 0) {
+      setSelectedSection(firstFilledSection(contents));
+    }
+  }, [data, selectedWeek, selectedDay, selectedSection]);
+
   if (loading && !data) {
     return (
       <PatientLayout>
@@ -282,6 +298,8 @@ export default function PatientDashboard() {
     : true;
   const activeContents = plan?.isDayWise ? (day?.contents ?? []) : (week?.contents ?? []);
   const groupedContents = groupContentsBySection(activeContents);
+  const selectedItems = groupedContents[selectedSection];
+  const SelectedSectionIcon = sectionIcons[selectedSection];
   const progressPct = plan
     ? Math.min(100, Math.round((unlockedWeek / Math.max(plan.totalWeeks, 1)) * 100))
     : 0;
@@ -346,7 +364,7 @@ export default function PatientDashboard() {
           ) : (
             <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--muted)]">
               {plan
-                ? "તમારી આરોગ્ય સંસ્કૃતિ નીચે જુઓ."
+                ? "તમારો Personalized Plan નીચે જુઓ."
                 : "હજુ plan assign નથી. Doctor સાથે contact કરો."}
             </p>
           )}
@@ -442,6 +460,16 @@ export default function PatientDashboard() {
             />
           )}
 
+          {week && weekUnlocked && dayUnlocked && activeContents.length > 0 ? (
+            <PlanSectionTabs
+              value={selectedSection}
+              onChange={setSelectedSection}
+              counts={sectionCounts(activeContents)}
+              hideEmpty
+              showGujarati
+            />
+          ) : null}
+
           {week && weekUnlocked && dayUnlocked ? (
             <section className="overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-white shadow-sm">
               <div className="border-b border-[var(--border)] bg-[linear-gradient(120deg,#e8f3ec,#ffffff_55%)] px-5 py-5 sm:px-6">
@@ -477,32 +505,29 @@ export default function PatientDashboard() {
                       ? `Day ${selectedDay} માટે હજુ content add નથી થયું`
                       : `Week ${week.weekNumber} માટે હજુ content add નથી થયું`}
                   </p>
+                ) : selectedItems.length === 0 ? (
+                  <p className="py-10 text-center text-slate-500">
+                    {PLAN_SECTION_LABELS_GU[selectedSection]} માટે હજુ content નથી
+                  </p>
                 ) : (
-                  PLAN_CONTENT_SECTIONS.map((section) => {
-                    const items = groupedContents[section];
-                    if (items.length === 0) return null;
-                    const SectionIcon = sectionIcons[section];
-                    return (
-                      <div key={section} className="space-y-3">
-                        <div className="flex items-center gap-2 px-1 pt-1">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary-light)] text-[var(--primary)]">
-                            <SectionIcon className="h-4 w-4" />
-                          </span>
-                          <div>
-                            <h3 className="text-sm font-semibold text-slate-900">
-                              {PLAN_SECTION_LABELS[section]}
-                            </h3>
-                            <p className="text-[11px] font-medium text-slate-500">
-                              {PLAN_SECTION_LABELS_GU[section]}
-                            </p>
-                          </div>
-                        </div>
-                        {items.map((item) => (
-                          <ContentItem key={item.id} item={item} />
-                        ))}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 px-1 pt-1">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary-light)] text-[var(--primary)]">
+                        <SelectedSectionIcon className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-900">
+                          {PLAN_SECTION_LABELS[selectedSection]}
+                        </h3>
+                        <p className="text-[11px] font-medium text-slate-500">
+                          {PLAN_SECTION_LABELS_GU[selectedSection]}
+                        </p>
                       </div>
-                    );
-                  })
+                    </div>
+                    {selectedItems.map((item) => (
+                      <ContentItem key={item.id} item={item} />
+                    ))}
+                  </div>
                 )}
               </div>
             </section>
