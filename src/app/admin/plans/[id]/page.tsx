@@ -9,11 +9,31 @@ import { FullscreenImage } from "@/components/FullscreenImage";
 import { FullscreenVideo } from "@/components/FullscreenVideo";
 import { FullscreenYoutube } from "@/components/FullscreenYoutube";
 import { WeekSelector, DaySelector, PlanBreadcrumb } from "@/components/PlanWeekDay";
-import { ArrowLeft, Plus, Trash2, Dumbbell, Video, ExternalLink, ImageIcon, Calendar } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Dumbbell,
+  Video,
+  ExternalLink,
+  ImageIcon,
+  Calendar,
+  ChefHat,
+  Flower2,
+  FileText,
+} from "lucide-react";
 import { useStaffPortal } from "@/components/StaffPortalContext";
+import {
+  PLAN_CONTENT_SECTIONS,
+  PLAN_SECTION_LABELS,
+  contentSection,
+  isSafeHttpUrl,
+  type PlanContentSection,
+} from "@/lib/plan-sections";
 
 type Content = {
   id: string;
+  section?: string | null;
   type: string;
   title: string;
   description: string | null;
@@ -54,13 +74,21 @@ type Plan = {
 
 const contentIcons = {
   EXERCISE: Dumbbell,
+  TEXT: FileText,
   VIDEO: Video,
   YOUTUBE: ExternalLink,
+  LINK: ExternalLink,
   IMAGE: ImageIcon,
 };
 
+const sectionIcons = {
+  RECIPE: ChefHat,
+  EXERCISE: Dumbbell,
+  MEDITATION: Flower2,
+};
+
 const emptyContentForm = {
-  type: "EXERCISE",
+  type: "TEXT",
   title: "",
   description: "",
   url: "",
@@ -75,8 +103,9 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
   const [plan, setPlan] = useState<Plan | null>(null);
   const [activeWeek, setActiveWeek] = useState(1);
   const [activeDay, setActiveDay] = useState(1);
-  const [showAddContent, setShowAddContent] = useState(false);
+  const [addingSection, setAddingSection] = useState<PlanContentSection | null>(null);
   const [contentForm, setContentForm] = useState(emptyContentForm);
+  const [savingContent, setSavingContent] = useState(false);
   const [addingWeek, setAddingWeek] = useState(false);
 
   async function loadPlan() {
@@ -93,6 +122,8 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
   function selectWeek(weekNumber: number) {
     setActiveWeek(weekNumber);
     setActiveDay(1);
+    setAddingSection(null);
+    setContentForm(emptyContentForm);
   }
 
   async function updateDay() {
@@ -124,17 +155,24 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
 
   async function addContent(e: React.FormEvent) {
     e.preventDefault();
-    if (!week) return;
+    if (!week || !addingSection) return;
     const endpoint = plan?.isDayWise && day
       ? `/api/admin/plans/${id}/weeks/${week.id}/days/${day.id}`
       : `/api/admin/plans/${id}/weeks/${week.id}`;
-    await fetch(endpoint, {
+    setSavingContent(true);
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contentForm),
+      body: JSON.stringify({ ...contentForm, section: addingSection }),
     });
+    setSavingContent(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Could not add content");
+      return;
+    }
     setContentForm(emptyContentForm);
-    setShowAddContent(false);
+    setAddingSection(null);
     loadPlan();
   }
 
@@ -263,7 +301,11 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
                   <DaySelector
                     days={week.days}
                     activeDay={activeDay}
-                    onSelectDay={setActiveDay}
+                    onSelectDay={(dayNumber) => {
+                      setActiveDay(dayNumber);
+                      setAddingSection(null);
+                      setContentForm(emptyContentForm);
+                    }}
                     variant="admin"
                   />
                   {day && (
@@ -286,107 +328,201 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
                 </Card>
               )}
 
-              <Card className="border-2 border-[var(--border)]">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <h3 className="font-semibold">
-                    {plan.isDayWise
-                      ? `Week ${week.weekNumber} · Day ${activeDay} Content (${activeContents.length})`
-                      : `Week ${week.weekNumber} Content (${activeContents.length})`}
-                  </h3>
-                  <Button className="w-full sm:w-auto" onClick={() => setShowAddContent(!showAddContent)}>
-                    <Plus className="mr-1 h-4 w-4" /> Add
-                  </Button>
-                </div>
-
-                {showAddContent && (
-                  <Card className="mt-4 border-dashed">
-                    <form onSubmit={addContent} className="space-y-4">
-                      <Select label="Type" value={contentForm.type} onChange={(e) => setContentForm({ ...emptyContentForm, type: e.target.value, title: contentForm.title, description: contentForm.description })}>
-                        <option value="EXERCISE">Exercise</option>
-                        <option value="IMAGE">Image Upload</option>
-                        <option value="VIDEO">Video Upload</option>
-                        <option value="YOUTUBE">YouTube Link</option>
-                      </Select>
-                      <Input label="Title" value={contentForm.title} onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })} required />
-                      <Textarea label="Description" value={contentForm.description} onChange={(e) => setContentForm({ ...contentForm, description: e.target.value })} rows={2} />
-                      {contentForm.type === "EXERCISE" && (
-                        <>
-                          <Textarea label="Instructions" value={contentForm.content} onChange={(e) => setContentForm({ ...contentForm, content: e.target.value })} rows={4} />
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <FileUpload label="Image (optional)" accept="image" value={contentForm.imageUrl} onChange={(url) => setContentForm({ ...contentForm, imageUrl: url })} />
-                            <FileUpload label="Video (optional)" accept="video" value={contentForm.videoUrl} onChange={(url) => setContentForm({ ...contentForm, videoUrl: url })} />
-                          </div>
-                        </>
-                      )}
-                      {contentForm.type === "IMAGE" && (
-                        <FileUpload label="Image" accept="image" value={contentForm.url} onChange={(url) => setContentForm({ ...contentForm, url })} />
-                      )}
-                      {contentForm.type === "VIDEO" && (
-                        <FileUpload label="Video" accept="video" value={contentForm.url} onChange={(url) => setContentForm({ ...contentForm, url })} />
-                      )}
-                      {contentForm.type === "YOUTUBE" && (
-                        <Input label="YouTube URL" value={contentForm.url} onChange={(e) => setContentForm({ ...contentForm, url: e.target.value })} />
-                      )}
-                      <div className="flex gap-2">
-                        <Button type="submit">
-                          {plan.isDayWise ? `Add to Day ${activeDay}` : `Add to Week ${week.weekNumber}`}
-                        </Button>
-                        <Button type="button" variant="ghost" onClick={() => setShowAddContent(false)}>Cancel</Button>
-                      </div>
-                    </form>
-                  </Card>
-                )}
-
-                <div className="mt-4 space-y-3">
-                  {activeContents.map((item) => {
-                    const Icon = contentIcons[item.type as keyof typeof contentIcons] || Dumbbell;
-                    return (
-                      <div key={item.id} className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-start sm:justify-between sm:p-4">
-                        <div className="flex min-w-0 gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--primary)] shadow-sm">
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-medium">{item.title}</h4>
-                              <Badge color="slate">{item.type}</Badge>
-                            </div>
-                            {item.description && <p className="mt-1 text-sm text-slate-500">{item.description}</p>}
-                            {item.content && <p className="mt-2 text-sm whitespace-pre-wrap">{item.content}</p>}
-                            {item.imageUrl && (
-                              <FullscreenImage src={item.imageUrl} alt={item.title} className="mt-2 max-h-40 rounded-lg" />
-                            )}
-                            {item.videoUrl && (
-                              <FullscreenVideo src={item.videoUrl} title={item.title} className="mt-2 max-h-40 w-full rounded-lg" />
-                            )}
-                            {item.type === "IMAGE" && item.url && (
-                              <FullscreenImage src={item.url} alt={item.title} className="mt-2 max-h-40 rounded-lg" />
-                            )}
-                            {item.type === "VIDEO" && item.url && (
-                              <FullscreenVideo src={item.url} title={item.title} className="mt-2 max-h-40 w-full rounded-lg" />
-                            )}
-                            {item.type === "YOUTUBE" && item.url && (
-                              <FullscreenYoutube url={item.url} title={item.title} className="mt-2" />
-                            )}
+              <div className="space-y-4">
+                {PLAN_CONTENT_SECTIONS.map((section) => {
+                  const SectionIcon = sectionIcons[section];
+                  const sectionItems = activeContents.filter((item) => contentSection(item) === section);
+                  const isAdding = addingSection === section;
+                  return (
+                    <Card key={section} className="border-2 border-[var(--border)]">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--primary-light)] text-[var(--primary)]">
+                            <SectionIcon className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <h3 className="font-semibold">{PLAN_SECTION_LABELS[section]}</h3>
+                            <p className="text-xs text-slate-500">
+                              {sectionItems.length} item{sectionItems.length === 1 ? "" : "s"} · description, image, video, or link
+                            </p>
                           </div>
                         </div>
-                        <button onClick={() => deleteContent(item.id)} className="self-end rounded p-1 text-red-500 hover:bg-red-50 sm:self-start">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <Button
+                          className="w-full sm:w-auto"
+                          onClick={() => {
+                            setAddingSection(isAdding ? null : section);
+                            setContentForm(emptyContentForm);
+                          }}
+                        >
+                          <Plus className="mr-1 h-4 w-4" /> Add
+                        </Button>
                       </div>
-                    );
-                  })}
-                  {activeContents.length === 0 && (
-                    <p className="rounded-lg border border-dashed border-slate-200 py-8 text-center text-slate-500">
-                      {plan.isDayWise
-                        ? `No content in Day ${activeDay} yet — click Add`
-                        : `No content in Week ${week.weekNumber} yet — click Add`}
-                    </p>
-                  )}
-                </div>
+
+                      {isAdding && (
+                        <Card className="mt-4 border-dashed">
+                          <form onSubmit={addContent} className="space-y-4">
+                            <Select
+                              label="Type"
+                              value={contentForm.type}
+                              onChange={(e) =>
+                                setContentForm({
+                                  ...emptyContentForm,
+                                  type: e.target.value,
+                                  title: contentForm.title,
+                                  description: contentForm.description,
+                                })
+                              }
+                            >
+                              <option value="TEXT">Description</option>
+                              <option value="IMAGE">Image</option>
+                              <option value="VIDEO">Video</option>
+                              <option value="LINK">Link (YouTube or URL)</option>
+                            </Select>
+                            <Input
+                              label={contentForm.type === "TEXT" ? "Title (optional)" : "Title"}
+                              value={contentForm.title}
+                              onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })}
+                              required={contentForm.type !== "TEXT"}
+                            />
+                            {contentForm.type === "TEXT" ? (
+                              <Textarea
+                                label="Description"
+                                value={contentForm.content}
+                                onChange={(e) => setContentForm({ ...contentForm, content: e.target.value })}
+                                rows={6}
+                                required
+                              />
+                            ) : (
+                              <Textarea
+                                label="Description"
+                                value={contentForm.description}
+                                onChange={(e) => setContentForm({ ...contentForm, description: e.target.value })}
+                                rows={2}
+                              />
+                            )}
+                            {contentForm.type === "IMAGE" && (
+                              <FileUpload
+                                label="Image"
+                                accept="image"
+                                value={contentForm.url}
+                                onChange={(url) => setContentForm({ ...contentForm, url })}
+                              />
+                            )}
+                            {contentForm.type === "VIDEO" && (
+                              <FileUpload
+                                label="Video"
+                                accept="video"
+                                value={contentForm.url}
+                                onChange={(url) => setContentForm({ ...contentForm, url })}
+                              />
+                            )}
+                            {contentForm.type === "LINK" && (
+                              <Input
+                                label="Link URL"
+                                value={contentForm.url}
+                                onChange={(e) => setContentForm({ ...contentForm, url: e.target.value })}
+                                placeholder="https://..."
+                                required
+                              />
+                            )}
+                            <div className="flex gap-2">
+                              <Button type="submit" disabled={savingContent}>
+                                {savingContent
+                                  ? "Adding..."
+                                  : plan.isDayWise
+                                    ? `Add to ${PLAN_SECTION_LABELS[section]} · Day ${activeDay}`
+                                    : `Add to ${PLAN_SECTION_LABELS[section]}`}
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => {
+                                  setAddingSection(null);
+                                  setContentForm(emptyContentForm);
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </form>
+                        </Card>
+                      )}
+
+                      <div className="mt-4 space-y-3">
+                        {sectionItems.map((item) => {
+                          const Icon = contentIcons[item.type as keyof typeof contentIcons] || ExternalLink;
+                          const linkUrl = item.type === "LINK" && item.url && isSafeHttpUrl(item.url) ? item.url : null;
+                          return (
+                            <div
+                              key={item.id}
+                              className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-start sm:justify-between sm:p-4"
+                            >
+                              <div className="flex min-w-0 gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--primary)] shadow-sm">
+                                  <Icon className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-medium">{item.title}</h4>
+                                    <Badge color="slate">
+                                      {item.type === "YOUTUBE" || item.type === "LINK"
+                                        ? "LINK"
+                                        : item.type === "TEXT" || item.type === "EXERCISE"
+                                          ? "DESCRIPTION"
+                                          : item.type}
+                                    </Badge>
+                                  </div>
+                                  {item.description && <p className="mt-1 text-sm text-slate-500">{item.description}</p>}
+                                  {item.content && <p className="mt-2 text-sm whitespace-pre-wrap">{item.content}</p>}
+                                  {item.imageUrl && (
+                                    <FullscreenImage src={item.imageUrl} alt={item.title} className="mt-2 max-h-40 rounded-lg" />
+                                  )}
+                                  {item.videoUrl && (
+                                    <FullscreenVideo src={item.videoUrl} title={item.title} className="mt-2 max-h-40 w-full rounded-lg" />
+                                  )}
+                                  {item.type === "IMAGE" && item.url && (
+                                    <FullscreenImage src={item.url} alt={item.title} className="mt-2 max-h-40 rounded-lg" />
+                                  )}
+                                  {item.type === "VIDEO" && item.url && (
+                                    <FullscreenVideo src={item.url} title={item.title} className="mt-2 max-h-40 w-full rounded-lg" />
+                                  )}
+                                  {item.type === "YOUTUBE" && item.url && (
+                                    <FullscreenYoutube url={item.url} title={item.title} className="mt-2" />
+                                  )}
+                                  {linkUrl && (
+                                    <a
+                                      href={linkUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-[var(--primary)] hover:underline"
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5" />
+                                      Open link
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => deleteContent(item.id)}
+                                className="self-end rounded p-1 text-red-500 hover:bg-red-50 sm:self-start"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                        {sectionItems.length === 0 && !isAdding && (
+                          <p className="rounded-lg border border-dashed border-slate-200 py-6 text-center text-sm text-slate-500">
+                            No {PLAN_SECTION_LABELS[section].toLowerCase()} yet — click Add to write a description or upload image, video, or link
+                          </p>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
 
                 {plan.isDayWise && activeDay < 7 && (
-                  <div className="mt-6 flex justify-stretch sm:justify-end">
+                  <div className="flex justify-stretch sm:justify-end">
                     <Button variant="secondary" className="w-full sm:w-auto" onClick={() => setActiveDay(activeDay + 1)}>
                       Next: Day {activeDay + 1} →
                     </Button>
@@ -394,13 +530,13 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
                 )}
 
                 {!plan.isDayWise && activeWeek < plan.totalWeeks && (
-                  <div className="mt-6 flex justify-stretch sm:justify-end">
+                  <div className="flex justify-stretch sm:justify-end">
                     <Button variant="secondary" className="w-full sm:w-auto" onClick={() => selectWeek(activeWeek + 1)}>
                       Next: Week {activeWeek + 1} →
                     </Button>
                   </div>
                 )}
-              </Card>
+              </div>
             </>
           )}
         </div>

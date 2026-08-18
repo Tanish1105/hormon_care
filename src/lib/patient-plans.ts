@@ -79,7 +79,7 @@ async function cloneCarePlan(sourceId: string, title: string) {
       totalWeeks: source.totalWeeks,
       isCustom: true,
       isDayWise: source.isDayWise,
-      weeks: { create: buildWeeksCreateData(source.weeks, source.isDayWise) },
+      weeks: { create: buildWeeksCreateData(source.weeks, source.isDayWise, true) },
     },
   });
 }
@@ -100,7 +100,7 @@ async function cloneGarbhaPlan(sourceId: string, title: string) {
       totalWeeks: source.totalWeeks,
       isCustom: true,
       isDayWise: source.isDayWise,
-      weeks: { create: buildWeeksCreateData(source.weeks, source.isDayWise) },
+      weeks: { create: buildWeeksCreateData(source.weeks, source.isDayWise, false) },
     },
   });
 }
@@ -121,7 +121,7 @@ async function cloneChildPlan(sourceId: string, title: string) {
       totalWeeks: source.totalWeeks,
       isCustom: true,
       isDayWise: source.isDayWise,
-      weeks: { create: buildWeeksCreateData(source.weeks, source.isDayWise) },
+      weeks: { create: buildWeeksCreateData(source.weeks, source.isDayWise, false) },
     },
   });
 }

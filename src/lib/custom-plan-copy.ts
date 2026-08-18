@@ -1,4 +1,5 @@
 type ContentCopy = {
+  section?: string | null;
   type: string;
   title: string;
   description: string | null;
@@ -24,8 +25,11 @@ type WeekCopy = {
   days: DayCopy[];
 };
 
-function copyContent(c: ContentCopy) {
+function copyContent(c: ContentCopy, withSection: boolean) {
   return {
+    ...(withSection
+      ? { section: c.section || (c.type === "EXERCISE" ? "EXERCISE" : "RECIPE") }
+      : {}),
     type: c.type,
     title: c.title,
     description: c.description,
@@ -37,12 +41,20 @@ function copyContent(c: ContentCopy) {
   };
 }
 
-export function buildWeeksCreateData(weeks: WeekCopy[], isDayWise: boolean) {
+function createNested<T>(items: T[]) {
+  return items.length ? { create: items } : undefined;
+}
+
+export function buildWeeksCreateData(
+  weeks: WeekCopy[],
+  isDayWise: boolean,
+  withSection = true
+) {
   return weeks.map((week) => ({
     weekNumber: week.weekNumber,
     title: week.title,
     description: week.description,
-    contents: { create: week.contents.map(copyContent) },
+    contents: createNested(week.contents.map((c) => copyContent(c, withSection))),
     ...(isDayWise
       ? {
           days: {
@@ -50,7 +62,7 @@ export function buildWeeksCreateData(weeks: WeekCopy[], isDayWise: boolean) {
               dayNumber: day.dayNumber,
               title: day.title,
               description: day.description,
-              contents: { create: day.contents.map(copyContent) },
+              contents: createNested(day.contents.map((c) => copyContent(c, withSection))),
             })),
           },
         }

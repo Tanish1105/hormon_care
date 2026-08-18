@@ -90,6 +90,7 @@ async function main() {
                 ? {
                     create: [
                       {
+                        section: "EXERCISE",
                         type: "EXERCISE",
                         title: "Gentle Breathing Exercise",
                         description: "Daily breathing practice",

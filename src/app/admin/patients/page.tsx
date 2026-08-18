@@ -295,7 +295,13 @@ export default function PatientsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ program, action: "open" }),
     });
-    const data = await res.json();
+    const text = await res.text();
+    let data: { error?: string; editPath?: string } = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = {};
+    }
     setEditLoading(null);
     if (!res.ok) {
       alert(data.error || "Could not open plan editor");

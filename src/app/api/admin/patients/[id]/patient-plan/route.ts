@@ -36,16 +36,21 @@ export async function POST(
   }
 
   if (body.action === "open") {
-    const result = await ensureEditablePatientPlan(
-      id,
-      program,
-      patient.user.name,
-      panelPath(access.session.role)
-    );
-    if (!result) {
-      return NextResponse.json({ error: "No plan assigned to edit" }, { status: 400 });
+    try {
+      const result = await ensureEditablePatientPlan(
+        id,
+        program,
+        patient.user.name,
+        panelPath(access.session.role)
+      );
+      if (!result) {
+        return NextResponse.json({ error: "No plan assigned to edit" }, { status: 400 });
+      }
+      return NextResponse.json(result);
+    } catch (err) {
+      console.error("Failed to open patient plan", err);
+      return NextResponse.json({ error: "Could not open plan editor" }, { status: 500 });
     }
-    return NextResponse.json(result);
   }
 
   const mode: "new" | "copy" = body.mode === "copy" ? "copy" : "new";

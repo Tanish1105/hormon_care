@@ -17,6 +17,12 @@ import Card from '../components/Card';
 import FullscreenImage from '../components/FullscreenImage';
 import { colors, radius } from '../theme';
 import type { RootStackParamList } from '../navigation/RootNavigator';
+import {
+  PLAN_CONTENT_SECTIONS,
+  groupContentsBySection,
+  isSafeHttpUrl,
+  type PlanContentSection,
+} from '../lib/plan-sections';
 
 type RParam = RouteProp<RootStackParamList, 'WeekDetail'>;
 
@@ -47,9 +53,13 @@ function ContentCard({
   const youtubeThumb = isYoutube
     ? api.youtubeThumbUrl(item.id, youtubeSource)
     : null;
+  const linkUrl =
+    item.type === 'LINK' && item.url && isSafeHttpUrl(item.url)
+      ? item.url
+      : null;
 
   return (
-    <Card title={item.title || undefined}>
+    <Card title={item.title && item.title !== 'Notes' ? item.title : undefined}>
       {item.description ? (
         <Text style={styles.contentDesc}>{item.description}</Text>
       ) : null}
@@ -119,6 +129,14 @@ function ContentCard({
           onPress={() => Linking.openURL(videoUri)}
           style={styles.linkBtn}>
           <Text style={styles.linkText}>{t('openVideo')}</Text>
+        </Pressable>
+      ) : null}
+
+      {linkUrl ? (
+        <Pressable
+          onPress={() => Linking.openURL(linkUrl)}
+          style={styles.linkBtn}>
+          <Text style={styles.linkText}>{t('openLink')}</Text>
         </Pressable>
       ) : null}
     </Card>
@@ -201,6 +219,27 @@ export default function WeekDetailScreen() {
   }, [week, isDayWise, selectedDay]);
 
   const activeDay = week?.days?.find(d => d.dayNumber === selectedDay);
+  const groupedContents = useMemo(
+    () => groupContentsBySection(activeContents),
+    [activeContents],
+  );
+  const showSections = program === 'care';
+
+  const sectionTitle = (section: PlanContentSection) => {
+    if (section === 'RECIPE') return t('sectionRecipes');
+    if (section === 'EXERCISE') return t('sectionExercise');
+    return t('sectionMeditation');
+  };
+
+  const renderContentCards = (items: api.PlanContent[]) =>
+    items.map(c => (
+      <ContentCard
+        key={c.id}
+        item={c}
+        cookie={cookie}
+        youtubeSource={youtubeSource}
+      />
+    ));
 
   if (loading) {
     return (
@@ -275,15 +314,26 @@ export default function WeekDetailScreen() {
             {isDayWise ? t('noDayContentYet') : t('noContentYet')}
           </Text>
         </Card>
+      ) : showSections ? (
+        PLAN_CONTENT_SECTIONS.map(section => {
+          const items = groupedContents[section];
+          if (items.length === 0) return null;
+          return (
+            <View key={section} style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionMark}>
+                  <Text style={styles.sectionMarkText}>
+                    {section === 'RECIPE' ? '1' : section === 'EXERCISE' ? '2' : '3'}
+                  </Text>
+                </View>
+                <Text style={styles.sectionHeading}>{sectionTitle(section)}</Text>
+              </View>
+              {renderContentCards(items)}
+            </View>
+          );
+        })
       ) : (
-        activeContents.map(c => (
-          <ContentCard
-            key={c.id}
-            item={c}
-            cookie={cookie}
-            youtubeSource={youtubeSource}
-          />
-        ))
+        renderContentCards(activeContents)
       )}
     </ScrollView>
   );
@@ -356,6 +406,33 @@ const styles = StyleSheet.create({
   },
   dayChipText: { fontWeight: '700', color: colors.textSoft },
   dayChipTextActive: { color: '#fff' },
+  sectionBlock: { marginBottom: 18 },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+    marginTop: 4,
+  },
+  sectionMark: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: colors.primaryTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionMarkText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  sectionHeading: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.text,
+    letterSpacing: -0.3,
+  },
   contentDesc: { color: colors.textSoft, marginBottom: 12, lineHeight: 20 },
   videoWrap: {
     height: 210,

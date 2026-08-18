@@ -75,6 +75,7 @@ export async function POST(
           description: week.description,
           contents: {
             create: week.contents.map((c) => ({
+              section: c.section || (c.type === "EXERCISE" ? "EXERCISE" : "RECIPE"),
               type: c.type,
               title: c.title,
               description: c.description,
@@ -94,6 +95,7 @@ export async function POST(
                     description: day.description,
                     contents: {
                       create: day.contents.map((c) => ({
+                        section: c.section || (c.type === "EXERCISE" ? "EXERCISE" : "RECIPE"),
                         type: c.type,
                         title: c.title,
                         description: c.description,

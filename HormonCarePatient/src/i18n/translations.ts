@@ -121,7 +121,11 @@ const en: Dict = {
   pinchToZoom: 'Pinch or double-tap to zoom',
   watchOnYoutube: '▶ Watch on YouTube',
   openVideo: '▶ Open video',
+  openLink: 'Open link',
   weekDetailTitle: 'Week Detail',
+  sectionRecipes: 'Recipes',
+  sectionExercise: 'Exercise',
+  sectionMeditation: 'Meditation',
 
   // Lifestyle
   lifestyleTitle: 'Lifestyle Assessment',
@@ -366,7 +370,11 @@ const gu: Dict = {
   pinchToZoom: 'Zoom માટે pinch અથવા double-tap કરો',
   watchOnYoutube: '▶ YouTube પર જુઓ',
   openVideo: '▶ Video ખોલો',
+  openLink: 'લિંક ખોલો',
   weekDetailTitle: 'સપ્તાહ વિગત',
+  sectionRecipes: 'રેસિપી',
+  sectionExercise: 'કસરત',
+  sectionMeditation: 'ધ્યાન',
 
   lifestyleTitle: 'જીવનશૈલી મૂલ્યાંકન',
   lifestyleHeroTitle: 'જીવનશૈલી મૂલ્યાંકન',

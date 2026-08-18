@@ -12,11 +12,19 @@ import { FullscreenImage } from "@/components/FullscreenImage";
 import { FullscreenVideo } from "@/components/FullscreenVideo";
 import { FullscreenYoutube } from "@/components/FullscreenYoutube";
 import { cn } from "@/lib/utils";
-import { CalendarDays, Dumbbell, ExternalLink, ImageIcon, Sparkles, Video, Pill } from "lucide-react";
+import { CalendarDays, Dumbbell, ExternalLink, ImageIcon, Sparkles, Video, Pill, ChefHat, Flower2, FileText } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import {
+  PLAN_CONTENT_SECTIONS,
+  PLAN_SECTION_LABELS,
+  PLAN_SECTION_LABELS_GU,
+  groupContentsBySection,
+  isSafeHttpUrl,
+} from "@/lib/plan-sections";
 
 type Content = {
   id: string;
+  section?: string | null;
   type: string;
   title: string;
   description: string | null;
@@ -80,9 +88,17 @@ type DashboardData = {
 
 const contentIcons = {
   EXERCISE: Dumbbell,
+  TEXT: FileText,
   VIDEO: Video,
   YOUTUBE: ExternalLink,
+  LINK: ExternalLink,
   IMAGE: ImageIcon,
+};
+
+const sectionIcons = {
+  RECIPE: ChefHat,
+  EXERCISE: Dumbbell,
+  MEDITATION: Flower2,
 };
 
 function ContentItem({ item }: { item: Content }) {
@@ -91,8 +107,10 @@ function ContentItem({ item }: { item: Content }) {
     Boolean(item.imageUrl) ||
     Boolean(item.videoUrl) ||
     item.type === "YOUTUBE" ||
+    item.type === "LINK" ||
     (item.type === "IMAGE" && Boolean(item.url)) ||
     (item.type === "VIDEO" && Boolean(item.url));
+  const linkUrl = item.type === "LINK" && item.url && isSafeHttpUrl(item.url) ? item.url : null;
 
   return (
     <article className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm transition hover:border-[var(--primary)]/25">
@@ -104,7 +122,11 @@ function ContentItem({ item }: { item: Content }) {
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold text-slate-900">{item.title}</h4>
             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-              {item.type}
+              {item.type === "TEXT" || item.type === "EXERCISE"
+                ? "DESCRIPTION"
+                : item.type === "YOUTUBE"
+                  ? "LINK"
+                  : item.type}
             </span>
           </div>
           {item.description && (
@@ -153,6 +175,17 @@ function ContentItem({ item }: { item: Content }) {
             protected
             className="w-full rounded-xl"
           />
+        )}
+        {linkUrl && (
+          <a
+            href={linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary-light)] px-4 py-3 text-sm font-semibold text-[var(--primary)]"
+          >
+            <ExternalLink className="h-4 w-4" />
+            લિંક ખોલો
+          </a>
         )}
       </div>
     </article>
@@ -248,6 +281,7 @@ export default function PatientDashboard() {
     ? day && isDayUnlocked(day.dayNumber, selectedWeek, unlockedWeek, unlockedDay)
     : true;
   const activeContents = plan?.isDayWise ? (day?.contents ?? []) : (week?.contents ?? []);
+  const groupedContents = groupContentsBySection(activeContents);
   const progressPct = plan
     ? Math.min(100, Math.round((unlockedWeek / Math.max(plan.totalWeeks, 1)) * 100))
     : 0;
@@ -444,7 +478,31 @@ export default function PatientDashboard() {
                       : `Week ${week.weekNumber} માટે હજુ content add નથી થયું`}
                   </p>
                 ) : (
-                  activeContents.map((item) => <ContentItem key={item.id} item={item} />)
+                  PLAN_CONTENT_SECTIONS.map((section) => {
+                    const items = groupedContents[section];
+                    if (items.length === 0) return null;
+                    const SectionIcon = sectionIcons[section];
+                    return (
+                      <div key={section} className="space-y-3">
+                        <div className="flex items-center gap-2 px-1 pt-1">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary-light)] text-[var(--primary)]">
+                            <SectionIcon className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <h3 className="text-sm font-semibold text-slate-900">
+                              {PLAN_SECTION_LABELS[section]}
+                            </h3>
+                            <p className="text-[11px] font-medium text-slate-500">
+                              {PLAN_SECTION_LABELS_GU[section]}
+                            </p>
+                          </div>
+                        </div>
+                        {items.map((item) => (
+                          <ContentItem key={item.id} item={item} />
+                        ))}
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </section>

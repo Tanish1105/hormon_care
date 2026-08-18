@@ -166,6 +166,7 @@ CREATE TABLE `PlanDay` (
 CREATE TABLE `DayContent` (
     `id` VARCHAR(191) NOT NULL,
     `dayId` VARCHAR(191) NOT NULL,
+    `section` VARCHAR(191) NOT NULL DEFAULT 'RECIPE',
     `type` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
     `description` TEXT NULL,
@@ -184,6 +185,7 @@ CREATE TABLE `DayContent` (
 CREATE TABLE `WeekContent` (
     `id` VARCHAR(191) NOT NULL,
     `weekId` VARCHAR(191) NOT NULL,
+    `section` VARCHAR(191) NOT NULL DEFAULT 'RECIPE',
     `type` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
     `description` TEXT NULL,

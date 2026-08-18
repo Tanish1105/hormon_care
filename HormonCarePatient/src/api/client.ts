@@ -303,7 +303,8 @@ export async function logout(): Promise<void> {
 
 export type PlanContent = {
   id: string;
-  type: 'YOUTUBE' | 'TEXT' | 'IMAGE' | 'VIDEO' | string;
+  section?: 'RECIPE' | 'EXERCISE' | 'MEDITATION' | string | null;
+  type: 'YOUTUBE' | 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | string;
   title: string | null;
   description: string | null;
   url: string | null;

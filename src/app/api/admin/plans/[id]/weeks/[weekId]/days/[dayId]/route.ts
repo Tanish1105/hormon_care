@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaffSession } from "@/lib/staff-access";
+import { parsePlanContentInput } from "@/lib/plan-content-input";
 
 export async function PUT(
   request: NextRequest,
@@ -31,11 +32,9 @@ export async function POST(
   const session = access.session;
 
   const { dayId } = await params;
-  const { type, title, description, url, content, imageUrl, videoUrl } =
-    await request.json();
-
-  if (!type || !title) {
-    return NextResponse.json({ error: "Type and title are required" }, { status: 400 });
+  const parsed = parsePlanContentInput(await request.json());
+  if ("error" in parsed) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
   const count = await prisma.dayContent.count({ where: { dayId } });
@@ -43,13 +42,14 @@ export async function POST(
   const item = await prisma.dayContent.create({
     data: {
       dayId,
-      type,
-      title,
-      description: description || null,
-      url: url || null,
-      content: content || null,
-      imageUrl: imageUrl || null,
-      videoUrl: videoUrl || null,
+      section: parsed.section,
+      type: parsed.type,
+      title: parsed.title,
+      description: parsed.description,
+      url: parsed.url,
+      content: parsed.content,
+      imageUrl: parsed.imageUrl,
+      videoUrl: parsed.videoUrl,
       sortOrder: count,
     },
   });
