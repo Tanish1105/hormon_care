@@ -10,6 +10,7 @@ import { FullscreenVideo } from "@/components/FullscreenVideo";
 import { FullscreenYoutube } from "@/components/FullscreenYoutube";
 import { WeekSelector, DaySelector, PlanBreadcrumb } from "@/components/PlanWeekDay";
 import { ArrowLeft, Plus, Trash2, Dumbbell, Video, ExternalLink, ImageIcon, Calendar } from "lucide-react";
+import { useStaffPortal } from "@/components/StaffPortalContext";
 
 type Content = {
   id: string;
@@ -69,6 +70,7 @@ const emptyContentForm = {
 };
 
 export default function GarbhaDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { capabilities } = useStaffPortal();
   const { id } = use(params);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [activeWeek, setActiveWeek] = useState(1);
@@ -170,7 +172,7 @@ export default function GarbhaDetailPage({ params }: { params: Promise<{ id: str
 
   return (
     <AdminLayout>
-      <Link href="/admin/garbha-sanskar" className="flex items-center gap-1 text-sm text-[var(--primary)] hover:underline">
+      <Link href={`${capabilities.basePath}/garbha-sanskar`} className="flex items-center gap-1 text-sm text-[var(--primary)] hover:underline">
         <ArrowLeft className="h-4 w-4" /> Back to Garbh Sanskruti
       </Link>
 

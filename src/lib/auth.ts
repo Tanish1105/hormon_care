@@ -15,12 +15,21 @@ export const SESSION_COOKIE_OPTIONS = {
   path: "/",
 };
 
+export const STAFF_ROLES = ["ADMIN", "DOCTOR", "DOCTOR_STAFF", "DIETITIAN"] as const;
+export type StaffRole = (typeof STAFF_ROLES)[number];
+export type UserRole = StaffRole | "PATIENT";
+
 export type SessionUser = {
   id: string;
   username: string;
-  role: "ADMIN" | "PATIENT";
+  role: UserRole;
   name: string;
+  doctorId?: string | null;
 };
+
+export function isStaffRole(role: string | null | undefined): role is StaffRole {
+  return STAFF_ROLES.includes(role as StaffRole);
+}
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 10);

@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/AdminLayout";
-import { Card, Badge } from "@/components/ui";
+import { Card, Badge, Input } from "@/components/ui";
+import { useStaffPortal } from "@/components/StaffPortalContext";
 import { Users, ClipboardList, Baby, GraduationCap, MessageSquare } from "lucide-react";
 
 export function AdminDashboard() {
+  const { capabilities, name } = useStaffPortal();
   const [stats, setStats] = useState({
     patients: 0,
     plans: 0,
@@ -22,13 +24,27 @@ export function AdminDashboard() {
   const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
-    Promise.all([
+    const requests: Promise<unknown>[] = [
       fetch("/api/admin/patients").then((r) => r.json()),
-      fetch("/api/admin/plans").then((r) => r.json()),
-      fetch("/api/admin/garbha-plans").then((r) => r.json()),
-      fetch("/api/admin/child-guidance-plans").then((r) => r.json()),
-      fetch("/api/admin/inquiries").then((r) => r.json()),
-    ]).then(([patients, plans, garbha, childGuidance, inquiries]) => {
+    ];
+    if (capabilities.canWritePlans) {
+      requests.push(
+        fetch("/api/admin/plans").then((r) => r.json()),
+        fetch("/api/admin/garbha-plans").then((r) => r.json()),
+        fetch("/api/admin/child-guidance-plans").then((r) => r.json())
+      );
+    }
+    if (capabilities.canManageInquiries) {
+      requests.push(fetch("/api/admin/inquiries").then((r) => r.json()));
+    }
+    Promise.all(requests).then((results) => {
+      const patients = results[0] as { length?: number };
+      const plans = capabilities.canWritePlans ? (results[1] as { length?: number }) : [];
+      const garbha = capabilities.canWritePlans ? (results[2] as { length?: number }) : [];
+      const childGuidance = capabilities.canWritePlans ? (results[3] as { length?: number }) : [];
+      const inquiries = capabilities.canManageInquiries
+        ? (results[capabilities.canWritePlans ? 4 : 1] as { aggregate?: { newCount?: number } })
+        : { aggregate: { newCount: 0 } };
       setStats({
         patients: patients.length || 0,
         plans: plans.length || 0,
@@ -37,7 +53,7 @@ export function AdminDashboard() {
         inquiries: inquiries.aggregate?.newCount || 0,
       });
     });
-  }, []);
+  }, [capabilities.canWritePlans, capabilities.canManageInquiries]);
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -67,12 +83,12 @@ export function AdminDashboard() {
   }
 
   const cards = [
-    { label: "Total Patients", value: stats.patients, icon: Users, href: "/admin/patients", color: "green" },
-    { label: "Active Plans", value: stats.plans, icon: ClipboardList, href: "/admin/plans", color: "gold" },
-    { label: "Garbh Sanskruti", value: stats.garbha, icon: Baby, href: "/admin/garbha-sanskar", color: "green" },
-    { label: "Parenting Sanskruti", value: stats.childGuidance, icon: GraduationCap, href: "/admin/child-guidance", color: "slate" },
-    { label: "New Inquiries", value: stats.inquiries, icon: MessageSquare, href: "/admin/inquiries", color: "gold" },
-  ];
+    { label: "Total Patients", value: stats.patients, icon: Users, href: `${capabilities.basePath}/patients`, color: "green", show: true },
+    { label: "Active Plans", value: stats.plans, icon: ClipboardList, href: `${capabilities.basePath}/plans`, color: "gold", show: capabilities.canWritePlans },
+    { label: "Garbh Sanskruti", value: stats.garbha, icon: Baby, href: `${capabilities.basePath}/garbha-sanskar`, color: "green", show: capabilities.canWritePlans },
+    { label: "Parenting Sanskruti", value: stats.childGuidance, icon: GraduationCap, href: `${capabilities.basePath}/child-guidance`, color: "slate", show: capabilities.canWritePlans },
+    { label: "New Inquiries", value: stats.inquiries, icon: MessageSquare, href: `${capabilities.basePath}/inquiries`, color: "gold", show: capabilities.canManageInquiries },
+  ].filter((card) => card.show);
 
   return (
     <AdminLayout>
@@ -80,7 +96,9 @@ export function AdminDashboard() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
           Dashboard
         </h1>
-        <p className="text-sm text-[var(--muted)] sm:text-base">JEEVANM care management overview</p>
+        <p className="text-sm text-[var(--muted)] sm:text-base">
+          {name ? `Welcome, ${name}` : "JEEVANM care management overview"}
+        </p>
 
         <div className="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {cards.map((card) => {
@@ -112,41 +130,35 @@ export function AdminDashboard() {
         </Card>
 
         <Card className="mt-8">
-          <h2 className="font-semibold text-slate-900">Change Admin Password</h2>
-          <p className="mt-1 text-sm text-slate-500">Password change option માત્ર admin portal અંદર ઉપલબ્ધ છે.</p>
+          <h2 className="font-semibold text-slate-900">Change Password</h2>
+          <p className="mt-1 text-sm text-slate-500">Update the password for this clinic login.</p>
           <form onSubmit={handleChangePassword} className="mt-4 space-y-3">
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-slate-700">Current Password</label>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-slate-700">New Password</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                minLength={6}
-                required
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-slate-700">Confirm New Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                minLength={6}
-                required
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
-              />
-            </div>
+            <Input
+              label="Current Password"
+              type="password"
+              autoComplete="current-password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+            />
+            <Input
+              label="New Password"
+              type="password"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              minLength={6}
+              required
+            />
+            <Input
+              label="Confirm New Password"
+              type="password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              minLength={6}
+              required
+            />
             {passwordError && <p className="text-sm text-red-600">{passwordError}</p>}
             {passwordSuccess && <p className="text-sm text-green-600">{passwordSuccess}</p>}
             <button

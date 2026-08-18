@@ -5,10 +5,13 @@ CREATE TABLE `User` (
     `password` VARCHAR(191) NOT NULL,
     `role` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
+    `doctorId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `User_username_key`(`username`),
+    INDEX `User_role_idx`(`role`),
+    INDEX `User_doctorId_idx`(`doctorId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -23,11 +26,15 @@ CREATE TABLE `PatientProfile` (
     `startDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `currentWeek` INTEGER NOT NULL DEFAULT 1,
     `followupAccessToken` VARCHAR(191) NULL,
+    `doctorId` VARCHAR(191) NULL,
+    `dietitianId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `PatientProfile_userId_key`(`userId`),
     UNIQUE INDEX `PatientProfile_followupAccessToken_key`(`followupAccessToken`),
+    INDEX `PatientProfile_doctorId_idx`(`doctorId`),
+    INDEX `PatientProfile_dietitianId_idx`(`dietitianId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -353,6 +360,15 @@ CREATE TABLE `ChildGuidanceContent` (
 
 -- AddForeignKey
 ALTER TABLE `PatientProfile` ADD CONSTRAINT `PatientProfile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `User` ADD CONSTRAINT `User_doctorId_fkey` FOREIGN KEY (`doctorId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `PatientProfile` ADD CONSTRAINT `PatientProfile_doctorId_fkey` FOREIGN KEY (`doctorId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `PatientProfile` ADD CONSTRAINT `PatientProfile_dietitianId_fkey` FOREIGN KEY (`dietitianId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `PatientProfile` ADD CONSTRAINT `PatientProfile_planId_fkey` FOREIGN KEY (`planId`) REFERENCES `Plan`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

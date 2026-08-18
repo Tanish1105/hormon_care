@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession, hashPassword, verifyPassword } from "@/lib/auth";
+import { hashPassword, verifyPassword } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const access = await requireStaffSession();
+    if (!access.ok) return access.response;
+    const session = access.session;
 
     const { currentPassword, newPassword, confirmPassword } = await request.json();
 
@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({ where: { id: session.id } });
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Admin account not found" }, { status: 404 });
+    if (!user) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
     const isCurrentValid = await verifyPassword(trimmedCurrentPassword, user.password);

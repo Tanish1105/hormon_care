@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ dayId: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("plans.write");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { dayId } = await params;
   const { title, description } = await request.json();
@@ -27,10 +26,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ dayId: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("plans.write");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { dayId } = await params;
   const { type, title, description, url, content, imageUrl, videoUrl } =

@@ -5,17 +5,21 @@ import {
   buildAssessmentFormUrl,
   buildFollowupFormUrl,
 } from "@/lib/assessment-link";
+import { hashPassword, generatePatientCredentials } from "@/lib/auth";
 import {
-  getSession,
-  hashPassword,
-  generatePatientCredentials,
-} from "@/lib/auth";
+  hasPermission,
+  patientWhereFor,
+  requireStaffSession,
+  resolveCareTeamIds,
+} from "@/lib/staff-access";
 
 const patientListInclude = {
   user: { select: { id: true, username: true, name: true, createdAt: true } },
   plan: { select: { id: true, title: true, totalWeeks: true, isCustom: true } },
   garbhaPlan: { select: { id: true, title: true, totalWeeks: true, isCustom: true } },
   childGuidancePlan: { select: { id: true, title: true, totalWeeks: true, isCustom: true } },
+  doctor: { select: { id: true, name: true, username: true } },
+  dietitian: { select: { id: true, name: true, username: true } },
   lifestyleAssessment: {
     select: {
       id: true,
@@ -68,13 +72,13 @@ function withShareLinks<
 }
 
 export async function GET() {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("patients.read");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   try {
     const patients = await prisma.patientProfile.findMany({
+      where: patientWhereFor(session),
       include: patientListInclude,
       orderBy: { createdAt: "desc" },
     });
@@ -141,10 +145,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("patients.create");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const {
     name,
@@ -160,10 +163,21 @@ export async function POST(request: NextRequest) {
     childGuidanceCurrentWeek,
     username: manualUsername,
     password: manualPassword,
+    doctorId: requestedDoctorId,
+    dietitianId: requestedDietitianId,
   } = await request.json();
 
   if (!name) {
     return NextResponse.json({ error: "Patient name is required" }, { status: 400 });
+  }
+
+  const team = await resolveCareTeamIds(
+    session,
+    requestedDoctorId || null,
+    requestedDietitianId || null
+  );
+  if (team.error) {
+    return NextResponse.json({ error: team.error }, { status: 400 });
   }
 
   const trimmedUsername = manualUsername?.trim();
@@ -206,6 +220,8 @@ export async function POST(request: NextRequest) {
 
   const hashedPassword = await hashPassword(password);
 
+  const canAssignPlans = hasPermission(session.role, "plans.assign");
+
   const careStart = startDate ? new Date(`${startDate}T00:00:00`) : new Date();
   const garbhaStart = garbhaStartDate
     ? new Date(`${garbhaStartDate}T00:00:00`)
@@ -224,9 +240,9 @@ export async function POST(request: NextRequest) {
       patientProfile: {
         create: {
           requirements: requirements || null,
-          planId: planId || null,
-          garbhaPlanId: garbhaPlanId || null,
-          childGuidancePlanId: childGuidancePlanId || null,
+          planId: canAssignPlans ? planId || null : null,
+          garbhaPlanId: canAssignPlans ? garbhaPlanId || null : null,
+          childGuidancePlanId: canAssignPlans ? childGuidancePlanId || null : null,
           currentWeek: careWeek,
           startDate: careStart,
           garbhaStartDate: garbhaStart,
@@ -235,6 +251,8 @@ export async function POST(request: NextRequest) {
           childGuidanceCurrentWeek: childGuidanceCurrentWeek
             ? Number(childGuidanceCurrentWeek)
             : careWeek,
+          doctorId: team.doctorId,
+          dietitianId: team.dietitianId,
         },
       },
     },

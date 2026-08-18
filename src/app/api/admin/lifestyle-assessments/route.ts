@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession, patientWhereFor } from "@/lib/staff-access";
 import { buildAssessmentFormUrl, generateAssessmentAccessToken } from "@/lib/assessment-link";
 import {
   assessmentToDisplayData,
@@ -9,15 +9,15 @@ import {
 } from "@/lib/lifestyle-assessment";
 
 export async function GET(req: Request) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("assessments.read");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   try {
     const origin = new URL(req.url).origin;
 
     const patients = await prisma.patientProfile.findMany({
+      where: patientWhereFor(session),
       include: {
         user: { select: { name: true, username: true } },
         lifestyleAssessment: true,
@@ -48,6 +48,7 @@ export async function GET(req: Request) {
         !p.lifestyleAssessment.accessToken
     )
       ? await prisma.patientProfile.findMany({
+          where: patientWhereFor(session),
           include: {
             user: { select: { name: true, username: true } },
             lifestyleAssessment: true,

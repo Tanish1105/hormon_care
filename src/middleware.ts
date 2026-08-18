@@ -6,6 +6,24 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "hormon-secret"
 );
 
+const STAFF_ROLES = new Set(["ADMIN", "DOCTOR", "DOCTOR_STAFF", "DIETITIAN"]);
+
+function panelForRole(role: string) {
+  if (role === "ADMIN") return "/admin";
+  if (role === "DOCTOR") return "/doctor";
+  if (role === "DOCTOR_STAFF") return "/staff";
+  if (role === "DIETITIAN") return "/dietitian";
+  return "/admin";
+}
+
+function panelFromPath(pathname: string) {
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return "ADMIN";
+  if (pathname === "/doctor" || pathname.startsWith("/doctor/")) return "DOCTOR";
+  if (pathname === "/staff" || pathname.startsWith("/staff/")) return "STAFF";
+  if (pathname === "/dietitian" || pathname.startsWith("/dietitian/")) return "DIETITIAN";
+  return null;
+}
+
 function sessionTokenFromRequest(request: NextRequest): string | null {
   const cookieToken = request.cookies.get("session")?.value?.trim();
   if (cookieToken) return cookieToken;
@@ -66,9 +84,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
-  if (pathname.startsWith("/admin/") && pathname !== "/admin/login") {
-    if (!user || user.role !== "ADMIN") {
+  const panel = panelFromPath(pathname);
+  if (panel) {
+    const isAdminLoginPage = pathname === "/admin";
+    if (isAdminLoginPage && (!user || !STAFF_ROLES.has(user.role))) {
+      return next();
+    }
+
+    if (!user || !STAFF_ROLES.has(user.role)) {
       return NextResponse.redirect(new URL("/admin", request.url));
+    }
+
+    const expected = panelForRole(user.role);
+    const currentRoot =
+      panel === "ADMIN"
+        ? "/admin"
+        : panel === "DOCTOR"
+          ? "/doctor"
+          : panel === "STAFF"
+            ? "/staff"
+            : "/dietitian";
+
+    // Admin can open every panel. Other roles stay on their own panel.
+    if (user.role !== "ADMIN" && expected !== currentRoot) {
+      const suffix = pathname.slice(currentRoot.length);
+      return NextResponse.redirect(new URL(`${expected}${suffix}`, request.url));
+    }
+
+    if (pathname.startsWith("/admin/") && user.role !== "ADMIN") {
+      return NextResponse.redirect(new URL(expected, request.url));
     }
   }
 
@@ -86,6 +130,13 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/admin/:path*",
+    "/admin",
+    "/doctor/:path*",
+    "/doctor",
+    "/staff/:path*",
+    "/staff",
+    "/dietitian/:path*",
+    "/dietitian",
     "/patient/:path*",
     "/assessment/:path*",
     "/followup/:path*",

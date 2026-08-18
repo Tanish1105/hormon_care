@@ -22,8 +22,14 @@ const programConfig = {
   },
 };
 
-export function getProgramEditPath(program: PatientProgram, planId: string) {
-  return programConfig[program].editPath(planId);
+export function getProgramEditPath(
+  program: PatientProgram,
+  planId: string,
+  basePath = "/admin"
+) {
+  if (program === "care") return `${basePath}/plans/${planId}`;
+  if (program === "garbha") return `${basePath}/garbha-sanskar/${planId}`;
+  return `${basePath}/child-guidance/${planId}`;
 }
 
 export async function deleteCustomPlanIfNeeded(
@@ -188,7 +194,8 @@ export async function assignPatientPlan(
 export async function ensureEditablePatientPlan(
   patientId: string,
   program: PatientProgram,
-  patientName: string
+  patientName: string,
+  basePath = "/admin"
 ) {
   const patient = await prisma.patientProfile.findUnique({
     where: { id: patientId },
@@ -206,7 +213,7 @@ export async function ensureEditablePatientPlan(
   if (!current) return null;
 
   if (current.isCustom) {
-    return { planId: current.id, editPath: getProgramEditPath(program, current.id) };
+    return { planId: current.id, editPath: getProgramEditPath(program, current.id, basePath) };
   }
 
   const title = `${patientName} - ${current.title}`;
@@ -214,5 +221,5 @@ export async function ensureEditablePatientPlan(
   if (!cloned) return null;
 
   await assignPatientPlan(patientId, program, cloned.id);
-  return { planId: cloned.id, editPath: getProgramEditPath(program, cloned.id) };
+  return { planId: cloned.id, editPath: getProgramEditPath(program, cloned.id, basePath) };
 }

@@ -19,6 +19,7 @@ import { ShareFormLink } from "@/components/ShareFormLink";
 import { formatDisplayDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { useStaffPortal } from "@/components/StaffPortalContext";
 
 type Highlight = { field: string; label: string; reason: string; severity: "high" | "medium" };
 
@@ -63,6 +64,7 @@ export function AdminLifestyleAssessmentCard({
   item: AssessmentItem;
   onUpdated: () => void;
 }) {
+  const { capabilities } = useStaffPortal();
   const [expanded, setExpanded] = useState(false);
   const [editingRec, setEditingRec] = useState(false);
   const [rec, setRec] = useState(item.doctorRecommendation ?? "");
@@ -306,7 +308,7 @@ export function AdminLifestyleAssessmentCard({
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-center justify-between gap-2">
                   <h4 className="text-sm font-semibold text-slate-800">Doctor Recommendation</h4>
-                  {!editingRec && (
+                  {!editingRec && capabilities.canWriteAssessments && (
                     <Button variant="ghost" className="!px-2" onClick={() => setEditingRec(true)}>
                       <Pencil className="h-4 w-4" />
                     </Button>

@@ -1,22 +1,20 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 import { getFollowupCompulsory, setFollowupCompulsory } from "@/lib/app-settings";
 
 export async function GET() {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("followups.read");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const compulsory = await getFollowupCompulsory();
   return NextResponse.json({ compulsory });
 }
 
 export async function PUT(req: Request) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("followups.settings");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const body = await req.json();
   if (typeof body.compulsory !== "boolean") {

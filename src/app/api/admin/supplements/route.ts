@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 
 export async function GET() {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("supplements.read");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const items = await prisma.supplement.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -17,10 +16,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("supplements.write");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { name, description, defaultTime, defaultQuantity, sortOrder } = await request.json();
   const trimmedName = String(name ?? "").trim();

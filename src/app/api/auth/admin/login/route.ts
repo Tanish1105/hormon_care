@@ -4,8 +4,11 @@ import {
   verifyPassword,
   createToken,
   attachSessionCookie,
+  isStaffRole,
+  type StaffRole,
 } from "@/lib/auth";
 import { jsonFromDatabaseError } from "@/lib/db-error";
+import { panelPath } from "@/lib/staff-roles";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({ where: { username } });
 
-    if (!user || user.role !== "ADMIN") {
+    if (!user || !isStaffRole(user.role)) {
       return NextResponse.json(
         { error: "અમાન્ય credentials" },
         { status: 401 }
@@ -38,16 +41,25 @@ export async function POST(request: NextRequest) {
     const token = await createToken({
       id: user.id,
       username: user.username,
-      role: "ADMIN",
+      role: user.role as StaffRole,
       name: user.name,
+      doctorId: user.doctorId,
     });
 
+    const panel = panelPath(user.role as StaffRole);
     const response = NextResponse.json({
-      user: { id: user.id, username: user.username, name: user.name, role: "ADMIN" },
+      user: {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        role: user.role,
+        doctorId: user.doctorId,
+      },
+      panel,
     });
     return attachSessionCookie(response, token);
   } catch (error) {
-    console.error("admin login error:", error);
+    console.error("staff login error:", error);
     const { status, error: message } = jsonFromDatabaseError(error);
     return NextResponse.json({ error: message }, { status });
   }

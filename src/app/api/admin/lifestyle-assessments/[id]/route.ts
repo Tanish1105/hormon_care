@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession, requirePatientAccess } from "@/lib/staff-access";
 import { validateLifestyleAssessment, dataToDbFields } from "@/lib/lifestyle-assessment";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function PUT(req: Request, { params }: RouteParams) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("assessments.write");
+  if (!access.ok) return access.response;
 
   const { id } = await params;
   const body = await req.json();
@@ -18,6 +16,9 @@ export async function PUT(req: Request, { params }: RouteParams) {
   if (!existing) {
     return NextResponse.json({ error: "Assessment not found" }, { status: 404 });
   }
+
+  const patientAccess = await requirePatientAccess(access.session, existing.patientProfileId);
+  if (!patientAccess.ok) return patientAccess.response;
 
   if (body.doctorRecommendation !== undefined) {
     const assessment = await prisma.lifestyleAssessment.update({

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession, requirePatientAccess, panelPath } from "@/lib/staff-access";
 import { prisma } from "@/lib/prisma";
 import {
   assignPatientPlan,
@@ -13,12 +13,13 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("plans.write");
+  if (!access.ok) return access.response;
 
   const { id } = await params;
+  const patientAccess = await requirePatientAccess(access.session, id);
+  if (!patientAccess.ok) return patientAccess.response;
+
   const patient = await prisma.patientProfile.findUnique({
     where: { id },
     include: { user: { select: { name: true } } },
@@ -35,7 +36,12 @@ export async function POST(
   }
 
   if (body.action === "open") {
-    const result = await ensureEditablePatientPlan(id, program, patient.user.name);
+    const result = await ensureEditablePatientPlan(
+      id,
+      program,
+      patient.user.name,
+      panelPath(access.session.role)
+    );
     if (!result) {
       return NextResponse.json({ error: "No plan assigned to edit" }, { status: 400 });
     }

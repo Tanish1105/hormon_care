@@ -25,6 +25,51 @@ async function main() {
 
   console.log("Admin: admin / admin123");
 
+  const doctorPassword = await bcrypt.hash("doctor123", 10);
+  const doctor = await prisma.user.upsert({
+    where: { username: "doctor" },
+    update: { password: doctorPassword, role: "DOCTOR", name: "Dr. Clinic" },
+    create: {
+      username: "doctor",
+      password: doctorPassword,
+      role: "DOCTOR",
+      name: "Dr. Clinic",
+    },
+  });
+  console.log("Doctor: doctor / doctor123");
+
+  const staffPassword = await bcrypt.hash("staff123", 10);
+  await prisma.user.upsert({
+    where: { username: "staff" },
+    update: {
+      password: staffPassword,
+      role: "DOCTOR_STAFF",
+      name: "Clinic Staff",
+      doctorId: doctor.id,
+    },
+    create: {
+      username: "staff",
+      password: staffPassword,
+      role: "DOCTOR_STAFF",
+      name: "Clinic Staff",
+      doctorId: doctor.id,
+    },
+  });
+  console.log("Staff: staff / staff123");
+
+  const dietPassword = await bcrypt.hash("diet123", 10);
+  await prisma.user.upsert({
+    where: { username: "dietitian" },
+    update: { password: dietPassword, role: "DIETITIAN", name: "Dietitian" },
+    create: {
+      username: "dietitian",
+      password: dietPassword,
+      role: "DIETITIAN",
+      name: "Dietitian",
+    },
+  });
+  console.log("Dietitian: dietitian / diet123");
+
   const existingPlan = await prisma.plan.findFirst({
     where: { title: "Pregnancy Care Plan - 2 Weeks" },
   });

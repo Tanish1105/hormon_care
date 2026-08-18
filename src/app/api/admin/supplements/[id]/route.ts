@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("supplements.write");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { id } = await params;
   const existing = await prisma.supplement.findUnique({ where: { id } });
@@ -44,10 +43,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("supplements.write");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { id } = await params;
   const existing = await prisma.supplement.findUnique({ where: { id } });

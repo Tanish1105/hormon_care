@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession, requirePatientAccess } from "@/lib/staff-access";
 import {
   normalizeSupplementItems,
   supplementPlanInclude,
@@ -10,12 +10,12 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("supplements.read");
+  if (!access.ok) return access.response;
 
   const { id } = await params;
+  const patientAccess = await requirePatientAccess(access.session, id);
+  if (!patientAccess.ok) return patientAccess.response;
   const patient = await prisma.patientProfile.findUnique({
     where: { id },
     select: { id: true },
@@ -46,12 +46,12 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("supplements.write");
+  if (!access.ok) return access.response;
 
   const { id } = await params;
+  const patientAccess = await requirePatientAccess(access.session, id);
+  if (!patientAccess.ok) return patientAccess.response;
   const patient = await prisma.patientProfile.findUnique({
     where: { id },
     select: { id: true },

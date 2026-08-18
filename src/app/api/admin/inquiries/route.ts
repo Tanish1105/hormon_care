@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 
 export async function GET() {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("inquiries.manage");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const items = await prisma.inquiry.findMany({
     orderBy: { createdAt: "desc" },

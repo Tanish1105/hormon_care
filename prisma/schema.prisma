@@ -16,7 +16,18 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  /// For DOCTOR_STAFF: the doctor this staff member belongs to
+  doctorId String?
+  doctor   User?   @relation("DoctorTeam", fields: [doctorId], references: [id], onDelete: SetNull)
+  staffMembers User[] @relation("DoctorTeam")
+
   patientProfile PatientProfile?
+
+  patientsAsDoctor    PatientProfile[] @relation("PatientDoctor")
+  patientsAsDietitian PatientProfile[] @relation("PatientDietitian")
+
+  @@index([role])
+  @@index([doctorId])
 }
 
 model PatientProfile {
@@ -38,12 +49,19 @@ model PatientProfile {
   childGuidanceStartDate DateTime @default(now())
   childGuidanceCurrentWeek Int @default(1)
   followupAccessToken String? @unique
+  doctorId     String?
+  doctor       User?    @relation("PatientDoctor", fields: [doctorId], references: [id], onDelete: SetNull)
+  dietitianId  String?
+  dietitian    User?    @relation("PatientDietitian", fields: [dietitianId], references: [id], onDelete: SetNull)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   weeklyFollowups WeeklyFollowup[]
   lifestyleAssessment LifestyleAssessment?
   supplementPlans PatientSupplementPlan[]
+
+  @@index([doctorId])
+  @@index([dietitianId])
 }
 
 model LifestyleAssessment {

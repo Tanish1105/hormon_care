@@ -9,6 +9,7 @@ import { ShareFormLink } from "@/components/ShareFormLink";
 import { AdminPatientSupplements } from "@/components/AdminPatientSupplements";
 import { APP_PUBLIC_URL, buildAssessmentFormUrl } from "@/lib/assessment-link";
 import { formatDateInputValue, formatDisplayDate } from "@/lib/utils";
+import { useStaffPortal } from "@/components/StaffPortalContext";
 
 type AssignedPlan = { id: string; title: string; totalWeeks: number; isCustom: boolean };
 type PatientProgram = "care" | "garbha" | "child";
@@ -26,6 +27,8 @@ type Patient = {
   plan: AssignedPlan | null;
   garbhaPlan: AssignedPlan | null;
   childGuidancePlan: AssignedPlan | null;
+  doctor: { id: string; name: string; username: string } | null;
+  dietitian: { id: string; name: string; username: string } | null;
   lifestyleAssessment: {
     requestedAt: string | null;
     submittedAt: string | null;
@@ -38,6 +41,7 @@ type Patient = {
 };
 
 type Plan = { id: string; title: string };
+type StaffOption = { id: string; name: string; username: string };
 
 type CustomForm = {
   mode: "new" | "copy";
@@ -66,10 +70,13 @@ function generatePreviewCredentials() {
 
 export default function PatientsPage() {
   const router = useRouter();
+  const { capabilities } = useStaffPortal();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [garbhaPlans, setGarbhaPlans] = useState<Plan[]>([]);
   const [childGuidancePlans, setChildGuidancePlans] = useState<Plan[]>([]);
+  const [doctors, setDoctors] = useState<StaffOption[]>([]);
+  const [dietitians, setDietitians] = useState<StaffOption[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [credentials, setCredentials] = useState<{ username: string; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -87,6 +94,8 @@ export default function PatientsPage() {
     childGuidanceStartDate: formatDateInputValue(),
     username: "",
     password: "",
+    doctorId: "",
+    dietitianId: "",
   });
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
@@ -108,17 +117,19 @@ export default function PatientsPage() {
   async function load() {
     setLoadError("");
     try {
-      const [pRes, plRes, gRes, cgRes] = await Promise.all([
+      const [pRes, plRes, gRes, cgRes, staffRes] = await Promise.all([
         fetch("/api/admin/patients"),
         fetch("/api/admin/plans?lite=1"),
         fetch("/api/admin/garbha-plans?lite=1"),
         fetch("/api/admin/child-guidance-plans?lite=1"),
+        fetch("/api/admin/staff"),
       ]);
 
       const patientsData = await pRes.json();
       const plData = await plRes.json();
       const gData = await gRes.json();
       const cgData = await cgRes.json();
+      const staffData = await staffRes.json().catch(() => ({}));
 
       if (!pRes.ok || !Array.isArray(patientsData)) {
         setPatients([]);
@@ -130,6 +141,8 @@ export default function PatientsPage() {
       setPlans(Array.isArray(plData) ? plData : []);
       setGarbhaPlans(Array.isArray(gData) ? gData : []);
       setChildGuidancePlans(Array.isArray(cgData) ? cgData : []);
+      setDoctors(Array.isArray(staffData.doctors) ? staffData.doctors : []);
+      setDietitians(Array.isArray(staffData.dietitians) ? staffData.dietitians : []);
 
       if (!plRes.ok || !gRes.ok || !cgRes.ok) {
         setLoadError("Some plans could not load. Please restart the server (npm run dev).");
@@ -172,6 +185,8 @@ export default function PatientsPage() {
       childGuidanceStartDate: formatDateInputValue(),
       username: "",
       password: "",
+      doctorId: "",
+      dietitianId: "",
     });
     setShowForm(false);
     setLoading(false);
@@ -266,10 +281,10 @@ export default function PatientsPage() {
     setCustomPatientId(null);
     const editPath =
       customProgram === "care"
-        ? `/admin/plans/${data.plan.id}`
+        ? `${capabilities.basePath}/plans/${data.plan.id}`
         : customProgram === "garbha"
-          ? `/admin/garbha-sanskar/${data.plan.id}`
-          : `/admin/child-guidance/${data.plan.id}`;
+          ? `${capabilities.basePath}/garbha-sanskar/${data.plan.id}`
+          : `${capabilities.basePath}/child-guidance/${data.plan.id}`;
     router.push(editPath);
   }
 
@@ -369,11 +384,19 @@ export default function PatientsPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Patients</h1>
-          <p className="text-sm text-slate-500 sm:text-base">Manage patients and assign plans</p>
+          <p className="text-sm text-slate-500 sm:text-base">
+            {capabilities.canCreatePatients
+              ? capabilities.canAssignPlans
+                ? "Manage patients and assign doctor, dietitian and plans"
+                : "Add patients, fill followups, and view assigned plans"
+              : "View assigned patients, reports and progress"}
+          </p>
         </div>
+        {capabilities.canCreatePatients ? (
         <Button className="w-full sm:w-auto" onClick={() => setShowForm(!showForm)}>
           <Plus className="mr-1 h-4 w-4" /> Add Patient
         </Button>
+        ) : null}
       </div>
 
       {loadError && (
@@ -399,7 +422,7 @@ export default function PatientsPage() {
         </Card>
       )}
 
-      {showForm && (
+      {showForm && capabilities.canCreatePatients && (
         <Card className="mt-6">
           <h2 className="mb-4 font-semibold text-slate-900">New Patient</h2>
           <p className="mb-4 text-sm text-slate-500">
@@ -412,6 +435,38 @@ export default function PatientsPage() {
           )}
           <form onSubmit={createPatient} className="space-y-4">
             <Input label="Patient Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            {(capabilities.showDoctorSelect || capabilities.showDietitianSelect) && (
+              <div className="grid gap-3 md:grid-cols-2">
+                {capabilities.showDoctorSelect ? (
+                  <Select
+                    label="Doctor"
+                    value={form.doctorId}
+                    onChange={(e) => setForm({ ...form, doctorId: e.target.value })}
+                  >
+                    <option value="">-- Select Doctor --</option>
+                    {doctors.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name} ({d.username})
+                      </option>
+                    ))}
+                  </Select>
+                ) : null}
+                {capabilities.showDietitianSelect ? (
+                  <Select
+                    label="Dietitian"
+                    value={form.dietitianId}
+                    onChange={(e) => setForm({ ...form, dietitianId: e.target.value })}
+                  >
+                    <option value="">-- Select Dietitian --</option>
+                    {dietitians.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name} ({d.username})
+                      </option>
+                    ))}
+                  </Select>
+                ) : null}
+              </div>
+            )}
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
               <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="text-sm font-semibold text-slate-800">Login Credentials</h3>
@@ -428,7 +483,8 @@ export default function PatientsPage() {
                 />
                 <Input
                   label="Password"
-                  type="text"
+                  type="password"
+                  autoComplete="new-password"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Min 4 characters"
@@ -437,6 +493,8 @@ export default function PatientsPage() {
               <p className="mt-2 text-xs text-slate-500">બંને ખાલી હોય તો create કરતી વખતે auto-generate થશે.</p>
             </div>
             <Textarea label="Requirements / Notes" value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} rows={3} placeholder="Patient's special requirements..." />
+            {capabilities.canAssignPlans ? (
+            <>
             <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 md:grid-cols-2">
               <Select label="Arogya Sanskruti" value={form.planId} onChange={(e) => setForm({ ...form, planId: e.target.value })}>
                 <option value="">-- Select Plan --</option>
@@ -495,6 +553,8 @@ export default function PatientsPage() {
                 onChange={(e) => setForm({ ...form, childGuidanceCurrentWeek: e.target.value })}
               />
             </div>
+            </>
+            ) : null}
             <div className="flex gap-2">
               <Button type="submit" disabled={loading}>{loading ? "Creating..." : "Create Patient"}</Button>
               <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
@@ -525,6 +585,8 @@ export default function PatientsPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold text-slate-900">{patient.user.name}</h3>
                   <Badge color="purple">{patient.user.username}</Badge>
+                  {patient.doctor ? <Badge color="green">Dr. {patient.doctor.name}</Badge> : null}
+                  {patient.dietitian ? <Badge color="gold">{patient.dietitian.name}</Badge> : null}
                   {lifestyleStatus(patient) === "pending" && (
                     <Badge color="pink">Assessment Pending</Badge>
                   )}
@@ -547,6 +609,7 @@ export default function PatientsPage() {
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-1 pt-0.5">
+                {capabilities.canEditCredentials ? (
                 <span
                   role="button"
                   tabIndex={0}
@@ -566,6 +629,8 @@ export default function PatientsPage() {
                 >
                   <Key className="h-4 w-4" />
                 </span>
+                ) : null}
+                {capabilities.canDeletePatients ? (
                 <span
                   role="button"
                   tabIndex={0}
@@ -584,6 +649,7 @@ export default function PatientsPage() {
                 >
                   <Trash2 className="h-4 w-4" />
                 </span>
+                ) : null}
                 <ChevronDown
                   className={`ml-1 h-5 w-5 shrink-0 text-slate-400 transition ${expanded ? "rotate-180" : ""}`}
                 />
@@ -604,7 +670,8 @@ export default function PatientsPage() {
                   />
                   <Input
                     label="New Password"
-                    type="text"
+                    type="password"
+                    autoComplete="new-password"
                     value={credentialForm.password}
                     onChange={(e) => setCredentialForm({ ...credentialForm, password: e.target.value })}
                     placeholder="Min 4 characters"
@@ -627,7 +694,9 @@ export default function PatientsPage() {
               </div>
             )}
 
+            {capabilities.canWriteAssessments ? (
             <div className="mt-4 flex flex-wrap gap-2">
+              {capabilities.canWriteAssessments ? (
               <Button
                 variant="secondary"
                 className="!py-1.5 text-xs"
@@ -641,6 +710,7 @@ export default function PatientsPage() {
                     ? "Re-send Assessment"
                     : "Send Assessment"}
               </Button>
+              ) : null}
               {lifestyleStatus(patient) === "pending" && getAssessmentFormLink(patient) && (
                 <Button
                   variant="secondary"
@@ -657,7 +727,7 @@ export default function PatientsPage() {
               )}
               {lifestyleStatus(patient) === "submitted" && (
                 <a
-                  href="/admin/lifestyle-assessments"
+                  href={`${capabilities.basePath}/lifestyle-assessments`}
                   className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
                 >
                   <FileText className="h-3.5 w-3.5" />
@@ -665,6 +735,19 @@ export default function PatientsPage() {
                 </a>
               )}
             </div>
+            ) : (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {lifestyleStatus(patient) === "submitted" && (
+                <a
+                  href={`${capabilities.basePath}/lifestyle-assessments`}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  View Assessment
+                </a>
+              )}
+            </div>
+            )}
 
             {(getAssessmentFormLink(patient) || patient.followupFormLink) && (
               <div className="mt-4 space-y-3">
@@ -702,6 +785,7 @@ export default function PatientsPage() {
                             {assigned.isCustom && <Sparkles className="h-3.5 w-3.5 shrink-0" />}
                             <span className="truncate">{assigned.title}</span>
                           </span>
+                          {capabilities.canWritePlans ? (
                           <button
                             type="button"
                             onClick={() => editPatientPlan(patient.id, program)}
@@ -711,15 +795,16 @@ export default function PatientsPage() {
                             <SquarePen className="h-3 w-3" />
                             {editLoading === editKey ? "..." : "Edit"}
                           </button>
+                          ) : null}
                         </div>
-                        {assigned.isCustom ? (
+                        {capabilities.canAssignPlans && assigned.isCustom ? (
                           <button
                             onClick={() => updatePatient(patient.id, { [fieldKey]: "" })}
                             className="text-xs text-slate-400 hover:text-slate-600 hover:underline"
                           >
                             Remove custom plan
                           </button>
-                        ) : (
+                        ) : capabilities.canAssignPlans ? (
                           <Select
                             value={assigned.id}
                             onChange={(e) => updatePatient(patient.id, { [fieldKey]: e.target.value })}
@@ -729,9 +814,9 @@ export default function PatientsPage() {
                               <option key={p.id} value={p.id}>{p.title}</option>
                             ))}
                           </Select>
-                        )}
+                        ) : null}
                       </>
-                    ) : (
+                    ) : capabilities.canAssignPlans ? (
                       <>
                         <Select
                           value=""
@@ -742,6 +827,7 @@ export default function PatientsPage() {
                             <option key={p.id} value={p.id}>{p.title}</option>
                           ))}
                         </Select>
+                        {capabilities.canWritePlans ? (
                         <button
                           onClick={() => openCustomForm(patient, program)}
                           className="flex items-center gap-1 text-xs font-medium text-[var(--primary)] hover:underline"
@@ -749,17 +835,60 @@ export default function PatientsPage() {
                           <Sparkles className="h-3.5 w-3.5" />
                           Create custom plan
                         </button>
+                        ) : null}
                       </>
+                    ) : (
+                      <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                        Not assigned
+                      </p>
                     )}
                   </div>
                 );
               })}
             </div>
 
+            {capabilities.showDoctorSelect || capabilities.showDietitianSelect ? (
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {capabilities.showDoctorSelect ? (
+                  <Select
+                    label="Doctor"
+                    value={patient.doctor?.id || ""}
+                    onChange={(e) => updatePatient(patient.id, { doctorId: e.target.value })}
+                  >
+                    <option value="">-- No Doctor --</option>
+                    {doctors.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </Select>
+                ) : null}
+                {capabilities.showDietitianSelect ? (
+                  <Select
+                    label="Dietitian"
+                    value={patient.dietitian?.id || ""}
+                    onChange={(e) => updatePatient(patient.id, { dietitianId: e.target.value })}
+                  >
+                    <option value="">-- No Dietitian --</option>
+                    {dietitians.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </Select>
+                ) : null}
+              </div>
+            ) : null}
+
             <div className="mt-4">
-              <AdminPatientSupplements patientId={patient.id} patientName={patient.user.name} />
+              <AdminPatientSupplements
+                patientId={patient.id}
+                patientName={patient.user.name}
+                readOnly={!capabilities.canManageSupplements}
+              />
             </div>
 
+            {capabilities.canAssignPlans ? (
             <div className="mt-4 space-y-3">
               <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3 md:grid-cols-2">
                 <Input
@@ -809,8 +938,9 @@ export default function PatientsPage() {
                 />
               </div>
             </div>
+            ) : null}
 
-            {customPatientId === patient.id && (
+            {customPatientId === patient.id && capabilities.canWritePlans && (
               <div className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--primary-light)]/40 p-4">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-[var(--primary)]" />

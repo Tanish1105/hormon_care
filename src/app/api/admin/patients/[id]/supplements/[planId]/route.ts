@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession, requirePatientAccess } from "@/lib/staff-access";
 import {
   normalizeSupplementItems,
   supplementPlanInclude,
@@ -17,12 +17,12 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; planId: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("supplements.write");
+  if (!access.ok) return access.response;
 
   const { id, planId } = await params;
+  const patientAccess = await requirePatientAccess(access.session, id);
+  if (!patientAccess.ok) return patientAccess.response;
   const existing = await getOwnedPlan(id, planId);
   if (!existing) {
     return NextResponse.json({ error: "Supplement list not found" }, { status: 404 });
@@ -87,12 +87,12 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string; planId: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("supplements.write");
+  if (!access.ok) return access.response;
 
   const { id, planId } = await params;
+  const patientAccess = await requirePatientAccess(access.session, id);
+  if (!patientAccess.ok) return patientAccess.response;
   const existing = await getOwnedPlan(id, planId);
   if (!existing) {
     return NextResponse.json({ error: "Supplement list not found" }, { status: 404 });

@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 import { planInclude, createWeeksData } from "@/lib/plan-includes";
 
 export async function GET(request: NextRequest) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("plans.read");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const lite = new URL(request.url).searchParams.get("lite") === "1";
 
@@ -30,10 +29,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("plans.write");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { title, description, totalWeeks, imageUrl, videoUrl, isDayWise } =
     await request.json();

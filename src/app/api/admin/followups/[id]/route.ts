@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession, requirePatientAccess } from "@/lib/staff-access";
 import { validateFollowupUpdatePayload } from "@/lib/weekly-followup";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function PUT(req: Request, { params }: RouteParams) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("followups.write");
+  if (!access.ok) return access.response;
 
   const { id } = await params;
   const body = await req.json();
@@ -22,6 +20,9 @@ export async function PUT(req: Request, { params }: RouteParams) {
   if (!existing) {
     return NextResponse.json({ error: "Followup not found" }, { status: 404 });
   }
+
+  const patientAccess = await requirePatientAccess(access.session, existing.patientProfileId);
+  if (!patientAccess.ok) return patientAccess.response;
 
   const followup = await prisma.weeklyFollowup.update({
     where: { id },
@@ -44,16 +45,17 @@ export async function PUT(req: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_req: Request, { params }: RouteParams) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("followups.delete");
+  if (!access.ok) return access.response;
 
   const { id } = await params;
   const existing = await prisma.weeklyFollowup.findUnique({ where: { id } });
   if (!existing) {
     return NextResponse.json({ error: "Followup not found" }, { status: 404 });
   }
+
+  const patientAccess = await requirePatientAccess(access.session, existing.patientProfileId);
+  if (!patientAccess.ok) return patientAccess.response;
 
   await prisma.weeklyFollowup.delete({ where: { id } });
   return NextResponse.json({ ok: true });

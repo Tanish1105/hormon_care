@@ -52,13 +52,13 @@ export function Input({
       )}
       <div className="relative">
         <input
+          {...props}
           type={inputType}
           className={cn(
             "w-full rounded-xl border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]",
             isPassword && "pr-11",
             className
           )}
-          {...props}
         />
         {isPassword && (
           <button

@@ -34,7 +34,7 @@ export function AdminLoginForm() {
         return;
       }
 
-      window.location.href = "/admin";
+      window.location.href = data.panel || "/admin";
     } catch (err) {
       const aborted = err instanceof Error && err.name === "AbortError";
       setError(
@@ -63,9 +63,12 @@ export function AdminLoginForm() {
           </h1>
           <div className="login-brand-rule mx-auto mt-3 h-px w-32" aria-hidden />
           <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--secondary)]">
-            Admin panel
+            Clinic login
           </p>
-          <p className="mt-2 text-sm text-[var(--muted)]">Doctor / clinic access</p>
+          <p className="mt-2 text-sm text-[var(--muted)]">Admin, doctor, staff & dietitian</p>
+          <p className="mt-1 text-xs text-[var(--muted)]">
+            Role badalva pehla Logout karo, pachhi bijo username thi login karo.
+          </p>
         </div>
 
         <form

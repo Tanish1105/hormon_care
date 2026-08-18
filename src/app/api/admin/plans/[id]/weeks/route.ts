@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 import { planInclude, createSingleWeekData } from "@/lib/plan-includes";
 
 const MAX_WEEKS = 52;
@@ -9,10 +9,9 @@ export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("plans.write");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { id } = await params;
   const plan = await prisma.plan.findUnique({

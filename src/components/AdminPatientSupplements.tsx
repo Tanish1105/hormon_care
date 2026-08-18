@@ -83,10 +83,12 @@ function timeOptions(current: string) {
 export function AdminPatientSupplements({
   patientId,
   patientName,
+  readOnly = false,
   onSaved,
 }: {
   patientId: string;
   patientName: string;
+  readOnly?: boolean;
   onSaved?: () => void;
 }) {
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
@@ -180,6 +182,7 @@ export function AdminPatientSupplements({
   }
 
   async function saveList() {
+    if (readOnly) return;
     const nextItems = payloadItems();
     const nextTitle = title.trim() || "Supplement list";
     if (!nextItems.length) {
@@ -212,6 +215,7 @@ export function AdminPatientSupplements({
   }
 
   function openNewList() {
+    if (readOnly) return;
     setError("");
     setTitle("");
     setNotes("");
@@ -220,6 +224,7 @@ export function AdminPatientSupplements({
   }
 
   function openEditList() {
+    if (readOnly) return;
     if (!activePlan) {
       openNewList();
       return;
@@ -240,6 +245,7 @@ export function AdminPatientSupplements({
   }
 
   async function reactivate(planId: string) {
+    if (readOnly) return;
     setSaving(true);
     const res = await fetch(`/api/admin/patients/${patientId}/supplements/${planId}`, {
       method: "PUT",
@@ -254,6 +260,7 @@ export function AdminPatientSupplements({
   }
 
   async function removePlan(planId: string) {
+    if (readOnly) return;
     if (!confirm("Delete this old list?")) return;
     await fetch(`/api/admin/patients/${patientId}/supplements/${planId}`, {
       method: "DELETE",
@@ -266,7 +273,7 @@ export function AdminPatientSupplements({
     return <p className="text-sm text-slate-500">Loading supplements...</p>;
   }
 
-  const editing = mode !== "view";
+  const editing = !readOnly && mode !== "view";
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -284,11 +291,13 @@ export function AdminPatientSupplements({
                 ? mode === "new"
                   ? "Navi list 1, 2, 3 number sathe assign karo."
                   : "Hali ni list edit karo. Number order patient app ma dekhase."
-                : "Pehla current list jovao. Navi assign karvi hoi to upar Assign new list dabavo."}
+                : readOnly
+                  ? "Assigned supplement list. Staff aa list joi sake, change nathi kari shakto."
+                  : "Pehla current list jovao. Navi assign karvi hoi to upar Assign new list dabavo."}
             </p>
           </div>
         </div>
-        {!editing ? (
+        {!editing && !readOnly ? (
           <div className="flex shrink-0 flex-wrap gap-2">
             {activePlan ? (
               <Button type="button" variant="ghost" onClick={openEditList}>
@@ -343,9 +352,11 @@ export function AdminPatientSupplements({
           ) : (
             <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
               <p className="font-medium text-slate-800">Haju list assign nathi</p>
-              <p className="mt-1 text-sm text-slate-500">
-                Upar <span className="font-semibold">Assign new list</span> par click karo.
-              </p>
+              {!readOnly ? (
+                <p className="mt-1 text-sm text-slate-500">
+                  Upar <span className="font-semibold">Assign new list</span> par click karo.
+                </p>
+              ) : null}
             </div>
           )}
 
@@ -367,6 +378,7 @@ export function AdminPatientSupplements({
                       · {new Date(plan.createdAt).toLocaleDateString()}
                     </p>
                   </div>
+                  {!readOnly ? (
                   <div className="flex gap-3">
                     <button
                       type="button"
@@ -383,6 +395,7 @@ export function AdminPatientSupplements({
                       Delete
                     </button>
                   </div>
+                  ) : null}
                 </div>
               ))}
             </div>

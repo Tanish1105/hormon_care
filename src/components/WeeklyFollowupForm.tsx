@@ -15,6 +15,7 @@ type WeeklyFollowupFormProps = {
   weekNumber: number;
   patientName: string;
   accessToken?: string;
+  submitUrl?: string;
   compact?: boolean;
   hideSubmit?: boolean;
   formId?: string;
@@ -205,6 +206,7 @@ export function WeeklyFollowupForm({
   weekNumber,
   patientName,
   accessToken,
+  submitUrl,
   compact,
   hideSubmit,
   formId,
@@ -252,7 +254,7 @@ export function WeeklyFollowupForm({
     onSubmittingChange?.(true);
 
     const res = await fetch(
-      accessToken ? `/api/followup/${accessToken}` : "/api/patient/followup",
+      submitUrl || (accessToken ? `/api/followup/${accessToken}` : "/api/patient/followup"),
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 import { saveUpload } from "@/lib/upload";
 
 export async function POST(request: NextRequest) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("upload");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   try {
     const formData = await request.formData();

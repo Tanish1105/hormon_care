@@ -103,9 +103,13 @@ function followupToForm(f: AdminFollowupRow) {
 export function AdminFollowupWeekCard({
   followup,
   onUpdated,
+  canEdit = true,
+  canDelete = true,
 }: {
   followup: AdminFollowupRow;
   onUpdated: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -282,13 +286,17 @@ export function AdminFollowupWeekCard({
           <p className="text-xs text-slate-500">Submitted {formatDisplayDate(followup.submittedAt)}</p>
         </div>
         <div className="flex gap-2">
+          {canEdit ? (
           <Button variant="ghost" onClick={startEdit} className="!px-2">
             <Pencil className="h-4 w-4" />
             Edit
           </Button>
+          ) : null}
+          {canDelete ? (
           <Button variant="ghost" onClick={remove} disabled={loading} className="!px-2 text-red-600 hover:bg-red-50">
             <Trash2 className="h-4 w-4" />
           </Button>
+          ) : null}
         </div>
       </div>
 
@@ -335,9 +343,13 @@ export function AdminFollowupWeekCard({
 export function AdminFollowupList({
   followups,
   onUpdated,
+  canEdit = true,
+  canDelete = true,
 }: {
   followups: AdminFollowupRow[];
   onUpdated: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   if (followups.length === 0) {
     return <p className="py-4 text-sm text-slate-500">No submissions yet.</p>;
@@ -346,7 +358,13 @@ export function AdminFollowupList({
   return (
     <div className="space-y-3">
       {followups.map((f) => (
-        <AdminFollowupWeekCard key={f.id} followup={f} onUpdated={onUpdated} />
+        <AdminFollowupWeekCard
+          key={f.id}
+          followup={f}
+          onUpdated={onUpdated}
+          canEdit={canEdit}
+          canDelete={canDelete}
+        />
       ))}
     </div>
   );

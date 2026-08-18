@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/staff-access";
 
 const STATUSES = new Set(["NEW", "READ", "CONTACTED"]);
 
@@ -8,10 +8,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("inquiries.manage");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));
@@ -33,10 +32,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("inquiries.manage");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { id } = await params;
   await prisma.inquiry.delete({ where: { id } });

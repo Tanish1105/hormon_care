@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession, requirePatientAccess } from "@/lib/staff-access";
 import { createWeekDaysData } from "@/lib/plan-includes";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("plans.write");
+  if (!access.ok) return access.response;
+  const session = access.session;
 
   const { id } = await params;
+  const patientAccess = await requirePatientAccess(access.session, id);
+  if (!patientAccess.ok) return patientAccess.response;
   const patient = await prisma.patientProfile.findUnique({
     where: { id },
     include: { user: { select: { name: true } } },

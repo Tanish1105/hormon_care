@@ -9,6 +9,8 @@ import { ShareFormLink } from "@/components/ShareFormLink";
 import { formatDisplayDate } from "@/lib/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useStaffPortal } from "@/components/StaffPortalContext";
+import { WeeklyFollowupForm } from "@/components/WeeklyFollowupForm";
 
 type PatientAnalytics = {
   id: string;
@@ -36,6 +38,7 @@ type AnalyticsData = {
 };
 
 export default function AdminFollowupsPage() {
+  const { capabilities } = useStaffPortal();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [compulsory, setCompulsory] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(false);
@@ -87,6 +90,7 @@ export default function AdminFollowupsPage() {
             Track patient progress week-by-week with comparisons across all submissions.
           </p>
         </div>
+        {capabilities.canManageFollowupSettings ? (
         <Card className="flex items-center gap-4 !p-4">
           <div>
             <p className="text-sm font-medium text-slate-700">Followup popup prompt</p>
@@ -115,6 +119,7 @@ export default function AdminFollowupsPage() {
             />
           </button>
         </Card>
+        ) : null}
       </div>
 
       {loadError && <p className="mb-4 text-sm text-red-600">{loadError}</p>}
@@ -219,10 +224,29 @@ export default function AdminFollowupsPage() {
                                 hint="Patient can open without login — Copy or WhatsApp."
                               />
                             ) : null}
+                            {capabilities.canFillFollowups && patient.pendingWeeks.length > 0 ? (
+                              <div className="rounded-xl border border-[var(--border)] bg-white p-4">
+                                <h3 className="mb-3 text-sm font-semibold text-slate-800">
+                                  Fill followup (Week {patient.nextDueWeek ?? patient.pendingWeeks[0]})
+                                </h3>
+                                <WeeklyFollowupForm
+                                  compact
+                                  weekNumber={patient.nextDueWeek ?? patient.pendingWeeks[0]}
+                                  patientName={patient.name}
+                                  submitUrl={`/api/admin/patients/${patient.id}/followup`}
+                                  onSubmitted={load}
+                                />
+                              </div>
+                            ) : null}
                           </div>
                         )}
                         <PatientFollowupCharts followups={patient.followups} />
-                        <AdminFollowupList followups={patient.followups} onUpdated={load} />
+                        <AdminFollowupList
+                          followups={patient.followups}
+                          onUpdated={load}
+                          canEdit={capabilities.canEditFollowups}
+                          canDelete={capabilities.canDeleteFollowups}
+                        />
                       </div>
                     )}
                   </Card>

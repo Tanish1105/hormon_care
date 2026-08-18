@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/AdminLayout";
 import { Button, Card, Input, Textarea, Badge } from "@/components/ui";
 import { FileUpload } from "@/components/FileUpload";
 import { Plus, Trash2, ChevronRight } from "lucide-react";
+import { useStaffPortal } from "@/components/StaffPortalContext";
 import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type Plan = {
@@ -19,6 +20,7 @@ type Plan = {
 };
 
 export default function PlansPage() {
+  const { capabilities } = useStaffPortal();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
@@ -152,7 +154,7 @@ export default function PlansPage() {
               <button onClick={() => deletePlan(plan.id)} className="rounded-lg p-2 text-red-500 hover:bg-red-50">
                 <Trash2 className="h-4 w-4" />
               </button>
-              <Link href={`/admin/plans/${plan.id}`} className="flex items-center gap-1 rounded-lg bg-[var(--primary-light)] px-3 py-2 text-sm font-medium text-[var(--primary)] hover:bg-[var(--primary-light)]">
+              <Link href={`${capabilities.basePath}/plans/${plan.id}`} className="flex items-center gap-1 rounded-lg bg-[var(--primary-light)] px-3 py-2 text-sm font-medium text-[var(--primary)] hover:bg-[var(--primary-light)]">
                 Manage <ChevronRight className="h-4 w-4" />
               </Link>
             </div>

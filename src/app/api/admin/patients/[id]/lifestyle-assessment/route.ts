@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireStaffSession, requirePatientAccess } from "@/lib/staff-access";
 import {
   generateAssessmentAccessToken,
   buildAssessmentFormUrl,
@@ -53,12 +53,12 @@ const RESET_FIELDS = {
 } as const;
 
 export async function POST(req: Request, { params }: RouteParams) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("assessments.write");
+  if (!access.ok) return access.response;
 
   const { id: patientProfileId } = await params;
+  const patientAccess = await requirePatientAccess(access.session, patientProfileId);
+  if (!patientAccess.ok) return patientAccess.response;
 
   try {
     const profile = await prisma.patientProfile.findUnique({
@@ -111,12 +111,12 @@ export async function POST(req: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_req: Request, { params }: RouteParams) {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const access = await requireStaffSession("assessments.write");
+  if (!access.ok) return access.response;
 
   const { id: patientProfileId } = await params;
+  const patientAccess = await requirePatientAccess(access.session, patientProfileId);
+  if (!patientAccess.ok) return patientAccess.response;
   await prisma.lifestyleAssessment.deleteMany({ where: { patientProfileId } });
   return NextResponse.json({ ok: true });
 }
