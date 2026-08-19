@@ -1,5 +1,5 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import * as api from '../api/client';
 import { useLocale } from '../context/LocaleContext';
 import FullscreenImage from './FullscreenImage';
@@ -26,14 +26,11 @@ export default function WeekBannerCard({
   const imageUri = api.resolveMediaUrl(week.imageUrl);
   const contentCount = api.countWeekContents(week, isDayWise);
   const isCurrent = variant === 'current';
+  const [bannerVisible, setBannerVisible] = useState(false);
 
-  const weekFallback = (
-    <View style={styles.fallback}>
-      <Text style={styles.fallbackText}>
-        {t('weekLabelShort', { week: week.weekNumber })}
-      </Text>
-    </View>
-  );
+  useEffect(() => {
+    setBannerVisible(false);
+  }, [imageUri]);
 
   return (
     <Pressable
@@ -45,24 +42,29 @@ export default function WeekBannerCard({
         pressed && { transform: [{ scale: 0.985 }], opacity: 0.96 },
       ]}
       testID={testID}>
-      <View style={styles.bannerWrap}>
-        {imageUri ? (
+      {imageUri && !bannerVisible ? (
+        <Image
+          source={{ uri: imageUri }}
+          style={styles.preload}
+          onLoad={() => setBannerVisible(true)}
+          onError={() => setBannerVisible(false)}
+        />
+      ) : null}
+      {imageUri && bannerVisible ? (
+        <View style={styles.bannerWrap}>
           <FullscreenImage
             uri={imageUri}
             style={styles.banner}
             resizeMode="cover"
-            fallback={weekFallback}
           />
-        ) : (
-          weekFallback
-        )}
-        <View style={styles.scrim} pointerEvents="none" />
-        <View style={styles.bannerTag} pointerEvents="none">
-          <Text style={styles.bannerTagText}>
-            {isCurrent ? t('thisWeek') : t('weekLabelShort', { week: week.weekNumber })}
-          </Text>
+          <View style={styles.scrim} pointerEvents="none" />
+          <View style={styles.bannerTag} pointerEvents="none">
+            <Text style={styles.bannerTagText}>
+              {isCurrent ? t('thisWeek') : t('weekLabelShort', { week: week.weekNumber })}
+            </Text>
+          </View>
         </View>
-      </View>
+      ) : null}
 
       <View style={styles.body}>
         <View style={{ flex: 1 }}>
@@ -103,6 +105,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(31,107,69,0.28)',
     ...shadows.glow,
   },
+  preload: {
+    width: 0,
+    height: 0,
+    opacity: 0,
+    position: 'absolute',
+  },
   bannerWrap: {
     height: 176,
     position: 'relative',
@@ -112,18 +120,6 @@ const styles = StyleSheet.create({
   banner: {
     width: '100%',
     height: '100%',
-  },
-  fallback: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
-  },
-  fallbackText: {
-    color: colors.primary,
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: 0.4,
   },
   scrim: {
     ...StyleSheet.absoluteFillObject,

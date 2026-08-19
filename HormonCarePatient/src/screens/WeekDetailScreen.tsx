@@ -75,6 +75,7 @@ function ContentCard({
           uri={imageFromField}
           style={styles.image}
           resizeMode="cover"
+          deferLayout
         />
       ) : null}
 
@@ -83,6 +84,7 @@ function ContentCard({
           uri={imageFromUrl}
           style={styles.image}
           resizeMode="cover"
+          deferLayout
         />
       ) : null}
 
@@ -287,23 +289,26 @@ export default function WeekDetailScreen() {
     <ScrollView
       contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       testID="week-detail-screen">
-      <View style={styles.hero}>
+      <View style={[styles.hero, !weekImage && styles.heroNoImage]}>
         {weekImage ? (
           <FullscreenImage
             uri={weekImage}
             style={styles.weekBanner}
             resizeMode="cover"
+            deferLayout
           />
         ) : null}
-        <View style={styles.heroBody}>
-          <Text style={styles.kicker}>Week {week.weekNumber}</Text>
-          <Text style={styles.title}>
+        <View style={[styles.heroBody, !weekImage && styles.heroBodyCompact]}>
+          <Text style={[styles.kicker, !weekImage && styles.kickerPlain]}>
+            Week {week.weekNumber}
+          </Text>
+          <Text style={[styles.title, !weekImage && styles.titlePlain]}>
             {isDayWise
               ? activeDay?.title || t('dayLabel', { day: selectedDay })
               : week.title || `Week ${week.weekNumber}`}
           </Text>
           {(isDayWise ? activeDay?.description : week.description) ? (
-            <Text style={styles.desc}>
+            <Text style={[styles.desc, !weekImage && styles.descPlain]}>
               {isDayWise ? activeDay?.description : week.description}
             </Text>
           ) : null}
@@ -402,13 +407,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     overflow: 'hidden',
   },
+  heroNoImage: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+  },
   weekBanner: {
     width: '100%',
     height: 180,
-    backgroundColor: colors.primaryTint,
   },
   heroBody: {
     padding: 22,
+  },
+  heroBodyCompact: {
+    paddingVertical: 18,
+    paddingHorizontal: 18,
   },
   kicker: {
     color: 'rgba(255,255,255,0.72)',
@@ -417,6 +430,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
+  kickerPlain: {
+    color: colors.textMuted,
+  },
   title: {
     color: '#fff',
     fontSize: 24,
@@ -424,11 +440,17 @@ const styles = StyleSheet.create({
     marginTop: 6,
     letterSpacing: -0.5,
   },
+  titlePlain: {
+    color: colors.text,
+  },
   desc: {
     color: 'rgba(255,255,255,0.9)',
     marginTop: 8,
     fontSize: 14,
     lineHeight: 20,
+  },
+  descPlain: {
+    color: colors.textSoft,
   },
   dayPicker: {
     backgroundColor: colors.surface,

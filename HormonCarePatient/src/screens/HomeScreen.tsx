@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -61,6 +61,34 @@ function useRise(active: boolean, delay = 0) {
       },
     ],
   };
+}
+
+function PlanBanner({ uri, label }: { uri: string; label: string }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    setVisible(false);
+  }, [uri]);
+
+  return (
+    <>
+      {!visible ? (
+        <Image
+          source={{ uri }}
+          style={styles.preload}
+          onLoad={() => setVisible(true)}
+          onError={() => setVisible(false)}
+        />
+      ) : null}
+      {visible ? (
+        <View style={styles.bannerWrap}>
+          <FullscreenImage uri={uri} style={styles.banner} resizeMode="cover" />
+          <View style={styles.bannerScrim} />
+          <Text style={styles.bannerTag}>{label}</Text>
+        </View>
+      ) : null}
+    </>
+  );
 }
 
 export default function HomeScreen() {
@@ -270,32 +298,12 @@ export default function HomeScreen() {
               <View
                 key={program}
                 style={[styles.plan, index === 0 && styles.planPrimary]}>
-                <View style={styles.bannerWrap}>
-                  {planImage ? (
-                    <FullscreenImage
-                      uri={planImage}
-                      style={styles.banner}
-                      resizeMode="cover"
-                      fallback={
-                        <View style={styles.bannerFallback}>
-                          <Text style={styles.programTag}>
-                            {t(programLabelKey(program))}
-                          </Text>
-                        </View>
-                      }
-                    />
-                  ) : (
-                    <View style={styles.bannerFallback}>
-                      <Text style={styles.programTag}>
-                        {t(programLabelKey(program))}
-                      </Text>
-                    </View>
-                  )}
-                  <View style={styles.bannerScrim} />
-                  <Text style={styles.bannerTag}>
-                    {t(programLabelKey(program))}
-                  </Text>
-                </View>
+                {planImage ? (
+                  <PlanBanner
+                    uri={planImage}
+                    label={t(programLabelKey(program))}
+                  />
+                ) : null}
 
                 <View style={styles.planBody}>
                   <Text style={styles.planTitle}>{plan.title}</Text>
@@ -612,11 +620,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  bannerFallback: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
+  preload: {
+    width: 0,
+    height: 0,
+    opacity: 0,
+    position: 'absolute',
   },
   bannerScrim: {
     ...StyleSheet.absoluteFillObject,
@@ -628,13 +636,6 @@ const styles = StyleSheet.create({
     bottom: 14,
     color: '#fff',
     fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  programTag: {
-    color: colors.primary,
-    fontSize: 12,
     fontWeight: '700',
     letterSpacing: 1,
     textTransform: 'uppercase',

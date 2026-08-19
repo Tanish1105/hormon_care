@@ -36,6 +36,10 @@ type Props = {
   resizeMode?: 'cover' | 'contain' | 'stretch' | 'center';
   accessibilityLabel?: string;
   fallback?: React.ReactNode;
+  /** Hide layout until the image loads; renders nothing on failure. */
+  deferLayout?: boolean;
+  onLoad?: () => void;
+  onLoadFail?: () => void;
 };
 
 const MIN_SCALE = 1;
@@ -203,19 +207,45 @@ export default function FullscreenImage({
   resizeMode = 'cover',
   accessibilityLabel,
   fallback,
+  deferLayout = false,
+  onLoad,
+  onLoadFail,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [ready, setReady] = useState(!deferLayout);
   const insets = useSafeAreaInsets();
   const { t } = useLocale();
   const { height } = Dimensions.get('window');
 
   useEffect(() => {
     setFailed(false);
-  }, [uri]);
+    setReady(!deferLayout);
+  }, [uri, deferLayout]);
+
+  const handleError = () => {
+    setFailed(true);
+    onLoadFail?.();
+  };
+
+  const handleLoad = () => {
+    setReady(true);
+    onLoad?.();
+  };
 
   if (failed) {
-    return fallback ? <>{fallback}</> : <View style={[styles.failed, style as ViewStyle]} />;
+    return fallback ? <>{fallback}</> : null;
+  }
+
+  if (deferLayout && !ready) {
+    return (
+      <Image
+        source={{ uri }}
+        style={styles.preload}
+        onLoad={handleLoad}
+        onError={handleError}
+      />
+    );
   }
 
   return (
@@ -229,7 +259,8 @@ export default function FullscreenImage({
           source={{ uri }}
           style={styles.thumbImage}
           resizeMode={resizeMode}
-          onError={() => setFailed(true)}
+          onLoad={handleLoad}
+          onError={handleError}
         />
       </Pressable>
 
@@ -274,8 +305,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  failed: {
-    backgroundColor: colors.borderLight,
+  preload: {
+    width: 0,
+    height: 0,
+    opacity: 0,
+    position: 'absolute',
   },
   backdrop: {
     flex: 1,
