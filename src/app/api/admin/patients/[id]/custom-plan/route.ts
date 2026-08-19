@@ -73,6 +73,7 @@ export async function POST(
           weekNumber: week.weekNumber,
           title: week.title,
           description: week.description,
+          imageUrl: week.imageUrl,
           contents: {
             create: week.contents.map((c) => ({
               section: c.section || (c.type === "EXERCISE" ? "EXERCISE" : "RECIPE"),

@@ -50,6 +50,7 @@ type Week = {
   weekNumber: number;
   title: string;
   description: string | null;
+  imageUrl?: string | null;
   contents: Content[];
   days: Day[];
 };
@@ -472,6 +473,14 @@ export default function PatientDashboard() {
 
           {week && weekUnlocked && dayUnlocked ? (
             <section className="overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-white shadow-sm">
+              {week.imageUrl ? (
+                <FullscreenImage
+                  src={week.imageUrl}
+                  alt={week.title}
+                  protected
+                  className="max-h-56 w-full object-cover"
+                />
+              ) : null}
               <div className="border-b border-[var(--border)] bg-[linear-gradient(120deg,#e8f3ec,#ffffff_55%)] px-5 py-5 sm:px-6">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--primary)]/70">
                   {plan.title}

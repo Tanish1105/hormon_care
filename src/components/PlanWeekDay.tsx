@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Lock, CheckCircle2 } from "lucide-react";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type ContentRef = { id: string };
 
@@ -14,6 +15,7 @@ type WeekInfo = {
   id: string;
   weekNumber: number;
   title: string;
+  imageUrl?: string | null;
   contents?: ContentRef[];
   days?: DayInfo[];
 };
@@ -66,13 +68,21 @@ export function WeekSelector({
           >
             <div
               className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-bold",
+                "flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg font-bold",
                 active && variant === "admin" && "bg-[var(--primary)] text-white",
                 active && variant === "patient" && "bg-[var(--secondary)] text-white",
                 !active && "bg-slate-100 text-slate-700"
               )}
             >
-              W{w.weekNumber}
+              {w.imageUrl ? (
+                <img
+                  src={resolvePublicMediaUrl(w.imageUrl)}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <>W{w.weekNumber}</>
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-semibold text-slate-900">{w.title}</p>
@@ -215,13 +225,21 @@ export function PatientWeekPicker({
               >
                 <span
                   className={cn(
-                    "relative z-[1] flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition",
+                    "relative z-[1] flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 text-sm font-bold transition",
                     active
                       ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-md shadow-[rgba(31,107,69,0.25)]"
                       : "border-[#d5e2d8] bg-white text-slate-600 group-hover:border-[var(--border)]"
                   )}
                 >
-                  {w.weekNumber}
+                  {w.imageUrl ? (
+                    <img
+                      src={resolvePublicMediaUrl(w.imageUrl)}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    w.weekNumber
+                  )}
                 </span>
                 <span
                   className={cn(

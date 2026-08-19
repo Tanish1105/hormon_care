@@ -26,6 +26,7 @@ import type { RootStackParamList } from '../navigation/RootNavigator';
 import type { MainTabParamList } from '../navigation/MainTabs';
 import Button from '../components/Button';
 import FullscreenImage from '../components/FullscreenImage';
+import WeekBannerCard from '../components/WeekBannerCard';
 import BrandTitle from '../components/BrandTitle';
 import PillMark from '../components/PillMark';
 import { brandLogo } from '../assets/brand';
@@ -263,9 +264,6 @@ export default function HomeScreen() {
             const planImage = api.resolveMediaUrl(plan.imageUrl);
             const currentWeek =
               plan.weeks?.find(w => w.weekNumber === unlockedWeek) ?? null;
-            const contentCount = currentWeek
-              ? api.countWeekContents(currentWeek, plan.isDayWise)
-              : 0;
             const canContinue = Boolean(currentWeek && unlockedWeek > 0);
 
             return (
@@ -331,45 +329,28 @@ export default function HomeScreen() {
                       </Text>
                     </View>
                   ) : null}
+                </View>
 
-                  {canContinue && currentWeek ? (
-                    <Pressable
-                      onPress={() =>
-                        nav.navigate('WeekDetail', {
-                          weekNumber: currentWeek.weekNumber,
-                          program,
-                        })
-                      }
-                      style={({ pressed }) => [
-                        styles.continueRow,
-                        pressed && { transform: [{ scale: 0.985 }], opacity: 0.94 },
-                      ]}>
-                      <View style={styles.weekMark}>
-                        <Text style={styles.weekMarkText}>
-                          {currentWeek.weekNumber}
-                        </Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.continueLabel}>{t('current')}</Text>
-                        <Text style={styles.continueTitle} numberOfLines={1}>
-                          {currentWeek.title ||
-                            `Week ${currentWeek.weekNumber}`}
-                        </Text>
-                        <Text style={styles.continueMeta}>
-                          {contentCount === 1
-                            ? t('contentOne')
-                            : t('contentMany', { count: contentCount })}
-                        </Text>
-                      </View>
-                      <Text style={styles.continueArrow}>→</Text>
-                    </Pressable>
-                  ) : null}
+                {canContinue && currentWeek ? (
+                  <WeekBannerCard
+                    week={currentWeek}
+                    isDayWise={plan.isDayWise}
+                    variant="current"
+                    style={styles.homeWeekBanner}
+                    onPress={() =>
+                      nav.navigate('WeekDetail', {
+                        weekNumber: currentWeek.weekNumber,
+                        program,
+                      })
+                    }
+                  />
+                ) : null}
 
+                <View style={styles.planFooter}>
                   <Button
                     title={t('viewPlanWeeks')}
                     variant={canContinue ? 'ghost' : 'secondary'}
                     onPress={() => nav.navigate('Plan', { program })}
-                    style={{ marginTop: 12 }}
                   />
                 </View>
               </View>
@@ -663,6 +644,11 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 18,
   },
+  planFooter: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 18,
+  },
   planTitle: {
     fontSize: 22,
     fontWeight: '700',
@@ -709,52 +695,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
   },
-  continueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 16,
-    padding: 14,
-    borderRadius: radius.lg,
-    backgroundColor: colors.primarySoft,
-    borderWidth: 1,
-    borderColor: colors.successBorder,
-  },
-  weekMark: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  weekMarkText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  continueLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: colors.primary,
-    marginBottom: 2,
-  },
-  continueTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  continueMeta: {
-    marginTop: 2,
-    fontSize: 12,
-    color: colors.textSoft,
-  },
-  continueArrow: {
-    fontSize: 20,
-    color: colors.primary,
-    fontWeight: '600',
+  homeWeekBanner: {
+    marginTop: 0,
+    borderRadius: 0,
+    borderWidth: 0,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: colors.borderLight,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   suppCard: {
     marginBottom: 14,

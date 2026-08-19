@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { readMediaFile } from "@/lib/serve-media";
 
 export const runtime = "nodejs";
 
 type Params = { params: Promise<{ filename: string }> };
 
-/**
- * Serve media from MySQL (primary) with legacy disk fallback.
- * Hostinger redeploys wipe public/uploads, so DB storage is durable.
- */
 export async function GET(_req: NextRequest, { params }: Params) {
+  const session = await getSession();
+  if (!session || session.role !== "PATIENT") {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   const { filename } = await params;
   const file = await readMediaFile(filename);
   if (!file) {
@@ -20,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     status: 200,
     headers: {
       "Content-Type": file.contentType,
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "private, max-age=86400",
     },
   });
 }

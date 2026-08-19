@@ -327,6 +327,7 @@ export type PlanWeek = {
   weekNumber: number;
   title: string | null;
   description: string | null;
+  imageUrl?: string | null;
   contents: PlanContent[];
   days: PlanDay[];
 };

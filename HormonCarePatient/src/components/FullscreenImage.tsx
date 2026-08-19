@@ -210,6 +210,10 @@ export default function FullscreenImage({
   const { t } = useLocale();
   const { height } = Dimensions.get('window');
 
+  useEffect(() => {
+    setFailed(false);
+  }, [uri]);
+
   if (failed) {
     return fallback ? <>{fallback}</> : <View style={[styles.failed, style as ViewStyle]} />;
   }

@@ -11,11 +11,15 @@ export async function PUT(
   const session = access.session;
 
   const { weekId } = await params;
-  const { title, description } = await request.json();
+  const { title, description, imageUrl } = await request.json();
 
   const week = await prisma.garbhaWeek.update({
     where: { id: weekId },
-    data: { title, description },
+    data: {
+      title,
+      description,
+      ...(imageUrl !== undefined ? { imageUrl: imageUrl || null } : {}),
+    },
     include: { contents: { orderBy: { sortOrder: "asc" } } },
   });
 

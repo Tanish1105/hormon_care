@@ -21,6 +21,7 @@ type WeekCopy = {
   weekNumber: number;
   title: string;
   description: string | null;
+  imageUrl?: string | null;
   contents: ContentCopy[];
   days: DayCopy[];
 };
@@ -54,6 +55,7 @@ export function buildWeeksCreateData(
     weekNumber: week.weekNumber,
     title: week.title,
     description: week.description,
+    imageUrl: week.imageUrl ?? null,
     contents: createNested(week.contents.map((c) => copyContent(c, withSection))),
     ...(isDayWise
       ? {

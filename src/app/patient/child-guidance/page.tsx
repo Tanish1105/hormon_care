@@ -35,6 +35,7 @@ type Week = {
   weekNumber: number;
   title: string;
   description: string | null;
+  imageUrl?: string | null;
   contents: Content[];
   days: Day[];
 };
@@ -208,22 +209,32 @@ export default function PatientChildGuidancePage() {
           <div className="mt-4 space-y-4">
             {week && weekUnlocked && dayUnlocked ? (
               <Card className="border-2 border-[var(--border)]">
-                <div className="border-b border-[var(--border)] bg-[var(--gold-soft)]/50 -mx-4 -mt-4 mb-4 rounded-t-xl px-4 py-4 sm:-mx-6 sm:-mt-6 sm:mb-6 sm:px-6">
-                  <PlanBreadcrumb
-                    planTitle={plan.title}
-                    weekNumber={week.weekNumber}
-                    dayNumber={plan.isDayWise ? selectedDay : undefined}
-                  />
-                  <h2 className="mt-2 text-lg font-bold text-[var(--secondary)] sm:text-xl">
-                    {plan.isDayWise
-                      ? `Week ${week.weekNumber} · Day ${selectedDay}: ${day?.title ?? ""}`
-                      : `Week ${week.weekNumber}: ${week.title}`}
-                  </h2>
-                  {plan.isDayWise ? (
-                    day?.description && <p className="mt-1 text-sm text-[var(--secondary)]">{day.description}</p>
-                  ) : (
-                    week.description && <p className="mt-1 text-sm text-[var(--secondary)]">{week.description}</p>
-                  )}
+                <div className="border-b border-[var(--border)] bg-[var(--gold-soft)]/50 -mx-4 -mt-4 mb-4 overflow-hidden rounded-t-xl sm:-mx-6 sm:-mt-6 sm:mb-6">
+                  {week.imageUrl ? (
+                    <FullscreenImage
+                      src={week.imageUrl}
+                      alt={week.title}
+                      protected
+                      className="max-h-48 w-full object-cover"
+                    />
+                  ) : null}
+                  <div className="px-4 py-4 sm:px-6">
+                    <PlanBreadcrumb
+                      planTitle={plan.title}
+                      weekNumber={week.weekNumber}
+                      dayNumber={plan.isDayWise ? selectedDay : undefined}
+                    />
+                    <h2 className="mt-2 text-lg font-bold text-[var(--secondary)] sm:text-xl">
+                      {plan.isDayWise
+                        ? `Week ${week.weekNumber} · Day ${selectedDay}: ${day?.title ?? ""}`
+                        : `Week ${week.weekNumber}: ${week.title}`}
+                    </h2>
+                    {plan.isDayWise ? (
+                      day?.description && <p className="mt-1 text-sm text-[var(--secondary)]">{day.description}</p>
+                    ) : (
+                      week.description && <p className="mt-1 text-sm text-[var(--secondary)]">{week.description}</p>
+                    )}
+                  </div>
                 </div>
 
                 {activeContents.length === 0 ? (

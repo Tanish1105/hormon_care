@@ -281,22 +281,33 @@ export default function WeekDetailScreen() {
     );
   }
 
+  const weekImage = api.resolveMediaUrl(week.imageUrl);
+
   return (
     <ScrollView
       contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       testID="week-detail-screen">
       <View style={styles.hero}>
-        <Text style={styles.kicker}>Week {week.weekNumber}</Text>
-        <Text style={styles.title}>
-          {isDayWise
-            ? activeDay?.title || t('dayLabel', { day: selectedDay })
-            : week.title || `Week ${week.weekNumber}`}
-        </Text>
-        {(isDayWise ? activeDay?.description : week.description) ? (
-          <Text style={styles.desc}>
-            {isDayWise ? activeDay?.description : week.description}
-          </Text>
+        {weekImage ? (
+          <FullscreenImage
+            uri={weekImage}
+            style={styles.weekBanner}
+            resizeMode="cover"
+          />
         ) : null}
+        <View style={styles.heroBody}>
+          <Text style={styles.kicker}>Week {week.weekNumber}</Text>
+          <Text style={styles.title}>
+            {isDayWise
+              ? activeDay?.title || t('dayLabel', { day: selectedDay })
+              : week.title || `Week ${week.weekNumber}`}
+          </Text>
+          {(isDayWise ? activeDay?.description : week.description) ? (
+            <Text style={styles.desc}>
+              {isDayWise ? activeDay?.description : week.description}
+            </Text>
+          ) : null}
+        </View>
       </View>
 
       {isDayWise && week.days?.length ? (
@@ -388,9 +399,16 @@ const styles = StyleSheet.create({
   hero: {
     backgroundColor: colors.primary,
     borderRadius: radius.xxl,
-    padding: 22,
     marginBottom: 16,
     overflow: 'hidden',
+  },
+  weekBanner: {
+    width: '100%',
+    height: 180,
+    backgroundColor: colors.primaryTint,
+  },
+  heroBody: {
+    padding: 22,
   },
   kicker: {
     color: 'rgba(255,255,255,0.72)',

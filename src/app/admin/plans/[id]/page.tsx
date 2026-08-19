@@ -57,6 +57,7 @@ type Week = {
   weekNumber: number;
   title: string;
   description: string | null;
+  imageUrl: string | null;
   contents: Content[];
   days: Day[];
 };
@@ -155,8 +156,28 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
     await fetch(`/api/admin/plans/${id}/weeks/${week.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: week.title, description: week.description }),
+      body: JSON.stringify({
+        title: week.title,
+        description: week.description,
+        imageUrl: week.imageUrl,
+      }),
     });
+  }
+
+  async function updateWeekImage(imageUrl: string) {
+    if (!week || !plan) return;
+    week.imageUrl = imageUrl || null;
+    setPlan({ ...plan });
+    await fetch(`/api/admin/plans/${id}/weeks/${week.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: week.title,
+        description: week.description,
+        imageUrl: imageUrl || null,
+      }),
+    });
+    loadPlan();
   }
 
   async function addContent(e: React.FormEvent) {
@@ -312,6 +333,14 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
                     onChange={(e) => { week.description = e.target.value; setPlan({ ...plan }); }}
                     onBlur={updateWeek}
                     rows={1}
+                  />
+                </div>
+                <div className="mt-4">
+                  <FileUpload
+                    label="Week Image (optional)"
+                    accept="image"
+                    value={week.imageUrl || ""}
+                    onChange={updateWeekImage}
                   />
                 </div>
               </Card>

@@ -5,6 +5,7 @@ import { getUnlockedWeek, getUnlockedDay } from "@/lib/utils";
 import { sanitizePatientContents, type ContentItem } from "@/lib/patient-content";
 import { planInclude, garbhaPlanInclude, childGuidancePlanInclude } from "@/lib/plan-includes";
 import { buildPatientGateStatus } from "@/lib/patient-gate";
+import { attachWeekImageUrls } from "@/lib/week-images";
 
 function sanitizePlanContents<
   T extends {
@@ -84,13 +85,17 @@ export async function GET() {
 
   const gate = await buildPatientGateStatus(profile);
 
+  const [plan, garbhaPlan, childGuidancePlan] = await Promise.all([
+    attachWeekImageUrls(profile.plan, "PlanWeek"),
+    attachWeekImageUrls(profile.garbhaPlan, "GarbhaWeek"),
+    attachWeekImageUrls(profile.childGuidancePlan, "ChildGuidanceWeek"),
+  ]);
+
   const safeProfile = {
     ...profile,
-    plan: profile.plan ? sanitizePlanContents(profile.plan) : null,
-    garbhaPlan: profile.garbhaPlan ? sanitizePlanContents(profile.garbhaPlan) : null,
-    childGuidancePlan: profile.childGuidancePlan
-      ? sanitizePlanContents(profile.childGuidancePlan)
-      : null,
+    plan: plan ? sanitizePlanContents(plan) : null,
+    garbhaPlan: garbhaPlan ? sanitizePlanContents(garbhaPlan) : null,
+    childGuidancePlan: childGuidancePlan ? sanitizePlanContents(childGuidancePlan) : null,
   };
 
   return NextResponse.json({
